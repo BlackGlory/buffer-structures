@@ -72,7 +72,7 @@ export class StructView<
     const constructor = this.structure[key]
     if (constructor) {
       const view = new constructor(this.buffer, this.getOffsetByIndex(key))
-      view.set(value as any)
+      view.set(value)
     } else {
       throw new Error('out of bounds')
     }

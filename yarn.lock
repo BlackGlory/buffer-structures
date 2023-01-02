@@ -4296,6 +4296,11 @@ justypes@^4.0.0:
   resolved "https://registry.yarnpkg.com/justypes/-/justypes-4.0.0.tgz#099bc656287eed97bdb5476df1593122d5269930"
   integrity sha512-+YRAP4MUfagIBHkzsFO6k5BHATZYHiTBjLxQ4axLIAdiQW05YtiS05wSrMW5LmETNBdKHScjv8CiqunTkfjRYA==
 
+justypes@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/justypes/-/justypes-4.1.0.tgz#f47a45fffe42d52ad0a1c7f3a69fc88f2490183f"
+  integrity sha512-eVBz2A+aA9GnQ1/RRcyIt74UwNb9cgcWioXYDD/5JhCy37W//Hy/85DuN7ID5nKhS/E/AMpMTFRBmBDdVghe7w==
+
 kind-of@^3.0.2, kind-of@^3.0.3, kind-of@^3.2.0:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-3.2.2.tgz#31ea21a734bab9bbb0f32466d893aea51e4a3c64"

@@ -70,7 +70,7 @@ export class TupleView<
     const constructor = this.structure[index]
     if (constructor) {
       const view = new constructor(this.buffer, this.getOffsetByIndex(index))
-      view.set(value as any)
+      view.set(value)
     } else {
       throw new Error('out of bounds')
     }
