@@ -13,7 +13,9 @@ export type PointerViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => PointerView<View>)
 
-export class ReferenceCountedView<View> implements IReference
+export class ReferenceCountedView<
+  View
+> implements IReference
            , IReadable<{ count: number; value: number | null }>
            , IWritable<{ count: number; value: number | null }> {
   static readonly byteLength = Uint32Array.BYTES_PER_ELEMENT + PointerView.byteLength

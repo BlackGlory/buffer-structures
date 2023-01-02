@@ -109,29 +109,58 @@ describe('ReferenceCountedView', () => {
     expect(dataView.getUint32(byteOffset)).toBe(count)
   })
 
-  test('getValue', () => {
-    const buffer = new ArrayBuffer(100)
-    const byteOffset = 1
-    const value = 1000000
-    const dataView = new DataView(buffer)
-    dataView.setUint32(byteOffset + Uint32Array.BYTES_PER_ELEMENT, value)
-    const rcView = new ReferenceCountedView(buffer, byteOffset, Uint8View)
+  describe('getValue', () => {
+    test('null', () => {
+      const buffer = new ArrayBuffer(100)
+      const byteOffset = 1
+      const value = 0
+      const dataView = new DataView(buffer)
+      dataView.setUint32(byteOffset + Uint32Array.BYTES_PER_ELEMENT, value)
+      const rcView = new ReferenceCountedView(buffer, byteOffset, Uint8View)
 
-    const result = rcView.getValue()
+      const result = rcView.getValue()
 
-    expect(result).toBe(value)
+      expect(result).toBe(null)
+    })
+
+    test('number', () => {
+      const buffer = new ArrayBuffer(100)
+      const byteOffset = 1
+      const value = 1000000
+      const dataView = new DataView(buffer)
+      dataView.setUint32(byteOffset + Uint32Array.BYTES_PER_ELEMENT, value)
+      const rcView = new ReferenceCountedView(buffer, byteOffset, Uint8View)
+
+      const result = rcView.getValue()
+
+      expect(result).toBe(value)
+    })
   })
 
-  test('setValue', () => {
-    const buffer = new ArrayBuffer(100)
-    const byteOffset = 1
-    const value = 1000000
-    const rcView = new ReferenceCountedView(buffer, byteOffset, Uint8View)
+  describe('setValue', () => {
+    test('null', () => {
+      const buffer = new ArrayBuffer(100)
+      const byteOffset = 1
+      const value = null
+      const rcView = new ReferenceCountedView(buffer, byteOffset, Uint8View)
 
-    rcView.setValue(value)
+      rcView.setValue(value)
 
-    const dataView = new DataView(buffer)
-    expect(dataView.getUint32(byteOffset + Uint32Array.BYTES_PER_ELEMENT)).toBe(value)
+      const dataView = new DataView(buffer)
+      expect(dataView.getUint32(byteOffset + Uint32Array.BYTES_PER_ELEMENT)).toBe(0)
+    })
+
+    test('number', () => {
+      const buffer = new ArrayBuffer(100)
+      const byteOffset = 1
+      const value = 1000000
+      const rcView = new ReferenceCountedView(buffer, byteOffset, Uint8View)
+
+      rcView.setValue(value)
+
+      const dataView = new DataView(buffer)
+      expect(dataView.getUint32(byteOffset + Uint32Array.BYTES_PER_ELEMENT)).toBe(value)
+    })
   })
 
   describe('deref', () => {
