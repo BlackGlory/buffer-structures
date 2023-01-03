@@ -1,4 +1,4 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
+import { IAllocator, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
 import { MapStructureToValue, ViewConstructor, StructView } from '@views/struct-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
@@ -7,8 +7,7 @@ export class Struct<
   T extends Record<string, ViewConstructor<unknown>>
 > implements ICopy<Struct<T>>
            , IReferenceCounted<Struct<T>>
-           , IReadable<MapStructureToValue<T>>
-           , IWritable<MapStructureToValue<T>>
+           , IReadableWritable<MapStructureToValue<T>>
            , IHash {
   readonly _view: StructView<T>
   readonly _counter: ReferenceCounter

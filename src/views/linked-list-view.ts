@@ -1,4 +1,4 @@
-import { IHash, IHasher, ISized, IReference, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, ISized, IReference, IReadableWritable } from '@src/types'
 import { StructView, MapStructureToValue } from '@views/struct-view'
 import { PointerView } from '@views/pointer-view'
 import { isntNull } from '@blackglory/prelude'
@@ -11,18 +11,17 @@ export type PointerViewConstructor<View extends IHash> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => PointerView<View>)
 
-export type Structure<View extends IHash & IReadable<Value> & IWritable<Value>, Value> = {
+export type Structure<View extends IHash & IReadableWritable<Value>, Value> = {
   next: PointerViewConstructor<LinkedListView<View, Value>>
   value: ViewConstructor<View>
 }
 
 export class LinkedListView<
-  View extends IReadable<Value> & IWritable<Value> & IHash
-, Value
+  View extends IReadableWritable<Value> & IHash
+, Value = View extends IReadableWritable<infer T> ? T : never
 > implements IHash
            , IReference
-           , IReadable<MapStructureToValue<Structure<View, Value>>>
-           , IWritable<MapStructureToValue<Structure<View, Value>>>
+           , IReadableWritable<MapStructureToValue<Structure<View, Value>>>
            , ISized {
   static getByteLength(viewConstructor: ViewConstructor<unknown>) {
     return viewConstructor.byteLength + PointerView.byteLength

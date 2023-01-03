@@ -1,12 +1,11 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
+import { IAllocator, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
 import { Int32View } from '@views/int32-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 
 export class Int32 implements ICopy<Int32>
                             , IReferenceCounted<Int32>
-                            , IReadable<number>
-                            , IWritable<number>
+                            , IReadableWritable<number>
                             , IHash {
   readonly _view: Int32View
   readonly _counter: ReferenceCounter

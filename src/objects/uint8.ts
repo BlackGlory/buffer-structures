@@ -1,12 +1,11 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
+import { IAllocator, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
 import { Uint8View } from '@views/uint8-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 
 export class Uint8 implements ICopy<Uint8>
                             , IReferenceCounted<Uint8>
-                            , IReadable<number>
-                            , IWritable<number>
+                            , IReadableWritable<number>
                             , IHash {
   readonly _view: Uint8View
   readonly _counter: ReferenceCounter

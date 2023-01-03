@@ -1,10 +1,9 @@
-import { IHash, IHasher, IReference, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, IReference, IReadableWritable } from '@src/types'
 import { readBytes } from '@utils/read-bytes'
 
 export class Uint8View implements IHash
                                 , IReference
-                                , IReadable<number>
-                                , IWritable<number> {
+                                , IReadableWritable<number> {
   static readonly byteLength = Uint8Array.BYTES_PER_ELEMENT
 
   private view: DataView

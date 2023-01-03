@@ -1,12 +1,11 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
+import { IAllocator, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
 import { DoubleView } from '@views/double-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 
 export class Double implements ICopy<Double>
                              , IReferenceCounted<Double>
-                             , IReadable<number>
-                             , IWritable<number>
+                             , IReadableWritable<number>
                              , IHash {
   readonly _view: DoubleView
   readonly _counter: ReferenceCounter

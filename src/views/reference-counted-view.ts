@@ -1,5 +1,5 @@
 import { isntNull } from '@blackglory/prelude'
-import { IHash, IHasher, ISized, IReference, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, ISized, IReference, IReadableWritable } from '@src/types'
 import { StructView } from '@views/struct-view'
 import { PointerView } from '@views/pointer-view'
 import { Uint32View } from '@views/uint32-view'
@@ -17,8 +17,7 @@ export class ReferenceCountedView<
   View extends IHash
 > implements IHash
            , IReference
-           , IReadable<{ count: number; value: number | null }>
-           , IWritable<{ count: number; value: number | null }> {
+           , IReadableWritable<{ count: number; value: number | null }> {
   static readonly byteLength = Uint32Array.BYTES_PER_ELEMENT + PointerView.byteLength
 
   private view: StructView<{

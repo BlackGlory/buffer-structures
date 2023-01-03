@@ -1,11 +1,10 @@
-import { IHash, IHasher, ISized, IReference, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, ISized, IReference, IReadableWritable } from '@src/types'
 import { Uint32View } from '@views/uint32-view'
 import { readBytes } from '@utils/read-bytes'
 
 export class StringView implements IHash
                                  , IReference
-                                 , IReadable<string>
-                                 , IWritable<string>
+                                 , IReadableWritable<string>
                                  , ISized {
   static getByteLength(value: string): number {
     const encoder = new TextEncoder()

@@ -1,4 +1,4 @@
-import { IHash, IHasher, IReference, ISized, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, IReference, ISized, IReadableWritable } from '@src/types'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ReturnTypeOfConstructor } from 'hotypes'
 
@@ -6,14 +6,13 @@ export type ViewConstructor<Value> =
   ISized
 & (
     new (buffer: ArrayBufferLike, byteOffset: number) =>
-      IReadable<Value>
-    & IWritable<Value>
+      IReadableWritable<Value>
     & IHash
   )
 
 export type MapStructureToValue<T extends NonEmptyArray<ViewConstructor<unknown>>> = {
   [Index in keyof T]:
-    ReturnTypeOfConstructor<T[Index]> extends IReadable<infer U>
+    ReturnTypeOfConstructor<T[Index]> extends IReadableWritable<infer U>
     ? U
     : never
 }
@@ -21,8 +20,7 @@ export type MapStructureToValue<T extends NonEmptyArray<ViewConstructor<unknown>
 export class TupleView<
   Structure extends NonEmptyArray<ViewConstructor<unknown>>
 > implements IReference
-           , IReadable<MapStructureToValue<Structure>>
-           , IWritable<MapStructureToValue<Structure>>
+           , IReadableWritable<MapStructureToValue<Structure>>
            , ISized
            , IHash {
   static getByteLength(structure: NonEmptyArray<ViewConstructor<unknown>>): number {

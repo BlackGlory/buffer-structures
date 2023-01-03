@@ -1,4 +1,4 @@
-import { IHash, IHasher, IReference, ISized, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, IReference, ISized, IReadableWritable } from '@src/types'
 import { pipe } from 'extra-utils'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import * as Iter from 'iterable-operator'
@@ -7,14 +7,13 @@ export type ViewConstructor<T> =
   ISized
 & (
     new (buffer: ArrayBufferLike, byteOffset: number) =>
-      IReadable<T>
-    & IWritable<T>
+      IReadableWritable<T>
     & IHash
   )
 
 export type MapStructureToValue<T extends Record<string, ViewConstructor<unknown>>> = {
   [Key in keyof T]:
-    ReturnTypeOfConstructor<T[Key]> extends IReadable<infer U>
+    ReturnTypeOfConstructor<T[Key]> extends IReadableWritable<infer U>
     ? U
     : never
 }
@@ -22,8 +21,7 @@ export type MapStructureToValue<T extends Record<string, ViewConstructor<unknown
 export class StructView<
   Structure extends Record<string, ViewConstructor<unknown>>
 > implements IReference
-           , IReadable<MapStructureToValue<Structure>>
-           , IWritable<MapStructureToValue<Structure>>
+           , IReadableWritable<MapStructureToValue<Structure>>
            , ISized
            , IHash {
   static getByteLength(structure: Record<string, ViewConstructor<unknown>>): number {

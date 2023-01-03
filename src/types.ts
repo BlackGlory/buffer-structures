@@ -14,6 +14,8 @@ export interface IWritable<T> {
   set(value: T): void
 }
 
+export interface IReadableWritable<T> extends IReadable<T>, IWritable<T> {}
+
 export interface IDestroyable {
   destroy(): void
 }

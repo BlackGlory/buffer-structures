@@ -1,17 +1,16 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
+import { IAllocator, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
 import { ViewConstructor, ArrayView } from '@views/array-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { FixedLengthArray } from 'justypes'
 
 export class Array<
-  View extends IReadable<Value> & IWritable<Value> & IHash
+  View extends IReadableWritable<Value> & IHash
 , Length extends number
-, Value
+, Value = View extends IReadableWritable<infer T> ? T : never
 > implements ICopy<Array<View, Length, Value>>
            , IReferenceCounted<Array<View, Length, Value>>
-           , IReadable<FixedLengthArray<View, Length>>
-           , IWritable<FixedLengthArray<View, Length>>
+           , IReadableWritable<FixedLengthArray<View, Length>>
            , IHash {
   readonly _view: ArrayView<View, Length, Value>
   readonly _counter: ReferenceCounter

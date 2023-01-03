@@ -1,4 +1,4 @@
-import { IHash, IHasher, IReference, ISized, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, IReference, ISized, IReadableWritable } from '@src/types'
 import { FixedLengthArray } from 'justypes'
 
 export type ViewConstructor<View> =
@@ -6,13 +6,12 @@ export type ViewConstructor<View> =
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
 export class ArrayView<
-  View extends IReadable<Value> & IWritable<Value> & IHash
+  View extends IReadableWritable<Value> & IHash
 , Length extends number
-, Value
+, Value = View extends IReadableWritable<infer T> ? T : never
 > implements IHash
            , IReference
-           , IReadable<FixedLengthArray<Value, Length>>
-           , IWritable<FixedLengthArray<Value, Length>>
+           , IReadableWritable<FixedLengthArray<Value, Length>>
            , ISized {
   static getByteLength(
     viewConstructor: ViewConstructor<unknown>

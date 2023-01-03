@@ -1,12 +1,11 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
+import { IAllocator, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
 import { FloatView } from '@views/float-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 
 export class Float implements ICopy<Float>
                             , IReferenceCounted<Float>
-                            , IReadable<number>
-                            , IWritable<number>
+                            , IReadableWritable<number>
                             , IHash {
   readonly _view: FloatView
   readonly _counter: ReferenceCounter

@@ -1,4 +1,4 @@
-import { IAllocator, ISized, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
+import { IAllocator, ISized, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
 import { MapStructureToValue } from '@views/struct-view'
 import { PointerView } from '@views/pointer-view'
 import { LinkedListView, Structure } from '@views/linked-list-view'
@@ -14,12 +14,11 @@ export type PointerViewConstructor<View extends IHash> =
 & (new (buffer: ArrayBufferLike, byteOffset: number) => PointerView<View>)
 
 export class LinkedList<
-  View extends IHash & IReadable<Value> & IWritable<Value>
-, Value
+  View extends IHash & IReadableWritable<Value>
+, Value = View extends IReadableWritable<infer T> ? T : never
 > implements ICopy<LinkedList<View, Value>>
            , IReferenceCounted<LinkedList<View, Value>>
-           , IReadable<MapStructureToValue<Structure<View, Value>>>
-           , IWritable<MapStructureToValue<Structure<View, Value>>>
+           , IReadableWritable<MapStructureToValue<Structure<View, Value>>>
            , IHash {
   readonly _view: LinkedListView<View, Value>
   readonly _counter: ReferenceCounter
@@ -58,7 +57,11 @@ export class LinkedList<
       this._counter = new ReferenceCounter()
 
       const offset = allocator.allocate(LinkedListView.getByteLength(viewConstructor))
-      const view = new LinkedListView(allocator.buffer, offset, viewConstructor)
+      const view = new LinkedListView<View, Value>(
+        allocator.buffer
+      , offset
+      , viewConstructor
+      )
       view.set(value)
       this._view = view
     } else {
@@ -66,7 +69,11 @@ export class LinkedList<
       this.allocator = allocator
       this.viewConstructor = viewConstructor
 
-      const view = new LinkedListView(allocator.buffer, offset, viewConstructor)
+      const view = new LinkedListView<View, Value>(
+        allocator.buffer
+      , offset
+      , viewConstructor
+      )
       this._view = view
 
       counter.increment()

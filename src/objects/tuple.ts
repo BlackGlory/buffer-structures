@@ -1,4 +1,4 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
+import { IAllocator, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
 import { MapStructureToValue, ViewConstructor, TupleView } from '@views/tuple-view'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ObjectStateMachine } from '@utils/object-state-machine'
@@ -8,8 +8,7 @@ export class Tuple<
   T extends NonEmptyArray<ViewConstructor<unknown>>
 > implements ICopy<Tuple<T>>
            , IReferenceCounted<Tuple<T>>
-           , IReadable<MapStructureToValue<T>>
-           , IWritable<MapStructureToValue<T>>
+           , IReadableWritable<MapStructureToValue<T>>
            , IHash {
   readonly _view: TupleView<T>
   readonly _counter: ReferenceCounter
