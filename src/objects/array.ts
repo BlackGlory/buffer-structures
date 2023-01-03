@@ -134,4 +134,8 @@ export class Array<
   setByIndex(index: number, value: Value): void {
     this._view.setByIndex(index, value)
   }
+
+  getViewByIndex(index: number): View {
+    return this._view.getViewByIndex(index)
+  }
 }

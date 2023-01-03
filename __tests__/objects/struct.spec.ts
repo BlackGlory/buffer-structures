@@ -2,7 +2,8 @@ import { Struct } from '@objects/struct'
 import { StructView } from '@views/struct-view'
 import { Uint8View } from '@views/uint8-view'
 import { Uint16View } from '@views/uint16-view'
-import { IAllocator } from '@src/types'
+import { IAllocator, IHasher } from '@src/types'
+import { uint8ToBytes, uint16ToBytes } from '@test/utils'
 import { getError } from 'return-style'
 import { Allocator } from '@src/allocator'
 
@@ -232,5 +233,44 @@ describe('Struct', () => {
       foo: 1
     , bar: 3
     })
+  })
+
+  test('getViewByKey', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = new Struct(
+      allocator
+    , {
+        foo: Uint8View
+      , bar: Uint16View
+      }
+    , { foo: 1, bar: 2 }
+    )
+
+    const view1 = obj.getViewByKey('foo')
+    const view2 = obj.getViewByKey('bar')
+
+    expect(view1).toBeInstanceOf(Uint8View)
+    expect(view2).toBeInstanceOf(Uint16View)
+  })
+
+  test('hash', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = new Struct(
+      allocator
+    , {
+        foo: Uint8View
+      , bar: Uint16View
+      }
+    , { foo: 10, bar: 20 }
+    )
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    obj.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(2)
+    expect(hasher.write).nthCalledWith(1, uint8ToBytes(10))
+    expect(hasher.write).nthCalledWith(2, uint16ToBytes(20))
   })
 })

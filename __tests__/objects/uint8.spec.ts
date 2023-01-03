@@ -1,7 +1,8 @@
 import { Uint8 } from '@objects/uint8'
 import { Uint8View } from '@views/uint8-view'
-import { IAllocator } from '@src/types'
+import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
+import { uint8ToBytes } from '@test/utils'
 import { Allocator } from '@src/allocator'
 
 describe('Uint8', () => {
@@ -120,5 +121,18 @@ describe('Uint8', () => {
     obj.set(2)
 
     expect(obj.get()).toBe(2)
+  })
+
+  test('hash', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = new Uint8(allocator, 1)
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    obj.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(1)
+    expect(hasher.write).nthCalledWith(1, uint8ToBytes(1))
   })
 })

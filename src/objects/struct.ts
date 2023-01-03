@@ -2,29 +2,30 @@ import { IAllocator, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher
 import { MapStructureToValue, ViewConstructor, StructView } from '@views/struct-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
+import { ReturnTypeOfConstructor } from 'hotypes'
 
 export class Struct<
-  T extends Record<string, ViewConstructor<unknown>>
-> implements ICopy<Struct<T>>
-           , IReferenceCounted<Struct<T>>
-           , IReadableWritable<MapStructureToValue<T>>
+  Structure extends Record<string, ViewConstructor<unknown>>
+> implements ICopy<Struct<Structure>>
+           , IReferenceCounted<Struct<Structure>>
+           , IReadableWritable<MapStructureToValue<Structure>>
            , IHash {
-  readonly _view: StructView<T>
+  readonly _view: StructView<Structure>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
-  private structure: T
+  private structure: Structure
 
-  constructor(allocator: IAllocator, structure: T, value: MapStructureToValue<T>)
+  constructor(allocator: IAllocator, structure: Structure, value: MapStructureToValue<Structure>)
   constructor(
     _allocator: IAllocator
-  , _structure: T
+  , _structure: Structure
   , _offset: number
   , _counter: ReferenceCounter
   )
   constructor(...args:
-  | [allocator: IAllocator, structure: T, value: MapStructureToValue<T>]
-  | [allocator: IAllocator, structure: T, offset: number, counter: ReferenceCounter]
+  | [allocator: IAllocator, structure: Structure, value: MapStructureToValue<Structure>]
+  | [allocator: IAllocator, structure: Structure, offset: number, counter: ReferenceCounter]
   ) {
     if (args.length === 3) {
       const [allocator, structure, value] = args
@@ -33,7 +34,7 @@ export class Struct<
       this._counter = new ReferenceCounter()
 
       const offset = allocator.allocate(StructView.getByteLength(structure))
-      const view = new StructView<T>(allocator.buffer, offset, structure)
+      const view = new StructView<Structure>(allocator.buffer, offset, structure)
       view.set(value)
       this._view = view
     } else {
@@ -41,7 +42,7 @@ export class Struct<
       this.allocator = allocator
       this.structure = structure
 
-      const view = new StructView<T>(allocator.buffer, offset, structure)
+      const view = new StructView<Structure>(allocator.buffer, offset, structure)
       this._view = view
 
       counter.increment()
@@ -62,35 +63,41 @@ export class Struct<
     }
   }
 
-  clone(): Struct<T> {
+  clone(): Struct<Structure> {
     this.fsm.assertAllocated()
 
     return new Struct(this.allocator, this.structure, this._view.byteOffset, this._counter)
   }
 
-  copy(): Struct<T> {
+  copy(): Struct<Structure> {
     this.fsm.assertAllocated()
 
     return new Struct(this.allocator, this.structure, this.get())
   }
 
-  get(): MapStructureToValue<T> {
+  get(): MapStructureToValue<Structure> {
     this.fsm.assertAllocated()
 
     return this._view.get()
   }
 
-  set(value: MapStructureToValue<T>): void {
+  set(value: MapStructureToValue<Structure>): void {
     this.fsm.assertAllocated()
 
     this._view.set(value)
   }
 
-  getByKey<U extends string & keyof T>(key: U): MapStructureToValue<T>[U] {
+  getByKey<U extends string & keyof Structure>(key: U): MapStructureToValue<Structure>[U] {
     return this._view.getByKey(key)
   }
 
-  setByKey<U extends string & keyof T>(key: U, value: MapStructureToValue<T>[U]): void {
+  setByKey<U extends string & keyof Structure>(key: U, value: MapStructureToValue<Structure>[U]): void {
     this._view.setByKey(key, value)
+  }
+
+  getViewByKey<U extends string & keyof Structure>(
+    key: U
+  ): ReturnTypeOfConstructor<Structure[U]> {
+    return this._view.getViewByKey(key)
   }
 }

@@ -1,8 +1,9 @@
 import { Array } from '@objects/array'
 import { ArrayView } from '@views/array-view'
 import { Uint8View } from '@views/uint8-view'
-import { IAllocator } from '@src/types'
+import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
+import { uint8ToBytes } from '@test/utils'
 import { Allocator } from '@src/allocator'
 
 describe('Array', () => {
@@ -139,5 +140,30 @@ describe('Array', () => {
     arr.setByIndex(1, 10)
 
     expect(arr.get()).toStrictEqual([1, 10, 3])
+  })
+
+  test('getViewByIndex', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const arr = new Array(allocator, Uint8View, 2, [1, 2])
+
+    const view1 = arr.getViewByIndex(0)
+    const view2 = arr.getViewByIndex(1)
+
+    expect(view1).toBeInstanceOf(Uint8View)
+    expect(view2).toBeInstanceOf(Uint8View)
+  })
+
+  test('hash', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const arr = new Array(allocator, Uint8View, 2, [1, 2])
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    arr.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(2)
+    expect(hasher.write).nthCalledWith(1, uint8ToBytes(1))
+    expect(hasher.write).nthCalledWith(2, uint8ToBytes(2))
   })
 })

@@ -40,7 +40,7 @@ export class Float implements ICopy<Float>
   }
 
   hash(hasher: IHasher): void {
-    this.hash(hasher)
+    this._view.hash(hasher)
   }
 
   destroy(): void {

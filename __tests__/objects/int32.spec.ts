@@ -1,7 +1,8 @@
 import { Int32 } from '@objects/int32'
 import { Int32View } from '@views/int32-view'
-import { IAllocator } from '@src/types'
+import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
+import { int32ToBytes } from '@test/utils'
 import { Allocator } from '@src/allocator'
 
 describe('Int32', () => {
@@ -120,5 +121,18 @@ describe('Int32', () => {
     obj.set(2)
 
     expect(obj.get()).toBe(2)
+  })
+
+  test('hash', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = new Int32(allocator, 1)
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    obj.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(1)
+    expect(hasher.write).nthCalledWith(1, int32ToBytes(1))
   })
 })

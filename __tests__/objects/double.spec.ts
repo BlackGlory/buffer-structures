@@ -1,7 +1,8 @@
 import { Double } from '@objects/double'
 import { DoubleView } from '@views/double-view'
-import { IAllocator } from '@src/types'
+import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
+import { float64ToBytes } from '@test/utils'
 import { Allocator } from '@src/allocator'
 
 describe('Double', () => {
@@ -120,5 +121,18 @@ describe('Double', () => {
     obj.set(2)
 
     expect(obj.get()).toBe(2)
+  })
+
+  test('hash', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = new Double(allocator, 1)
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    obj.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(1)
+    expect(hasher.write).nthCalledWith(1, float64ToBytes(1))
   })
 })

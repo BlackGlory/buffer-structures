@@ -1,6 +1,6 @@
 import { String } from '@objects/string'
 import { StringView } from '@views/string-view'
-import { IAllocator } from '@src/types'
+import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
 import { Allocator } from '@src/allocator'
 
@@ -111,5 +111,18 @@ describe('String', () => {
     const result = obj.get()
 
     expect(result).toBe('foo')
+  })
+
+  test('hash', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = new String(allocator, 'foo')
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    obj.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(1)
+    expect(hasher.write).nthCalledWith(1, [...Buffer.from('foo')])
   })
 })

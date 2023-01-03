@@ -40,7 +40,7 @@ export class Int8 implements ICopy<Int8>
   }
 
   hash(hasher: IHasher): void {
-    this.hash(hasher)
+    this._view.hash(hasher)
   }
 
   destroy(): void {

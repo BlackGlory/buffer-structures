@@ -1,7 +1,8 @@
 import { Int16 } from '@objects/int16'
 import { Int16View } from '@views/int16-view'
-import { IAllocator } from '@src/types'
+import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
+import { int16ToBytes } from '@test/utils'
 import { Allocator } from '@src/allocator'
 
 describe('Int16', () => {
@@ -120,5 +121,18 @@ describe('Int16', () => {
     obj.set(2)
 
     expect(obj.get()).toBe(2)
+  })
+
+  test('hash', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = new Int16(allocator, 1)
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    obj.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(1)
+    expect(hasher.write).nthCalledWith(1, int16ToBytes(1))
   })
 })

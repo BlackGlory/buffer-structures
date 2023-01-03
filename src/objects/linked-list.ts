@@ -129,4 +129,16 @@ export class LinkedList<
   getValue(): MapStructureToValue<Structure<View, Value>>['value'] {
     return this._view.getValue()
   }
+
+  getViewOfValue(): View {
+    return this._view.getViewOfValue()
+  }
+
+  getViewOfNext(): PointerView<LinkedListView<View, Value>> {
+    return this._view.getViewOfNext()
+  }
+
+  deferNext(): LinkedListView<View, Value> | null {
+    return this._view.deferNext()
+  }
 }
