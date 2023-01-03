@@ -14,10 +14,10 @@ export type MapStructureToValue<T extends NonEmptyArray<ViewConstructor<any>>> =
 }
 
 export class TupleView<
-  T extends NonEmptyArray<ViewConstructor<unknown>>
+  Structure extends NonEmptyArray<ViewConstructor<unknown>>
 > implements IReference
-           , IReadable<MapStructureToValue<T>>
-           , IWritable<MapStructureToValue<T>>
+           , IReadable<MapStructureToValue<Structure>>
+           , IWritable<MapStructureToValue<Structure>>
            , ISized
            , IHash {
   static getByteLength(structure: NonEmptyArray<ViewConstructor<unknown>>): number {
@@ -29,7 +29,7 @@ export class TupleView<
   constructor(
     private buffer: ArrayBufferLike
   , public readonly byteOffset: number
-  , private structure: T
+  , private structure: Structure
   ) {}
 
   hash(hasher: IHasher): void {
@@ -41,7 +41,7 @@ export class TupleView<
     }
   }
 
-  get(): MapStructureToValue<T> {
+  get(): MapStructureToValue<Structure> {
     const results: any[] = []
 
     let offset: number = this.byteOffset
@@ -52,10 +52,10 @@ export class TupleView<
       offset += constructor.byteLength
     }
 
-    return results as MapStructureToValue<T>
+    return results as MapStructureToValue<Structure>
   }
 
-  set(values: MapStructureToValue<T>): void {
+  set(values: MapStructureToValue<Structure>): void {
     let offset: number = this.byteOffset
     for (let i = 0; i < this.structure.length; i++) {
       const constructor = this.structure[i]
@@ -66,30 +66,34 @@ export class TupleView<
     }
   }
 
-  getByIndex<U extends number & keyof T>(index: U): MapStructureToValue<T>[U] {
-    const constructor = this.structure[index]
-    if (constructor) {
-      const view = new constructor(this.buffer, this.getOffsetByIndex(index))
-      return view.get() as MapStructureToValue<T>[U]
-    } else {
-      throw new Error('out of bounds')
-    }
-  }
-
-  setByIndex<U extends number & keyof T>(
+  getByIndex<U extends number & keyof Structure>(
     index: U
-  , value: MapStructureToValue<T>[U]
+  ): MapStructureToValue<Structure>[U] {
+    const view = this.getViewByIndex(index)
+    return view.get() as MapStructureToValue<Structure>[U]
+  }
+
+  setByIndex<U extends number & keyof Structure>(
+    index: U
+  , value: MapStructureToValue<Structure>[U]
   ): void {
+    const view = this.getViewByIndex(index)
+    view.set(value)
+  }
+
+  getViewByIndex<U extends number & keyof Structure>(
+    index: U
+  ): ReturnTypeOfConstructor<Structure[U]> {
     const constructor = this.structure[index]
     if (constructor) {
       const view = new constructor(this.buffer, this.getOffsetByIndex(index))
-      view.set(value)
+      return view as ReturnTypeOfConstructor<Structure[U]>
     } else {
       throw new Error('out of bounds')
     }
   }
 
-  private getOffsetByIndex<U extends number & keyof T>(index: U): number {
+  private getOffsetByIndex<U extends number & keyof Structure>(index: U): number {
     return this.byteOffset
          + this.structure
              .slice(0, index)

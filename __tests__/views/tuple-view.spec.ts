@@ -102,6 +102,26 @@ describe('TupleView', () => {
     expect(dataView.getUint16(byteOffset + Uint8Array.BYTES_PER_ELEMENT)).toBe(1000)
   })
 
+  test('getViewByIndex', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const dataView = new DataView(buffer)
+    dataView.setUint8(byteOffset, 100)
+    dataView.setUint16(byteOffset + Uint8Array.BYTES_PER_ELEMENT, 1000)
+    const tupleView = new TupleView(buffer, byteOffset, [
+      Uint8View
+    , Uint16View
+    ])
+
+    const view1 = tupleView.getViewByIndex(0)
+    const view2 = tupleView.getViewByIndex(1)
+
+    expect(view1).toBeInstanceOf(Uint8View)
+    expect(view1.byteOffset).toBe(byteOffset)
+    expect(view2).toBeInstanceOf(Uint16View)
+    expect(view2.byteOffset).toBe(byteOffset + Uint8Array.BYTES_PER_ELEMENT)
+  })
+
   test('hash', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1

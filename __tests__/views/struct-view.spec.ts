@@ -108,6 +108,26 @@ describe('StructView', () => {
     expect(dataView.getUint16(byteOffset + Uint8Array.BYTES_PER_ELEMENT)).toBe(1000)
   })
 
+  test('getViewByKey', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const dataView = new DataView(buffer)
+    dataView.setUint8(byteOffset, 100)
+    dataView.setUint16(byteOffset + Uint8Array.BYTES_PER_ELEMENT, 1000)
+    const structView = new StructView(buffer, byteOffset, {
+      foo: Uint8View
+    , bar: Uint16View
+    })
+
+    const view1 = structView.getViewByKey('foo')
+    const view2 = structView.getViewByKey('bar')
+
+    expect(view1).toBeInstanceOf(Uint8View)
+    expect(view1.byteOffset).toBe(byteOffset)
+    expect(view2).toBeInstanceOf(Uint16View)
+    expect(view2.byteOffset).toBe(byteOffset + Uint8Array.BYTES_PER_ELEMENT)
+  })
+
   test('hash', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1

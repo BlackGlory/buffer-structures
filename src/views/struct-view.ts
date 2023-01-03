@@ -15,10 +15,10 @@ export type MapStructureToValue<T extends Record<string, ViewConstructor<any>>> 
 }
 
 export class StructView<
-  T extends Record<string, ViewConstructor<unknown>>
+  Structure extends Record<string, ViewConstructor<unknown>>
 > implements IReference
-           , IReadable<MapStructureToValue<T>>
-           , IWritable<MapStructureToValue<T>>
+           , IReadable<MapStructureToValue<Structure>>
+           , IWritable<MapStructureToValue<Structure>>
            , ISized
            , IHash {
   static getByteLength(structure: Record<string, ViewConstructor<unknown>>): number {
@@ -32,7 +32,7 @@ export class StructView<
   constructor(
     private buffer: ArrayBufferLike
   , public readonly byteOffset: number
-  , private structure: T
+  , private structure: Structure
   ) {}
 
   hash(hasher: IHasher): void {
@@ -44,7 +44,7 @@ export class StructView<
     }
   }
 
-  get(): MapStructureToValue<T> {
+  get(): MapStructureToValue<Structure> {
     const results: Record<string, any> = {}
 
     let offset: number = this.byteOffset
@@ -55,10 +55,10 @@ export class StructView<
       offset += constructor.byteLength
     }
 
-    return results as MapStructureToValue<T>
+    return results as MapStructureToValue<Structure>
   }
 
-  set(values: MapStructureToValue<T>): void {
+  set(values: MapStructureToValue<Structure>): void {
     let offset: number = this.byteOffset
     for (const [key, constructor] of Object.entries(this.structure)) {
       const view = new constructor(this.buffer, offset)
@@ -68,37 +68,32 @@ export class StructView<
     }
   }
 
-  getByKey<U extends string & keyof T>(key: U): MapStructureToValue<T>[U] {
+  getByKey<U extends string & keyof Structure>(key: U): MapStructureToValue<Structure>[U] {
+    const view = this.getViewByKey(key)
+    return view.get() as MapStructureToValue<Structure>[U]
+  }
+
+  setByKey<U extends string & keyof Structure>(
+    key: U
+  , value: MapStructureToValue<Structure>[U]
+  ): void {
+    const view = this.getViewByKey(key)
+    view.set(value)
+  }
+
+  getViewByKey<U extends string & keyof Structure>(
+    key: U
+  ): ReturnTypeOfConstructor<Structure[U]> {
     const constructor = this.structure[key]
     if (constructor) {
       const view = new constructor(this.buffer, this.getOffsetByIndex(key))
-      return view.get() as MapStructureToValue<T>[U]
+      return view as ReturnTypeOfConstructor<Structure[U]>
     } else {
       throw new Error('out of bounds')
     }
   }
 
-  getViewByKey<U extends string & keyof T>(key: U): ReturnTypeOfConstructor<T[U]> {
-    const constructor = this.structure[key]
-    if (constructor) {
-      const view = new constructor(this.buffer, this.getOffsetByIndex(key))
-      return view as ReturnTypeOfConstructor<T[U]>
-    } else {
-      throw new Error('out of bounds')
-    }
-  }
-
-  setByKey<U extends string & keyof T>(key: U, value: MapStructureToValue<T>[U]): void {
-    const constructor = this.structure[key]
-    if (constructor) {
-      const view = new constructor(this.buffer, this.getOffsetByIndex(key))
-      view.set(value)
-    } else {
-      throw new Error('out of bounds')
-    }
-  }
-
-  private getOffsetByIndex<U extends string & keyof T>(key: U): number {
+  private getOffsetByIndex<U extends string & keyof Structure>(key: U): number {
     return this.byteOffset
          + pipe(
              Object.entries(this.structure)
