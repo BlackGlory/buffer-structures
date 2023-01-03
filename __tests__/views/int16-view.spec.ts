@@ -1,4 +1,6 @@
 import { Int16View } from '@views/int16-view'
+import { int16ToBytes } from '@test/utils'
+import { IHasher } from '@src/types'
 
 describe('Int16View', () => {
   test('byteLength', () => {
@@ -40,5 +42,21 @@ describe('Int16View', () => {
 
     const dataView = new DataView(buffer)
     expect(dataView.getInt16(byteOffset)).toBe(value)
+  })
+
+  test('hash', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const value = -10000
+    const view = new Int16View(buffer, byteOffset)
+    view.set(value)
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    view.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(1)
+    expect(hasher.write).toBeCalledWith(int16ToBytes(-10000))
   })
 })

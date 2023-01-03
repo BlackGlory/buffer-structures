@@ -1,6 +1,7 @@
 import { StringView } from '@views/string-view'
-import { getSlice, setSlice, uint32ToBytes } from '@test/utils'
+import { getSlice, setSlice, uint32ToBytes, bufferToBytes } from '@test/utils'
 import { toArray } from '@blackglory/prelude'
+import { IHasher } from '@src/types'
 
 describe('StringView', () => {
   test('getByteLength', () => {
@@ -74,5 +75,20 @@ describe('StringView', () => {
       ...uint32ToBytes(Buffer.from(value, 'utf-8').byteLength)
     , ...Buffer.from(value, 'utf-8')
     ])
+  })
+
+  test('hash', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const view = new StringView(buffer, byteOffset)
+    view.set('foo')
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    view.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(1)
+    expect(hasher.write).toBeCalledWith([...Buffer.from('foo')])
   })
 })

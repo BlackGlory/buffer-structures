@@ -1,6 +1,10 @@
-import { IReference, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, IReference, IReadable, IWritable } from '@src/types'
+import { readBytes } from '@utils/read-bytes'
 
-export class DoubleView implements IReference, IReadable<number>, IWritable<number> {
+export class DoubleView implements IHash
+                                 , IReference
+                                 , IReadable<number>
+                                 , IWritable<number> {
   static readonly byteLength = Float64Array.BYTES_PER_ELEMENT
 
   private view: DataView
@@ -15,5 +19,10 @@ export class DoubleView implements IReference, IReadable<number>, IWritable<numb
 
   set(value: number): void {
     this.view.setFloat64(this.byteOffset, value)
+  }
+
+  hash(hasher: IHasher): void {
+    const bytes = readBytes(this.view.buffer, this.byteOffset, DoubleView.byteLength)
+    hasher.write(bytes)
   }
 }

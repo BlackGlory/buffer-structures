@@ -1,4 +1,4 @@
-import { IAllocator, ISized, ICopy, IReferenceCounted, IReadable, IWritable } from '@src/types'
+import { IAllocator, ISized, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
 import { MapStructureToValue } from '@views/struct-view'
 import { PointerView } from '@views/pointer-view'
 import { LinkedListView, Structure } from '@views/linked-list-view'
@@ -9,16 +9,17 @@ export type ViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
-export type PointerViewConstructor<View> =
+export type PointerViewConstructor<View extends IHash> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => PointerView<View>)
 
 export class LinkedList<
-  View extends IReadable<unknown> & IWritable<unknown>
+  View extends IHash & IReadable<unknown> & IWritable<unknown>
 > implements ICopy<LinkedList<View>>
            , IReferenceCounted<LinkedList<View>>
            , IReadable<MapStructureToValue<Structure<View>>>
-           , IWritable<MapStructureToValue<Structure<View>>> {
+           , IWritable<MapStructureToValue<Structure<View>>>
+           , IHash {
   readonly _view: LinkedListView<View>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -70,6 +71,10 @@ export class LinkedList<
       counter.increment()
       this._counter = counter
     }
+  }
+
+  hash(hasher: IHasher): void {
+    this._view.hash(hasher)
   }
 
   destroy(): void {

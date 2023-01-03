@@ -1,7 +1,12 @@
-import { ISized, IReference, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, ISized, IReference, IReadable, IWritable } from '@src/types'
 import { Uint32View } from '@views/uint32-view'
+import { readBytes } from '@utils/read-bytes'
 
-export class StringView implements IReference, IReadable<string>, IWritable<string>, ISized {
+export class StringView implements IHash
+                                 , IReference
+                                 , IReadable<string>
+                                 , IWritable<string>
+                                 , ISized {
   static getByteLength(value: string): number {
     const encoder = new TextEncoder()
     const valueLength = encoder.encode(value).byteLength
@@ -48,5 +53,15 @@ export class StringView implements IReference, IReadable<string>, IWritable<stri
       , bytes[i]
       )
     }
+  }
+
+  hash(hasher: IHasher): void {
+    const length = this.lengthView.get()
+    const bytes = readBytes(
+      this.valueView.buffer
+    , this.byteOffset + Uint32View.byteLength
+    , length
+    )
+    hasher.write(bytes)
   }
 }

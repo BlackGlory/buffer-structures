@@ -1,5 +1,5 @@
 import { isntNull } from '@blackglory/prelude'
-import { ISized, IReference, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, ISized, IReference, IReadable, IWritable } from '@src/types'
 import { StructView } from '@views/struct-view'
 import { PointerView } from '@views/pointer-view'
 import { Uint32View } from '@views/uint32-view'
@@ -9,13 +9,14 @@ export type ViewConstructor<View> = new (
 , byteOffset: number
 ) => View
 
-export type PointerViewConstructor<View> =
+export type PointerViewConstructor<View extends IHash> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => PointerView<View>)
 
 export class ReferenceCountedView<
-  View
-> implements IReference
+  View extends IHash
+> implements IHash
+           , IReference
            , IReadable<{ count: number; value: number | null }>
            , IWritable<{ count: number; value: number | null }> {
   static readonly byteLength = Uint32Array.BYTES_PER_ELEMENT + PointerView.byteLength
@@ -40,6 +41,15 @@ export class ReferenceCountedView<
       count: Uint32View
     , value: InternalView
     })
+  }
+
+  hash(hasher: IHasher): void {
+    const view = this.deref()
+    if (view) {
+      view.hash(hasher)
+    } else {
+      hasher.write([0])
+    }
   }
 
   set(value: { count: number; value: number | null }): void {

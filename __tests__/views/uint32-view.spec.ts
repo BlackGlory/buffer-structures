@@ -1,4 +1,6 @@
 import { Uint32View } from '@views/uint32-view'
+import { uint32ToBytes } from '@test/utils'
+import { IHasher } from '@src/types'
 
 describe('Uint32View', () => {
   test('byteLength', () => {
@@ -40,5 +42,21 @@ describe('Uint32View', () => {
 
     const dataView = new DataView(buffer)
     expect(dataView.getUint32(byteOffset)).toBe(value)
+  })
+
+  test('hash', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const value = 1000000
+    const view = new Uint32View(buffer, byteOffset)
+    view.set(value)
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    view.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(1)
+    expect(hasher.write).toBeCalledWith(uint32ToBytes(1000000))
   })
 })

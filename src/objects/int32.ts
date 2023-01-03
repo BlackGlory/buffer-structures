@@ -1,4 +1,4 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable } from '@src/types'
+import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
 import { Int32View } from '@views/int32-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
@@ -6,7 +6,8 @@ import { ReferenceCounter } from '@utils/reference-counter'
 export class Int32 implements ICopy<Int32>
                             , IReferenceCounted<Int32>
                             , IReadable<number>
-                            , IWritable<number> {
+                            , IWritable<number>
+                            , IHash {
   readonly _view: Int32View
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -37,6 +38,10 @@ export class Int32 implements ICopy<Int32>
       counter.increment()
       this._counter = counter
     }
+  }
+
+  hash(hasher: IHasher): void {
+    this._view.hash(hasher)
   }
 
   destroy(): void {

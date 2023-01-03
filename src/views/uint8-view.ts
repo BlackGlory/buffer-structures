@@ -1,6 +1,10 @@
-import { IReference, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, IReference, IReadable, IWritable } from '@src/types'
+import { readBytes } from '@utils/read-bytes'
 
-export class Uint8View implements IReference, IReadable<number>, IWritable<number> {
+export class Uint8View implements IHash
+                                , IReference
+                                , IReadable<number>
+                                , IWritable<number> {
   static readonly byteLength = Uint8Array.BYTES_PER_ELEMENT
 
   private view: DataView
@@ -18,5 +22,10 @@ export class Uint8View implements IReference, IReadable<number>, IWritable<numbe
 
   set(value: number): void {
     this.view.setUint8(this.byteOffset, value)
+  }
+
+  hash(hasher: IHasher): void {
+    const bytes = readBytes(this.view.buffer, this.byteOffset, Uint8View.byteLength)
+    hasher.write(bytes)
   }
 }

@@ -1,6 +1,8 @@
 import { LinkedListView } from '@views/linked-list-view'
 import { PointerView } from '@views/pointer-view'
 import { Uint8View } from '@views/uint8-view'
+import { uint8ToBytes } from '@test/utils'
+import { IHasher } from '@src/types'
 
 describe('LinkedListView', () => {
   test('getByteLength', () => {
@@ -129,5 +131,24 @@ describe('LinkedListView', () => {
 
     const dataView = new DataView(buffer)
     expect(dataView.getUint8(byteOffset + Uint32Array.BYTES_PER_ELEMENT)).toBe(value)
+  })
+
+  test('hash', () => {
+    const buffer = new ArrayBuffer(100)
+    const view1 = new LinkedListView(buffer, 1, Uint8View)
+    const view2 = new LinkedListView(buffer, 50, Uint8View)
+    view1.setNext(view2.byteOffset)
+    view1.setValue(10)
+    view2.setValue(20)
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    view1.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(3)
+    expect(hasher.write).nthCalledWith(1, uint8ToBytes(10))
+    expect(hasher.write).nthCalledWith(2, uint8ToBytes(20))
+    expect(hasher.write).nthCalledWith(3, uint8ToBytes(0))
   })
 })

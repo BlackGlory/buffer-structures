@@ -1,4 +1,4 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable } from '@src/types'
+import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
 import { ViewConstructor, ArrayView } from '@views/array-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
@@ -10,7 +10,8 @@ export class Array<
 > implements ICopy<Array<T, Length>>
            , IReferenceCounted<Array<T, Length>>
            , IReadable<FixedLengthArray<T, Length>>
-           , IWritable<FixedLengthArray<T, Length>> {
+           , IWritable<FixedLengthArray<T, Length>>
+           , IHash {
   readonly _view: ArrayView<T, Length>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -81,6 +82,10 @@ export class Array<
       }
       this._view = view
     }
+  }
+
+  hash(hasher: IHasher): void {
+    this._view.hash(hasher)
   }
 
   destroy(): void {

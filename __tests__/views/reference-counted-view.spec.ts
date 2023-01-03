@@ -1,6 +1,8 @@
 import { ReferenceCountedView } from '@views/reference-counted-view'
 import { PointerView } from '@views/pointer-view'
 import { Uint8View } from '@views/uint8-view'
+import { uint8ToBytes } from '@test/utils'
+import { IHasher } from '@src/types'
 
 describe('ReferenceCountedView', () => {
   test('byteLength', () => {
@@ -197,5 +199,21 @@ describe('ReferenceCountedView', () => {
       expect(result!.byteOffset).toBe(value)
       expect(result!.get()).toBe(100)
     })
+  })
+
+  test('hash', () => {
+    const buffer = new ArrayBuffer(100)
+    const dataView = new Uint8View(buffer, 1)
+    dataView.set(10)
+    const pointerView = new ReferenceCountedView(buffer, 50, Uint8View)
+    pointerView.set({ count: 1, value: 1 })
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    pointerView.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(1)
+    expect(hasher.write).toBeCalledWith(uint8ToBytes(10))
   })
 })

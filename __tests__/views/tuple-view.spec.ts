@@ -1,6 +1,8 @@
 import { TupleView } from '@views/tuple-view'
 import { Uint8View } from '@views/uint8-view'
 import { Uint16View } from '@views/uint16-view'
+import { uint8ToBytes, uint16ToBytes } from '@test/utils'
+import { IHasher } from '@src/types'
 
 describe('TupleView', () => {
   test('getByteLength', () => {
@@ -98,5 +100,24 @@ describe('TupleView', () => {
     const dataView = new DataView(buffer)
     expect(dataView.getUint8(byteOffset)).toBe(0)
     expect(dataView.getUint16(byteOffset + Uint8Array.BYTES_PER_ELEMENT)).toBe(1000)
+  })
+
+  test('hash', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const view = new TupleView(buffer, byteOffset, [
+      Uint8View
+    , Uint16View
+    ])
+    view.set([10, 20])
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    view.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(2)
+    expect(hasher.write).nthCalledWith(1, uint8ToBytes(10))
+    expect(hasher.write).nthCalledWith(2, uint16ToBytes(20))
   })
 })

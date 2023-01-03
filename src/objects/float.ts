@@ -1,4 +1,4 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable } from '@src/types'
+import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
 import { FloatView } from '@views/float-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
@@ -6,7 +6,8 @@ import { ReferenceCounter } from '@utils/reference-counter'
 export class Float implements ICopy<Float>
                             , IReferenceCounted<Float>
                             , IReadable<number>
-                            , IWritable<number> {
+                            , IWritable<number>
+                            , IHash {
   readonly _view: FloatView
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -37,6 +38,10 @@ export class Float implements ICopy<Float>
       counter.increment()
       this._counter = counter
     }
+  }
+
+  hash(hasher: IHasher): void {
+    this.hash(hasher)
   }
 
   destroy(): void {

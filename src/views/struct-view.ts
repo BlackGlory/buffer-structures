@@ -1,11 +1,11 @@
-import { IReference, ISized, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, IReference, ISized, IReadable, IWritable } from '@src/types'
 import { pipe } from 'extra-utils'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import * as Iter from 'iterable-operator'
 
 export type ViewConstructor<T> =
   ISized
-& (new (buffer: ArrayBufferLike, offset: number) => IReadable<T> & IWritable<T>)
+& (new (buffer: ArrayBufferLike, offset: number) => IReadable<T> & IWritable<T> & IHash)
 
 export type MapStructureToValue<T extends Record<string, ViewConstructor<any>>> = {
   [Key in keyof T]:
@@ -19,7 +19,8 @@ export class StructView<
 > implements IReference
            , IReadable<MapStructureToValue<T>>
            , IWritable<MapStructureToValue<T>>
-           , ISized {
+           , ISized
+           , IHash {
   static getByteLength(structure: Record<string, ViewConstructor<unknown>>): number {
     return Object
       .values(structure)
@@ -33,6 +34,15 @@ export class StructView<
   , public readonly byteOffset: number
   , private structure: T
   ) {}
+
+  hash(hasher: IHasher): void {
+    let offset: number = this.byteOffset
+    for (const constructor of Object.values(this.structure)) {
+      const view = new constructor(this.buffer, offset)
+      view.hash(hasher)
+      offset += constructor.byteLength
+    }
+  }
 
   get(): MapStructureToValue<T> {
     const results: Record<string, any> = {}
@@ -63,6 +73,16 @@ export class StructView<
     if (constructor) {
       const view = new constructor(this.buffer, this.getOffsetByIndex(key))
       return view.get() as MapStructureToValue<T>[U]
+    } else {
+      throw new Error('out of bounds')
+    }
+  }
+
+  getViewByKey<U extends string & keyof T>(key: U): ReturnTypeOfConstructor<T[U]> {
+    const constructor = this.structure[key]
+    if (constructor) {
+      const view = new constructor(this.buffer, this.getOffsetByIndex(key))
+      return view as ReturnTypeOfConstructor<T[U]>
     } else {
       throw new Error('out of bounds')
     }

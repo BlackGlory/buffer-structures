@@ -1,4 +1,6 @@
 import { DoubleView } from '@views/double-view'
+import { float64ToBytes } from '@test/utils'
+import { IHasher } from '@src/types'
 
 describe('DoubleView', () => {
   test('byteLength', () => {
@@ -40,5 +42,21 @@ describe('DoubleView', () => {
 
     const dataView = new DataView(buffer)
     expect(dataView.getFloat64(byteOffset)).toBe(value)
+  })
+
+  test('hash', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const value = 3.14
+    const view = new DoubleView(buffer, byteOffset)
+    view.set(value)
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    view.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(1)
+    expect(hasher.write).toBeCalledWith(float64ToBytes(3.14))
   })
 })

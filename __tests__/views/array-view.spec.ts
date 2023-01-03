@@ -1,5 +1,7 @@
 import { ArrayView } from '@views/array-view'
 import { Uint8View } from '@views/uint8-view'
+import { uint8ToBytes } from '@test/utils'
+import { IHasher } from '@src/types'
 
 describe('ArrayView', () => {
   test('getByteLength', () => {
@@ -78,5 +80,22 @@ describe('ArrayView', () => {
 
     const dataView = new DataView(buffer)
     expect(dataView.getUint8(byteOffset + Uint8Array.BYTES_PER_ELEMENT)).toBe(2)
+  })
+
+  test('hash', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const view = new ArrayView(buffer, byteOffset, Uint8View, 2)
+    view.setByIndex(0, 1)
+    view.setByIndex(1, 2)
+    const hasher = {
+      write: jest.fn()
+    } satisfies IHasher
+
+    view.hash(hasher)
+
+    expect(hasher.write).toBeCalledTimes(2)
+    expect(hasher.write).nthCalledWith(1, uint8ToBytes(1))
+    expect(hasher.write).nthCalledWith(2, uint8ToBytes(2))
   })
 })

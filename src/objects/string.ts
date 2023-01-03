@@ -1,11 +1,12 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable } from '@src/types'
+import { IAllocator, ICopy, IReferenceCounted, IReadable, IHash, IHasher } from '@src/types'
 import { StringView } from '@views/string-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 
 export class String implements ICopy<String>
                              , IReferenceCounted<String>
-                             , IReadable<string> {
+                             , IReadable<string>
+                             , IHash {
   readonly _view: StringView
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -36,6 +37,10 @@ export class String implements ICopy<String>
       counter.increment()
       this._counter = counter
     }
+  }
+
+  hash(hasher: IHasher): void {
+    this._view.hash(hasher)
   }
 
   destroy(): void {

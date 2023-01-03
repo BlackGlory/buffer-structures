@@ -1,4 +1,4 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable } from '@src/types'
+import { IAllocator, ICopy, IReferenceCounted, IReadable, IWritable, IHash, IHasher } from '@src/types'
 import { MapStructureToValue, ViewConstructor, TupleView } from '@views/tuple-view'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ObjectStateMachine } from '@utils/object-state-machine'
@@ -9,7 +9,8 @@ export class Tuple<
 > implements ICopy<Tuple<T>>
            , IReferenceCounted<Tuple<T>>
            , IReadable<MapStructureToValue<T>>
-           , IWritable<MapStructureToValue<T>> {
+           , IWritable<MapStructureToValue<T>>
+           , IHash {
   readonly _view: TupleView<T>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -48,6 +49,10 @@ export class Tuple<
       counter.increment()
       this._counter = counter
     }
+  }
+
+  hash(hasher: IHasher): void {
+    this._view.hash(hasher)
   }
 
   destroy(): void {

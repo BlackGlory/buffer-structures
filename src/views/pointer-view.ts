@@ -1,9 +1,10 @@
-import { IReference, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, IReference, IReadable, IWritable } from '@src/types'
 import { isntNull } from '@blackglory/prelude'
 
-export class PointerView<View> implements IReference
-                                        , IReadable<number | null>
-                                        , IWritable<number | null> {
+export class PointerView<View extends IHash> implements IHash
+                                                      , IReference
+                                                      , IReadable<number | null>
+                                                      , IWritable<number | null> {
   static readonly byteLength = Uint32Array.BYTES_PER_ELEMENT
 
   private view: DataView
@@ -14,6 +15,15 @@ export class PointerView<View> implements IReference
   , private viewConstruct: new (buffer: ArrayBufferLike, offset: number) => View
   ) {
     this.view = new DataView(buffer)
+  }
+
+  hash(hasher: IHasher): void {
+    const view = this.deref()
+    if (view) {
+      view.hash(hasher)
+    } else {
+      hasher.write([0])
+    }
   }
 
   set(value: number | null): void {

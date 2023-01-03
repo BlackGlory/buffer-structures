@@ -1,10 +1,10 @@
-import { IReference, ISized, IReadable, IWritable } from '@src/types'
+import { IHash, IHasher, IReference, ISized, IReadable, IWritable } from '@src/types'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ReturnTypeOfConstructor } from 'hotypes'
 
 export type ViewConstructor<T> =
   ISized
-& (new (buffer: ArrayBufferLike, offset: number) => IReadable<T> & IWritable<T>)
+& (new (buffer: ArrayBufferLike, offset: number) => IReadable<T> & IWritable<T> & IHash)
 
 export type MapStructureToValue<T extends NonEmptyArray<ViewConstructor<any>>> = {
   [Index in keyof T]:
@@ -18,7 +18,8 @@ export class TupleView<
 > implements IReference
            , IReadable<MapStructureToValue<T>>
            , IWritable<MapStructureToValue<T>>
-           , ISized {
+           , ISized
+           , IHash {
   static getByteLength(structure: NonEmptyArray<ViewConstructor<unknown>>): number {
     return structure.reduce((acc, cur) => acc + cur.byteLength, 0)
   }
@@ -30,6 +31,15 @@ export class TupleView<
   , public readonly byteOffset: number
   , private structure: T
   ) {}
+
+  hash(hasher: IHasher): void {
+    let offset: number = this.byteOffset
+    for (const constructor of this.structure) {
+      const view = new constructor(this.buffer, offset)
+      view.hash(hasher)
+      offset += constructor.byteLength
+    }
+  }
 
   get(): MapStructureToValue<T> {
     const results: any[] = []
@@ -66,7 +76,10 @@ export class TupleView<
     }
   }
 
-  setByIndex<U extends number & keyof T>(index: U, value: MapStructureToValue<T>[U]): void {
+  setByIndex<U extends number & keyof T>(
+    index: U
+  , value: MapStructureToValue<T>[U]
+  ): void {
     const constructor = this.structure[index]
     if (constructor) {
       const view = new constructor(this.buffer, this.getOffsetByIndex(index))
