@@ -1,13 +1,14 @@
 import { IHash, IHasher, IReference, ISized, IReadable, IWritable } from '@src/types'
 import { FixedLengthArray } from 'justypes'
 
-export type ViewConstructor<T> =
+export type ViewConstructor<View> =
   ISized
-& (new (buffer: ArrayBufferLike, offset: number) => IReadable<T> & IWritable<T> & IHash)
+& (new (buffer: ArrayBufferLike, offset: number) => View)
 
 export class ArrayView<
-  Value
+  View extends IReadable<Value> & IWritable<Value> & IHash
 , Length extends number
+, Value
 > implements IHash
            , IReference
            , IReadable<FixedLengthArray<Value, Length>>
@@ -25,7 +26,7 @@ export class ArrayView<
   constructor(
     private buffer: ArrayBufferLike
   , public readonly byteOffset: number
-  , private viewConstructor: ViewConstructor<Value>
+  , private viewConstructor: ViewConstructor<View>
   , private length: Length
   ) {}
 
@@ -67,20 +68,20 @@ export class ArrayView<
   }
 
   getByIndex(index: number): Value {
-    if (index < this.length) {
-      const constructor = this.viewConstructor
-      const view = new constructor(this.buffer, this.getOffsetByIndex(index))
-      return view.get()
-    } else {
-      throw new Error('out of bounds')
-    }
+    const view = this.getViewByIndex(index)
+    return view.get()
   }
 
   setByIndex(index: number, value: Value): void {
+    const view = this.getViewByIndex(index)
+    view.set(value)
+  }
+
+  getViewByIndex(index: number): View {
     if (index < this.length) {
       const constructor = this.viewConstructor
       const view = new constructor(this.buffer, this.getOffsetByIndex(index))
-      view.set(value)
+      return view
     } else {
       throw new Error('out of bounds')
     }

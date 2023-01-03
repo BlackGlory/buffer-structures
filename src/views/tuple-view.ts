@@ -2,11 +2,16 @@ import { IHash, IHasher, IReference, ISized, IReadable, IWritable } from '@src/t
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ReturnTypeOfConstructor } from 'hotypes'
 
-export type ViewConstructor<T> =
+export type ViewConstructor<Value> =
   ISized
-& (new (buffer: ArrayBufferLike, offset: number) => IReadable<T> & IWritable<T> & IHash)
+& (
+    new (buffer: ArrayBufferLike, offset: number) =>
+      IReadable<Value>
+    & IWritable<Value>
+    & IHash
+  )
 
-export type MapStructureToValue<T extends NonEmptyArray<ViewConstructor<any>>> = {
+export type MapStructureToValue<T extends NonEmptyArray<ViewConstructor<unknown>>> = {
   [Index in keyof T]:
     ReturnTypeOfConstructor<T[Index]> extends IReadable<infer U>
     ? U

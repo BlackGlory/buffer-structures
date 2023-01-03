@@ -5,29 +5,30 @@ import { ReferenceCounter } from '@utils/reference-counter'
 import { FixedLengthArray } from 'justypes'
 
 export class Array<
-  T
+  View extends IReadable<Value> & IWritable<Value> & IHash
 , Length extends number
-> implements ICopy<Array<T, Length>>
-           , IReferenceCounted<Array<T, Length>>
-           , IReadable<FixedLengthArray<T, Length>>
-           , IWritable<FixedLengthArray<T, Length>>
+, Value
+> implements ICopy<Array<View, Length, Value>>
+           , IReferenceCounted<Array<View, Length, Value>>
+           , IReadable<FixedLengthArray<View, Length>>
+           , IWritable<FixedLengthArray<View, Length>>
            , IHash {
-  readonly _view: ArrayView<T, Length>
+  readonly _view: ArrayView<View, Length, Value>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
-  private viewConstructor: ViewConstructor<T>
+  private viewConstructor: ViewConstructor<View>
   private length: Length
 
   constructor(
     allocator: IAllocator
-  , viewConstructor: ViewConstructor<T>
+  , viewConstructor: ViewConstructor<View>
   , length: Length
-  , values?: FixedLengthArray<T, Length>
+  , values?: FixedLengthArray<Value, Length>
   )
   constructor(
     _allocator: IAllocator
-  , _viewConstructor: ViewConstructor<T>
+  , _viewConstructor: ViewConstructor<View>
   , _length: Length
   , _offset: number
   , _counter: ReferenceCounter
@@ -35,13 +36,13 @@ export class Array<
   constructor(...args:
   | [
       allocator: IAllocator
-    , viewConstructor: ViewConstructor<T>
+    , viewConstructor: ViewConstructor<View>
     , length: Length
-    , values?: FixedLengthArray<T, Length>
+    , values?: FixedLengthArray<View, Length>
     ]
   | [
       allocator: IAllocator
-    , viewConstructor: ViewConstructor<T>
+    , viewConstructor: ViewConstructor<View>
     , length: Length
     , offset: number
     , counter: ReferenceCounter
@@ -53,7 +54,7 @@ export class Array<
       this.viewConstructor = viewConstructor
       this.length = length
 
-      const view = new ArrayView<T, Length>(
+      const view = new ArrayView<View, Length, Value>(
         allocator.buffer
       , offset
       , viewConstructor
@@ -71,7 +72,7 @@ export class Array<
       this._counter = new ReferenceCounter()
 
       const offset = allocator.allocate(ArrayView.getByteLength(viewConstructor, length))
-      const view = new ArrayView<T, Length>(
+      const view = new ArrayView<View, Length, Value>(
         allocator.buffer
       , offset
       , viewConstructor
@@ -97,7 +98,7 @@ export class Array<
     }
   }
 
-  clone(): Array<T, Length> {
+  clone(): Array<View, Length, Value> {
     this.fsm.assertAllocated()
 
     return new Array(
@@ -109,29 +110,29 @@ export class Array<
     )
   }
 
-  copy(): Array<T, Length> {
+  copy(): Array<View, Length, Value> {
     this.fsm.assertAllocated()
 
     return new Array(this.allocator, this.viewConstructor, this.length, this.get())
   }
 
-  get(): FixedLengthArray<T, Length> {
+  get(): FixedLengthArray<Value, Length> {
     this.fsm.assertAllocated()
 
     return this._view.get()
   }
 
-  set(values: FixedLengthArray<T, Length>): void {
+  set(values: FixedLengthArray<Value, Length>): void {
     this.fsm.assertAllocated()
 
     this._view.set(values)
   }
 
-  getByIndex(index: number): T {
+  getByIndex(index: number): Value {
     return this._view.getByIndex(index)
   }
 
-  setByIndex(index: number, value: T): void {
+  setByIndex(index: number, value: Value): void {
     this._view.setByIndex(index, value)
   }
 }

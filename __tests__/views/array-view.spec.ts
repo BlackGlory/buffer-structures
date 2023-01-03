@@ -82,6 +82,23 @@ describe('ArrayView', () => {
     expect(dataView.getUint8(byteOffset + Uint8Array.BYTES_PER_ELEMENT)).toBe(2)
   })
 
+  test('getViewByIndex', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const dataView = new DataView(buffer)
+    dataView.setUint8(byteOffset, 1)
+    dataView.setUint8(byteOffset + Uint8Array.BYTES_PER_ELEMENT, 2)
+    const tupleView = new ArrayView(buffer, byteOffset, Uint8View, 2)
+
+    const view1 = tupleView.getViewByIndex(0)
+    const view2 = tupleView.getViewByIndex(1)
+
+    expect(view1).toBeInstanceOf(Uint8View)
+    expect(view1.byteOffset).toBe(byteOffset)
+    expect(view2).toBeInstanceOf(Uint8View)
+    expect(view2.byteOffset).toBe(byteOffset + Uint8Array.BYTES_PER_ELEMENT)
+  })
+
   test('hash', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1

@@ -1,10 +1,12 @@
 import { IHash, IHasher, IReference, IReadable, IWritable } from '@src/types'
 import { isntNull } from '@blackglory/prelude'
 
-export class PointerView<View extends IHash> implements IHash
-                                                      , IReference
-                                                      , IReadable<number | null>
-                                                      , IWritable<number | null> {
+export class PointerView<
+  View extends IHash
+> implements IHash
+           , IReference
+           , IReadable<number | null>
+           , IWritable<number | null> {
   static readonly byteLength = Uint32Array.BYTES_PER_ELEMENT
 
   private view: DataView

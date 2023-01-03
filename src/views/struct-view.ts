@@ -5,9 +5,14 @@ import * as Iter from 'iterable-operator'
 
 export type ViewConstructor<T> =
   ISized
-& (new (buffer: ArrayBufferLike, offset: number) => IReadable<T> & IWritable<T> & IHash)
+& (
+    new (buffer: ArrayBufferLike, offset: number) =>
+      IReadable<T>
+    & IWritable<T>
+    & IHash
+  )
 
-export type MapStructureToValue<T extends Record<string, ViewConstructor<any>>> = {
+export type MapStructureToValue<T extends Record<string, ViewConstructor<unknown>>> = {
   [Key in keyof T]:
     ReturnTypeOfConstructor<T[Key]> extends IReadable<infer U>
     ? U
