@@ -5,7 +5,7 @@ import { ReturnTypeOfConstructor } from 'hotypes'
 export type ViewConstructor<Value> =
   ISized
 & (
-    new (buffer: ArrayBufferLike, offset: number) =>
+    new (buffer: ArrayBufferLike, byteOffset: number) =>
       IReadable<Value>
     & IWritable<Value>
     & IHash

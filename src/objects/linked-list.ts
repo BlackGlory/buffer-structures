@@ -14,13 +14,14 @@ export type PointerViewConstructor<View extends IHash> =
 & (new (buffer: ArrayBufferLike, byteOffset: number) => PointerView<View>)
 
 export class LinkedList<
-  View extends IHash & IReadable<unknown> & IWritable<unknown>
-> implements ICopy<LinkedList<View>>
-           , IReferenceCounted<LinkedList<View>>
-           , IReadable<MapStructureToValue<Structure<View>>>
-           , IWritable<MapStructureToValue<Structure<View>>>
+  View extends IHash & IReadable<Value> & IWritable<Value>
+, Value
+> implements ICopy<LinkedList<View, Value>>
+           , IReferenceCounted<LinkedList<View, Value>>
+           , IReadable<MapStructureToValue<Structure<View, Value>>>
+           , IWritable<MapStructureToValue<Structure<View, Value>>>
            , IHash {
-  readonly _view: LinkedListView<View>
+  readonly _view: LinkedListView<View, Value>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
@@ -29,7 +30,7 @@ export class LinkedList<
   constructor(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
-  , value: MapStructureToValue<Structure<View>>
+  , value: MapStructureToValue<Structure<View, Value>>
   )
   constructor(
     _allocator: IAllocator
@@ -41,7 +42,7 @@ export class LinkedList<
   | [
       allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
-    , value: MapStructureToValue<Structure<View>>
+    , value: MapStructureToValue<Structure<View, Value>>
     ]
   | [
       allocator: IAllocator
@@ -86,39 +87,39 @@ export class LinkedList<
     }
   }
 
-  clone(): LinkedList<View> {
+  clone(): LinkedList<View, Value> {
     this.fsm.assertAllocated()
 
     return new LinkedList(this.allocator,this.viewConstructor , this._view.byteOffset, this._counter)
   }
 
-  copy(): LinkedList<View> {
+  copy(): LinkedList<View, Value> {
     this.fsm.assertAllocated()
 
     return new LinkedList(this.allocator, this.viewConstructor, this.get())
   }
 
-  get(): MapStructureToValue<Structure<View>> {
+  get(): MapStructureToValue<Structure<View, Value>> {
     return this._view.get()
   }
 
-  set(value: MapStructureToValue<Structure<View>>): void {
+  set(value: MapStructureToValue<Structure<View, Value>>): void {
     this._view.set(value)
   }
 
-  setNext(value: MapStructureToValue<Structure<View>>['next']): void {
+  setNext(value: MapStructureToValue<Structure<View, Value>>['next']): void {
     this._view.setNext(value)
   }
 
-  getNext(): MapStructureToValue<Structure<View>>['next'] {
+  getNext(): MapStructureToValue<Structure<View, Value>>['next'] {
     return this._view.getNext()
   }
 
-  setValue(value: MapStructureToValue<Structure<View>>['value']): void {
+  setValue(value: MapStructureToValue<Structure<View, Value>>['value']): void {
     this._view.setValue(value)
   }
 
-  getValue(): MapStructureToValue<Structure<View>>['value'] {
+  getValue(): MapStructureToValue<Structure<View, Value>>['value'] {
     return this._view.getValue()
   }
 }

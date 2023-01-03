@@ -3,7 +3,7 @@ import { FixedLengthArray } from 'justypes'
 
 export type ViewConstructor<View> =
   ISized
-& (new (buffer: ArrayBufferLike, offset: number) => View)
+& (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
 export class ArrayView<
   View extends IReadable<Value> & IWritable<Value> & IHash

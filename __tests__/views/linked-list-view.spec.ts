@@ -30,9 +30,9 @@ describe('LinkedListView', () => {
       const dataView = new DataView(buffer)
       dataView.setUint32(byteOffset, next)
       dataView.setUint8(byteOffset + Uint32Array.BYTES_PER_ELEMENT, value)
-      const rcView = new LinkedListView(buffer, byteOffset, Uint8View)
+      const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
-      const result = rcView.get()
+      const result = view.get()
 
       expect(result).toStrictEqual({ value, next })
     })
@@ -45,9 +45,9 @@ describe('LinkedListView', () => {
       const dataView = new DataView(buffer)
       dataView.setUint32(byteOffset, next)
       dataView.setUint8(byteOffset + Uint32Array.BYTES_PER_ELEMENT, value)
-      const rcView = new LinkedListView(buffer, byteOffset, Uint8View)
+      const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
-      const result = rcView.get()
+      const result = view.get()
 
       expect(result).toStrictEqual({ value, next })
     })
@@ -59,9 +59,9 @@ describe('LinkedListView', () => {
       const byteOffset = 1
       const next = null
       const value = 1
-      const rcView = new LinkedListView(buffer, byteOffset, Uint8View)
+      const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
-      rcView.set({ next, value })
+      view.set({ next, value })
 
       const dataView = new DataView(buffer)
       expect(dataView.getUint32(byteOffset)).toBe(0)
@@ -73,9 +73,9 @@ describe('LinkedListView', () => {
       const byteOffset = 1
       const next = 1
       const value = 2
-      const rcView = new LinkedListView(buffer, byteOffset, Uint8View)
+      const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
-      rcView.set({ next, value })
+      view.set({ next, value })
 
       const dataView = new DataView(buffer)
       expect(dataView.getUint32(byteOffset)).toBe(next)
@@ -89,9 +89,9 @@ describe('LinkedListView', () => {
     const next = 1
     const dataView = new DataView(buffer)
     dataView.setUint32(byteOffset, next)
-    const rcView = new LinkedListView(buffer, byteOffset, Uint8View)
+    const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
-    const result = rcView.getNext()
+    const result = view.getNext()
 
     expect(result).toBe(next)
   })
@@ -100,9 +100,9 @@ describe('LinkedListView', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
     const next = 1
-    const rcView = new LinkedListView(buffer, byteOffset, Uint8View)
+    const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
-    rcView.setNext(next)
+    view.setNext(next)
 
     const dataView = new DataView(buffer)
     expect(dataView.getUint32(byteOffset)).toBe(next)
@@ -114,9 +114,9 @@ describe('LinkedListView', () => {
     const value = 1
     const dataView = new DataView(buffer)
     dataView.setUint8(byteOffset + Uint32Array.BYTES_PER_ELEMENT, value)
-    const rcView = new LinkedListView(buffer, byteOffset, Uint8View)
+    const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
-    const result = rcView.getValue()
+    const result = view.getValue()
 
     expect(result).toBe(value)
   })
@@ -125,9 +125,9 @@ describe('LinkedListView', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
     const value = 1
-    const rcView = new LinkedListView(buffer, byteOffset, Uint8View)
+    const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
-    rcView.setValue(value)
+    view.setValue(value)
 
     const dataView = new DataView(buffer)
     expect(dataView.getUint8(byteOffset + Uint32Array.BYTES_PER_ELEMENT)).toBe(value)
@@ -150,5 +150,58 @@ describe('LinkedListView', () => {
     expect(hasher.write).nthCalledWith(1, uint8ToBytes(10))
     expect(hasher.write).nthCalledWith(2, uint8ToBytes(20))
     expect(hasher.write).nthCalledWith(3, uint8ToBytes(0))
+  })
+
+  test('getViewOfValue', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const value = 1
+    const dataView = new DataView(buffer)
+    dataView.setUint8(byteOffset + Uint32Array.BYTES_PER_ELEMENT, value)
+    const linkedListView = new LinkedListView(buffer, byteOffset, Uint8View)
+
+    const result = linkedListView.getViewOfValue()
+
+    expect(result).toBeInstanceOf(Uint8View)
+    expect(result.byteOffset).toBe(byteOffset + Uint32Array.BYTES_PER_ELEMENT)
+  })
+
+  test('getViewOfNext', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const value = 50
+    const dataView = new DataView(buffer)
+    dataView.setUint8(byteOffset, value)
+    const linkedListView = new LinkedListView(buffer, byteOffset, Uint8View)
+
+    const result = linkedListView.getViewOfNext()
+
+    expect(result).toBeInstanceOf(PointerView)
+    expect(result.byteOffset).toBe(byteOffset)
+  })
+
+  describe('deferNext', () => {
+    test('next: null', () => {
+      const buffer = new ArrayBuffer(100)
+      const byteOffset = 1
+      const view = new LinkedListView(buffer, byteOffset, Uint8View)
+      view.setNext(null)
+
+      const result = view.deferNext()
+
+      expect(result).toBe(null)
+    })
+
+    test('next: number', () => {
+      const buffer = new ArrayBuffer(100)
+      const byteOffset = 1
+      const view = new LinkedListView(buffer, byteOffset, Uint8View)
+      view.setNext(50)
+
+      const result = view.deferNext()
+
+      expect(result).toBeInstanceOf(LinkedListView)
+      expect(result!.byteOffset).toBe(50)
+    })
   })
 })

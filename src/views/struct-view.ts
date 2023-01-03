@@ -6,7 +6,7 @@ import * as Iter from 'iterable-operator'
 export type ViewConstructor<T> =
   ISized
 & (
-    new (buffer: ArrayBufferLike, offset: number) =>
+    new (buffer: ArrayBufferLike, byteOffset: number) =>
       IReadable<T>
     & IWritable<T>
     & IHash

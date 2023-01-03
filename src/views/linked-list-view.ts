@@ -11,35 +11,39 @@ export type PointerViewConstructor<View extends IHash> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => PointerView<View>)
 
-export type Structure<View extends IHash & IReadable<unknown> & IWritable<unknown>> = {
-  next: PointerViewConstructor<LinkedListView<View>>
+export type Structure<View extends IHash & IReadable<Value> & IWritable<Value>, Value> = {
+  next: PointerViewConstructor<LinkedListView<View, Value>>
   value: ViewConstructor<View>
 }
 
 export class LinkedListView<
-  View extends IHash & IReadable<unknown> & IWritable<unknown>
+  View extends IReadable<Value> & IWritable<Value> & IHash
+, Value
 > implements IHash
            , IReference
-           , IReadable<MapStructureToValue<Structure<View>>>
-           , IWritable<MapStructureToValue<Structure<View>>> {
-  static getByteLength(view: ViewConstructor<unknown>) {
-    return view.byteLength + PointerView.byteLength
+           , IReadable<MapStructureToValue<Structure<View, Value>>>
+           , IWritable<MapStructureToValue<Structure<View, Value>>>
+           , ISized {
+  static getByteLength(viewConstructor: ViewConstructor<unknown>) {
+    return viewConstructor.byteLength + PointerView.byteLength
   }
 
-  readonly view: StructView<Structure<View>>
+  readonly byteLength = LinkedListView.getByteLength(this.viewConstructor)
+
+  private view: StructView<Structure<View, Value>>
 
   constructor(
     private buffer: ArrayBufferLike
   , public readonly byteOffset: number
   , private viewConstructor: ViewConstructor<View>
   ) {
-    class InternalLinkedListView extends LinkedListView<View> {
+    class InternalLinkedListView extends LinkedListView<View, Value> {
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
         super(buffer, byteOffset, viewConstructor)
       }
     }
 
-    class InternalPointerView extends PointerView<LinkedListView<View>> {
+    class InternalPointerView extends PointerView<LinkedListView<View, Value>> {
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
         super(buffer, byteOffset, InternalLinkedListView)
       }
@@ -63,36 +67,44 @@ export class LinkedListView<
     }
   }
 
-  get(): MapStructureToValue<Structure<View>> {
+  get(): MapStructureToValue<Structure<View, Value>> {
     return this.view.get()
   }
 
-  set(value: MapStructureToValue<Structure<View>>): void {
+  set(value: MapStructureToValue<Structure<View, Value>>): void {
     this.view.set(value)
   }
 
-  setNext(value: MapStructureToValue<Structure<View>>['next']): void {
+  setNext(value: MapStructureToValue<Structure<View, Value>>['next']): void {
     this.view.setByKey('next', value)
   }
 
-  getNext(): MapStructureToValue<Structure<View>>['next'] {
+  getNext(): MapStructureToValue<Structure<View, Value>>['next'] {
     return this.view.getByKey('next')
   }
 
-  private deferNext(): LinkedListView<View> | null {
+  setValue(value: MapStructureToValue<Structure<View, Value>>['value']): void {
+    this.view.setByKey('value', value)
+  }
+
+  getValue(): MapStructureToValue<Structure<View, Value>>['value'] {
+    return this.view.getByKey('value')
+  }
+
+  getViewOfValue(): View {
+    return this.view.getViewByKey('value')
+  }
+
+  getViewOfNext(): PointerView<LinkedListView<View, Value>> {
+    return this.view.getViewByKey('next')
+  }
+
+  deferNext(): LinkedListView<View, Value> | null {
     const offset = this.getNext()
     if (isntNull(offset)) {
       return new LinkedListView(this.buffer, offset, this.viewConstructor)
     } else {
       return null
     }
-  }
-
-  setValue(value: MapStructureToValue<Structure<View>>['value']): void {
-    this.view.setByKey('value', value)
-  }
-
-  getValue(): MapStructureToValue<Structure<View>>['value'] {
-    return this.view.getByKey('value')
   }
 }
