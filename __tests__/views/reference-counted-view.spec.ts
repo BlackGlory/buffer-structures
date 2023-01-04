@@ -111,6 +111,32 @@ describe('ReferenceCountedView', () => {
     expect(dataView.getUint32(byteOffset)).toBe(count)
   })
 
+  test('incrementCount', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const count = 1
+    const rcView = new ReferenceCountedView(buffer, byteOffset, Uint8View)
+    rcView.setCount(count)
+
+    rcView.incrementCount(1)
+
+    const dataView = new DataView(buffer)
+    expect(dataView.getUint32(byteOffset)).toBe(2)
+  })
+
+  test('decrementCount', () => {
+    const buffer = new ArrayBuffer(100)
+    const byteOffset = 1
+    const count = 1
+    const rcView = new ReferenceCountedView(buffer, byteOffset, Uint8View)
+    rcView.setCount(count)
+
+    rcView.decrementCount(1)
+
+    const dataView = new DataView(buffer)
+    expect(dataView.getUint32(byteOffset)).toBe(0)
+  })
+
   describe('getValue', () => {
     test('null', () => {
       const buffer = new ArrayBuffer(100)

@@ -1,4 +1,4 @@
-import { isntNull } from '@blackglory/prelude'
+import { assert, isntNull, isPositiveInfinity } from '@blackglory/prelude'
 import { IHash, IHasher, ISized, IReference, IReadableWritable } from '@src/types'
 import { StructView } from '@views/struct-view'
 import { PointerView } from '@views/pointer-view'
@@ -60,11 +60,25 @@ export class ReferenceCountedView<
   }
 
   setCount(value: number): void {
+    assert(Number.isInteger(value), 'The new count must be an integer')
+    assert(value >= 0, 'The new count must be greater than or equal to 0')
+    assert(value <= Number.MAX_SAFE_INTEGER, 'The new count must be less than or equal to Number.MAX_SAFE_INTEGER')
+
     this.view.setByKey('count', value)
   }
 
   getCount(): number {
     return this.view.getByKey('count')
+  }
+
+  incrementCount(value: number = 1): void {
+    const newCount = this.getCount() + value
+    this.setCount(newCount)
+  }
+
+  decrementCount(value: number = 1): void {
+    const newCount = this.getCount() - value
+    this.setCount(newCount)
   }
 
   setValue(value: number | null): void {
