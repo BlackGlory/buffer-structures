@@ -3,11 +3,11 @@ import { pipe } from 'extra-utils'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import * as Iter from 'iterable-operator'
 
-export type ViewConstructor<T> =
+export type ViewConstructor<Value> =
   ISized
 & (
     new (buffer: ArrayBufferLike, byteOffset: number) =>
-      IReadableWritable<T>
+      IReadableWritable<Value>
     & IHash
   )
 

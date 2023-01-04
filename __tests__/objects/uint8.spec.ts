@@ -31,7 +31,7 @@ describe('Uint8', () => {
       result.destroy()
 
       expect(allocator.free).toBeCalledTimes(1)
-      expect(allocator.free).toBeCalledWith(result._view.byteOffset)
+      expect(allocator.free).toBeCalledWith(result.view.byteOffset)
     })
 
     it('cannot destory twice', () => {
@@ -76,7 +76,7 @@ describe('Uint8', () => {
         obj2.destroy()
 
         expect(allocator.free).toBeCalledTimes(1)
-        expect(allocator.free).toBeCalledWith(obj1._view.byteOffset)
+        expect(allocator.free).toBeCalledWith(obj1.view.byteOffset)
       })
     })
   })
@@ -88,7 +88,7 @@ describe('Uint8', () => {
     const result = obj.clone()
 
     expect(result).not.toBe(obj)
-    expect(result._view.byteOffset).toBe(obj._view.byteOffset)
+    expect(result.view.byteOffset).toBe(obj.view.byteOffset)
     expect(result._counter).toBe(obj._counter)
     expect(result._counter._count).toBe(2)
   })
@@ -100,7 +100,7 @@ describe('Uint8', () => {
     const result = obj.copy()
 
     expect(result).not.toBe(obj)
-    expect(result._view.byteOffset).not.toBe(obj._view.byteOffset)
+    expect(result.view.byteOffset).not.toBe(obj.view.byteOffset)
     expect(result._counter).not.toBe(obj._counter)
     expect(result._counter._count).toBe(1)
   })

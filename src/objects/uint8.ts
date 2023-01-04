@@ -7,7 +7,7 @@ export class Uint8 implements ICopy<Uint8>
                             , IReferenceCounted<Uint8>
                             , IReadableWritable<number>
                             , IHash {
-  readonly _view: Uint8View
+  readonly view: Uint8View
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
@@ -26,13 +26,13 @@ export class Uint8 implements ICopy<Uint8>
       const offset = allocator.allocate(Uint8View.byteLength)
       const view = new Uint8View(allocator.buffer, offset)
       view.set(value)
-      this._view = view
+      this.view = view
     } else {
       const [allocator, offset, counter] = args
       this.allocator = allocator
 
       const view = new Uint8View(allocator.buffer, offset)
-      this._view = view
+      this.view = view
 
       counter.increment()
       this._counter = counter
@@ -40,7 +40,7 @@ export class Uint8 implements ICopy<Uint8>
   }
 
   hash(hasher: IHasher): void {
-    this._view.hash(hasher)
+    this.view.hash(hasher)
   }
 
   destroy(): void {
@@ -48,14 +48,14 @@ export class Uint8 implements ICopy<Uint8>
 
     this._counter.decrement()
     if (this._counter.isZero()) {
-      this.allocator.free(this._view.byteOffset)
+      this.allocator.free(this.view.byteOffset)
     }
   }
 
   clone(): Uint8 {
     this.fsm.assertAllocated()
 
-    return new Uint8(this.allocator, this._view.byteOffset, this._counter)
+    return new Uint8(this.allocator, this.view.byteOffset, this._counter)
   }
 
   copy(): Uint8 {
@@ -67,12 +67,12 @@ export class Uint8 implements ICopy<Uint8>
   get(): number {
     this.fsm.assertAllocated()
 
-    return this._view.get()
+    return this.view.get()
   }
 
   set(value: number): void {
     this.fsm.assertAllocated()
 
-    this._view.set(value)
+    this.view.set(value)
   }
 }
