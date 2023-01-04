@@ -100,7 +100,7 @@ describe('HashMap', () => {
       const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
       const key = new Uint8(allocator, 1)
 
-      const result = obj.has(key.view)
+      const result = obj.has(key._view)
 
       expect(result).toBe(false)
     })
@@ -110,9 +110,9 @@ describe('HashMap', () => {
       const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
       const key = new Uint8(allocator, 1)
       const value = new Uint8(allocator, 2)
-      obj.set(key.view, value.view)
+      obj.set(key._view, value._view)
 
-      const result = obj.has(key.view)
+      const result = obj.has(key._view)
 
       expect(result).toBe(true)
     })
@@ -124,7 +124,7 @@ describe('HashMap', () => {
       const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
       const key = new Uint8(allocator, 1)
 
-      const result = obj.get(key.view)
+      const result = obj.get(key._view)
 
       expect(result).toBe(undefined)
     })
@@ -134,9 +134,9 @@ describe('HashMap', () => {
       const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
       const key = new Uint8(allocator, 1)
       const value = new Uint8(allocator, 2)
-      obj.set(key.view, value.view)
+      obj.set(key._view, value._view)
 
-      const result = obj.get(key.view)
+      const result = obj.get(key._view)
 
       expect(result).toBeInstanceOf(Uint8View)
       expect(result!.get()).toBe(2)
@@ -150,9 +150,9 @@ describe('HashMap', () => {
       const key = new Uint8(allocator, 1)
       const value = new Uint8(allocator, 2)
 
-      obj.set(key.view, value.view)
+      obj.set(key._view, value._view)
 
-      expect(obj.get(key.view)!.get()).toBe(2)
+      expect(obj.get(key._view)!.get()).toBe(2)
     })
 
     test('item exists', () => {
@@ -161,11 +161,11 @@ describe('HashMap', () => {
       const key = new Uint8(allocator, 1)
       const value = new Uint8(allocator, 2)
       const newValue = new Uint8(allocator, 3)
-      obj.set(key.view, value.view)
+      obj.set(key._view, value._view)
 
-      obj.set(key.view, newValue.view)
+      obj.set(key._view, newValue._view)
 
-      expect(obj.get(key.view)!.get()).toBe(3)
+      expect(obj.get(key._view)!.get()).toBe(3)
     })
   })
 
@@ -175,9 +175,9 @@ describe('HashMap', () => {
       const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
       const key = new Uint8(allocator, 1)
 
-      obj.delete(key.view)
+      obj.delete(key._view)
 
-      expect(obj.has(key.view)).toBe(false)
+      expect(obj.has(key._view)).toBe(false)
     })
 
     test('item exists', () => {
@@ -185,11 +185,11 @@ describe('HashMap', () => {
       const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
       const key = new Uint8(allocator, 1)
       const value = new Uint8(allocator, 2)
-      obj.set(key.view, value.view)
+      obj.set(key._view, value._view)
 
-      obj.delete(key.view)
+      obj.delete(key._view)
 
-      expect(obj.has(key.view)).toBe(false)
+      expect(obj.has(key._view)).toBe(false)
     })
   })
 })
