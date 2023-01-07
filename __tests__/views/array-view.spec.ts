@@ -1,7 +1,7 @@
 import { ArrayView } from '@views/array-view'
 import { Uint8View } from '@views/uint8-view'
 import { uint8ToBytes } from '@test/utils'
-import { IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/types'
 
 describe('ArrayView', () => {
   test('getByteLength', () => {
@@ -28,6 +28,21 @@ describe('ArrayView', () => {
     const result = view.byteOffset
 
     expect(result).toBe(byteOffset)
+  })
+
+  test('free', () => {
+    const allocator = {
+      buffer: new ArrayBuffer(100)
+    , allocate: jest.fn()
+    , free: jest.fn()
+    } satisfies IAllocator
+    const byteOffset = 1
+    const view = new ArrayView(allocator.buffer, byteOffset, Uint8View, 3)
+
+    view.free(allocator)
+
+    expect(allocator.free).toBeCalledTimes(1)
+    expect(allocator.free).toBeCalledWith(byteOffset)
   })
 
   test('get', () => {

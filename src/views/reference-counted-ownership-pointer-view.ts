@@ -1,24 +1,25 @@
-import { assert, isntNull, isPositiveInfinity } from '@blackglory/prelude'
-import { IHash, IHasher, ISized, IReference, IReadableWritable } from '@src/types'
+import { assert } from '@blackglory/prelude'
+import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFree } from '@src/types'
 import { StructView } from '@views/struct-view'
-import { PointerView } from '@views/pointer-view'
+import { ViewConstructor } from '@views/pointer-view'
 import { Uint32View } from '@views/uint32-view'
+import { OwnershipPointerView } from '@views/ownership-pointer-view'
 
-export type ViewConstructor<View> = new (
-  buffer: ArrayBufferLike
-, byteOffset: number
-) => View
-
-export type PointerViewConstructor<View extends IHash> =
+type PointerViewConstructor<View extends IHash & IFree> =
   ISized
-& (new (buffer: ArrayBufferLike, byteOffset: number) => PointerView<View>)
+& (new (buffer: ArrayBufferLike, byteOffset: number) => OwnershipPointerView<View>)
 
-export class ReferenceCountedView<
-  View extends IHash
+/**
+ * ReferenceCountedOwnershipPointerView与OwnershipPointerView的区别:
+ * ReferenceCountedOwnershipPointerView附带引用计数.
+ */
+export class ReferenceCountedOwnershipPointerView<
+  View extends IHash & IFree
 > implements IHash
            , IReference
-           , IReadableWritable<{ count: number; value: number | null }> {
-  static readonly byteLength = Uint32Array.BYTES_PER_ELEMENT + PointerView.byteLength
+           , IReadableWritable<{ count: number; value: number | null }>
+           , IFree {
+  static readonly byteLength = Uint32View.byteLength + OwnershipPointerView.byteLength
 
   private view: StructView<{
     count: typeof Uint32View
@@ -26,11 +27,11 @@ export class ReferenceCountedView<
   }>
 
   constructor(
-    private buffer: ArrayBufferLike
+    buffer: ArrayBufferLike
   , public readonly byteOffset: number
-  , private viewConstruct: ViewConstructor<View>
+  , viewConstruct: ViewConstructor<View>
   ) {
-    class InternalView extends PointerView<View> {
+    class InternalOwnershipPointerView extends OwnershipPointerView<View> {
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
         super(buffer, byteOffset, viewConstruct)
       }
@@ -38,8 +39,14 @@ export class ReferenceCountedView<
 
     this.view = new StructView(buffer, byteOffset, {
       count: Uint32View
-    , value: InternalView
+    , value: InternalOwnershipPointerView
     })
+  }
+
+  free(allocator: IAllocator): void {
+    this.deref()?.free(allocator)
+
+    allocator.free(this.byteOffset)
   }
 
   hash(hasher: IHasher): void {
@@ -90,10 +97,7 @@ export class ReferenceCountedView<
   }
 
   deref(): View | null {
-    const value = this.view.getByKey('value')
-
-    return isntNull(value)
-         ? new this.viewConstruct(this.buffer, value)
-         : null
+    const valueView = this.view.getViewByKey('value')
+    return valueView.deref()
   }
 }

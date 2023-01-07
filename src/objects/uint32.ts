@@ -1,22 +1,23 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
+import { IAllocator, ICopy, IClone, IDestroy, IReadableWritable, IHash, IHasher } from '@src/types'
 import { Uint32View } from '@views/uint32-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 
 export class Uint32 implements ICopy<Uint32>
-                             , IReferenceCounted<Uint32>
+                             , IClone<Uint32>
                              , IReadableWritable<number>
-                             , IHash {
+                             , IHash
+                             , IDestroy {
   readonly _view: Uint32View
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
   constructor(allocator: IAllocator, value: number)
-  constructor(_allocator: IAllocator, _offset: number, _counter: ReferenceCounter)
+  constructor(_allocator: IAllocator, _byteOffset: number, _counter: ReferenceCounter)
   constructor(...args:
   | [allocator: IAllocator, value: number]
-  | [allocator: IAllocator, offset: number, counter: ReferenceCounter]
+  | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
     if (args.length === 2) {
       const [allocator, value] = args
@@ -28,10 +29,10 @@ export class Uint32 implements ICopy<Uint32>
       view.set(value)
       this._view = view
     } else {
-      const [allocator, offset, counter] = args
+      const [allocator, byteOffset, counter] = args
       this.allocator = allocator
 
-      const view = new Uint32View(allocator.buffer, offset)
+      const view = new Uint32View(allocator.buffer, byteOffset)
       this._view = view
 
       counter.increment()
@@ -48,7 +49,7 @@ export class Uint32 implements ICopy<Uint32>
 
     this._counter.decrement()
     if (this._counter.isZero()) {
-      this.allocator.free(this._view.byteOffset)
+      this._view.free(this.allocator)
     }
   }
 

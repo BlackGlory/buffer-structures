@@ -1,4 +1,4 @@
-import { IAllocator, ISized, IHash, IReadableWritable, IReferenceCounted } from '@src/types'
+import { IAllocator, ISized, IHash, IReadableWritable, IClone, IDestroy } from '@src/types'
 import { ArrayView } from '@views/array-view'
 import { LinkedListView } from '@views/linked-list-view'
 import { Uint32View } from '@views/uint32-view'
@@ -16,7 +16,8 @@ export class HashMap<
   KeyView extends IHash
 , ValueView extends IReadableWritable<Value> & IHash
 , Value = ValueView extends IReadableWritable<infer T> ? T : never
-> implements IReferenceCounted<HashMap<KeyView, ValueView, Value>> {
+> implements IClone<HashMap<KeyView, ValueView, Value>>
+           , IDestroy {
   readonly _view: ArrayView<
     PointerView<
       LinkedListView<
@@ -44,7 +45,7 @@ export class HashMap<
     _allocator: IAllocator
   , _valueViewConstructor: ViewConstructor<ValueView>
   , _capacity: number
-  , _offset: number
+  , _byteOffset: number
   , _counter: ReferenceCounter
   )
   constructor(...args:
@@ -57,12 +58,12 @@ export class HashMap<
       allocator: IAllocator
     , valueViewConstructor: ViewConstructor<ValueView>
     , capacity: number
-    , offset: number
+    , byteOffset: number
     , counter: ReferenceCounter
     ]
   ) {
     if (args.length === 5) {
-      const [allocator, valueViewConstructor, capacity, offset, counter] = args
+      const [allocator, valueViewConstructor, capacity, byteOffset, counter] = args
       this.allocator = allocator
       this.valueViewConstructor = valueViewConstructor
       this.capacity = capacity
@@ -111,7 +112,7 @@ export class HashMap<
       , number
       >(
         allocator.buffer
-      , offset
+      , byteOffset
       , InternalPointerView
       , capacity
       )
@@ -158,7 +159,7 @@ export class HashMap<
         }
       }
 
-      const offset = allocator.allocate(
+      const byteOffset = allocator.allocate(
         ArrayView.getByteLength(InternalPointerView, capacity)
       )
       const view = new ArrayView<
@@ -173,7 +174,7 @@ export class HashMap<
       , number
       >(
         allocator.buffer
-      , offset
+      , byteOffset
       , InternalPointerView
       , capacity
       )
@@ -220,7 +221,7 @@ export class HashMap<
       if (hash === keyHash) {
         return true
       } else {
-        linkedList = linkedList.deferNext()
+        linkedList = linkedList.derefNext()
       }
     }
 
@@ -242,7 +243,7 @@ export class HashMap<
         const value = struct.getViewByKey('value')
         return value
       } else {
-        linkedList = linkedList.deferNext()
+        linkedList = linkedList.derefNext()
       }
     }
   }
@@ -264,7 +265,7 @@ export class HashMap<
           struct.setByKey('value', valueView.get())
           return
         } else {
-          const nextLinkedList = linkedList.deferNext()
+          const nextLinkedList = linkedList.derefNext()
           if (nextLinkedList) {
             linkedList = nextLinkedList
           } else {
@@ -318,7 +319,7 @@ export class HashMap<
         return
       } else {
         previous = linkedList
-        linkedList = linkedList.deferNext()
+        linkedList = linkedList.derefNext()
       }
     }
   }

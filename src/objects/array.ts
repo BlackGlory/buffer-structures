@@ -1,4 +1,4 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
+import { IAllocator, IHasher, ICopy, IClone, IDestroy, IHash, IReadableWritable } from '@src/types'
 import { ViewConstructor, ArrayView } from '@views/array-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
@@ -9,9 +9,9 @@ export class Array<
 , Length extends number
 , Value = View extends IReadableWritable<infer T> ? T : never
 > implements ICopy<Array<View, Length, Value>>
-           , IReferenceCounted<Array<View, Length, Value>>
-           , IReadableWritable<FixedLengthArray<View, Length>>
-           , IHash {
+           , IClone<Array<View, Length, Value>>
+           , IHash
+           , IDestroy {
   readonly _view: ArrayView<View, Length, Value>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -29,7 +29,7 @@ export class Array<
     _allocator: IAllocator
   , _viewConstructor: ViewConstructor<View>
   , _length: Length
-  , _offset: number
+  , _byteOffset: number
   , _counter: ReferenceCounter
   )
   constructor(...args:
@@ -43,19 +43,19 @@ export class Array<
       allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
     , length: Length
-    , offset: number
+    , byteOffset: number
     , counter: ReferenceCounter
     ]
   ) {
     if (args.length === 5) {
-      const [allocator, viewConstructor, length, offset, counter] = args
+      const [allocator, viewConstructor, length, byteOffset, counter] = args
       this.allocator = allocator
       this.viewConstructor = viewConstructor
       this.length = length
 
       const view = new ArrayView<View, Length, Value>(
         allocator.buffer
-      , offset
+      , byteOffset
       , viewConstructor
       , length
       )
@@ -70,10 +70,12 @@ export class Array<
       this.length = length
       this._counter = new ReferenceCounter()
 
-      const offset = allocator.allocate(ArrayView.getByteLength(viewConstructor, length))
+      const byteOffset = allocator.allocate(
+        ArrayView.getByteLength(viewConstructor, length)
+      )
       const view = new ArrayView<View, Length, Value>(
         allocator.buffer
-      , offset
+      , byteOffset
       , viewConstructor
       , length
       )
@@ -93,7 +95,7 @@ export class Array<
 
     this._counter.decrement()
     if (this._counter.isZero()) {
-      this.allocator.free(this._view.byteOffset)
+      this._view.free(this.allocator)
     }
   }
 

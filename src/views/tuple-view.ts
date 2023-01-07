@@ -1,4 +1,4 @@
-import { IHash, IHasher, IReference, ISized, IReadableWritable } from '@src/types'
+import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree } from '@src/types'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ReturnTypeOfConstructor } from 'hotypes'
 
@@ -22,7 +22,8 @@ export class TupleView<
 > implements IReference
            , IReadableWritable<MapStructureToValue<Structure>>
            , ISized
-           , IHash {
+           , IHash
+           , IFree {
   static getByteLength(structure: NonEmptyArray<ViewConstructor<unknown>>): number {
     return structure.reduce((acc, cur) => acc + cur.byteLength, 0)
   }
@@ -34,6 +35,10 @@ export class TupleView<
   , public readonly byteOffset: number
   , private structure: Structure
   ) {}
+
+  free(allocator: IAllocator): void {
+    allocator.free(this.byteOffset)
+  }
 
   hash(hasher: IHasher): void {
     let offset: number = this.byteOffset

@@ -383,7 +383,7 @@ describe('LinkedList', () => {
     expect(result).toBeInstanceOf(PointerView)
   })
 
-  describe('deferNext', () => {
+  describe('derefNext', () => {
     test('null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const obj = new LinkedList(
@@ -395,7 +395,7 @@ describe('LinkedList', () => {
         }
       )
 
-      const result = obj.deferNext()
+      const result = obj.derefNext()
 
       expect(result).toBe(null)
     })
@@ -411,7 +411,7 @@ describe('LinkedList', () => {
         }
       )
 
-      const result = obj.deferNext()
+      const result = obj.derefNext()
 
       expect(result).toBeInstanceOf(LinkedListView)
     })

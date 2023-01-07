@@ -1,22 +1,23 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
+import { IAllocator, ICopy, IClone, IDestroy, IReadableWritable, IHash, IHasher } from '@src/types'
 import { FloatView } from '@views/float-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 
 export class Float implements ICopy<Float>
-                            , IReferenceCounted<Float>
+                            , IClone<Float>
                             , IReadableWritable<number>
-                            , IHash {
+                            , IHash
+                            , IDestroy {
   readonly _view: FloatView
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
   constructor(allocator: IAllocator, value: number)
-  constructor(_allocator: IAllocator, _offset: number, _counter: ReferenceCounter)
+  constructor(_allocator: IAllocator, _byteOffset: number, _counter: ReferenceCounter)
   constructor(...args:
   | [allocator: IAllocator, value: number]
-  | [allocator: IAllocator, offset: number, counter: ReferenceCounter]
+  | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
     if (args.length === 2) {
       const [allocator, value] = args
@@ -28,10 +29,10 @@ export class Float implements ICopy<Float>
       view.set(value)
       this._view = view
     } else {
-      const [allocator, offset, counter] = args
+      const [allocator, byteOffset, counter] = args
       this.allocator = allocator
 
-      const view = new FloatView(allocator.buffer, offset)
+      const view = new FloatView(allocator.buffer, byteOffset)
       this._view = view
 
       counter.increment()
@@ -48,7 +49,7 @@ export class Float implements ICopy<Float>
 
     this._counter.decrement()
     if (this._counter.isZero()) {
-      this.allocator.free(this._view.byteOffset)
+      this._view.free(this.allocator)
     }
   }
 

@@ -1,9 +1,10 @@
-import { IHash, IHasher, IReference, IReadableWritable } from '@src/types'
+import { IAllocator, IHash, IHasher, IReference, IReadableWritable, IFree } from '@src/types'
 import { readBytes } from '@utils/read-bytes'
 
 export class Uint16View implements IHash
                                  , IReference
-                                 , IReadableWritable<number> {
+                                 , IReadableWritable<number>
+                                 , IFree {
   static readonly byteLength = Uint16Array.BYTES_PER_ELEMENT
 
   private view: DataView
@@ -13,6 +14,10 @@ export class Uint16View implements IHash
   , public readonly byteOffset: number
   ) {
     this.view = new DataView(buffer)
+  }
+
+  free(allocator: IAllocator): void {
+    allocator.free(this.byteOffset)
   }
 
   get(): number {

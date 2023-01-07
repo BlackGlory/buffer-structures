@@ -1,6 +1,6 @@
 import { Int8View } from '@views/int8-view'
 import { int8ToBytes } from '@test/utils'
-import { IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/types'
 
 describe('Int8View', () => {
   test('byteLength', () => {
@@ -17,6 +17,21 @@ describe('Int8View', () => {
     const result = view.byteOffset
 
     expect(result).toBe(byteOffset)
+  })
+
+  test('free', () => {
+    const allocator = {
+      buffer: new ArrayBuffer(100)
+    , allocate: jest.fn()
+    , free: jest.fn()
+    } satisfies IAllocator
+    const byteOffset = 1
+    const view = new Int8View(allocator.buffer, byteOffset)
+
+    view.free(allocator)
+
+    expect(allocator.free).toBeCalledTimes(1)
+    expect(allocator.free).toBeCalledWith(byteOffset)
   })
 
   test('get', () => {

@@ -47,7 +47,7 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
   }
 
   /**
-   * @returns 绝对偏移值
+   * @returns 字节单位的绝对偏移值
    */
   allocate(size: number): number {
     return this.byteOffset + this._allocate(size)
@@ -101,10 +101,10 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
   }
 
   /**
-   * @param offset 绝对偏移值
+   * @param byteOffset 绝对偏移值
    */
-  free(offset: number): void {
-    return this._free(offset - this.byteOffset)
+  free(byteOffset: number): void {
+    return this._free(byteOffset - this.byteOffset)
   }
 
   private _free(offset: number): void {

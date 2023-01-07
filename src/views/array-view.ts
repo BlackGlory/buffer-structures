@@ -1,4 +1,4 @@
-import { IHash, IHasher, IReference, ISized, IReadableWritable } from '@src/types'
+import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree } from '@src/types'
 import { FixedLengthArray } from 'justypes'
 
 export type ViewConstructor<View> =
@@ -12,7 +12,8 @@ export class ArrayView<
 > implements IHash
            , IReference
            , IReadableWritable<FixedLengthArray<Value, Length>>
-           , ISized {
+           , ISized
+           , IFree {
   static getByteLength(
     viewConstructor: ViewConstructor<unknown>
   , length: number
@@ -28,6 +29,10 @@ export class ArrayView<
   , private viewConstructor: ViewConstructor<View>
   , private length: Length
   ) {}
+
+  free(allocator: IAllocator): void {
+    allocator.free(this.byteOffset)
+  }
 
   hash(hasher: IHasher): void {
     for (

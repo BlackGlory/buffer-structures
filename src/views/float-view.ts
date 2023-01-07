@@ -1,15 +1,20 @@
-import { IHash, IHasher, IReference, IReadableWritable } from '@src/types'
+import { IAllocator, IHash, IHasher, IReference, IReadableWritable, IFree } from '@src/types'
 import { readBytes } from '@utils/read-bytes'
 
 export class FloatView implements IHash
                                 , IReference
-                                , IReadableWritable<number> {
+                                , IReadableWritable<number>
+                                , IFree {
   static readonly byteLength = Float32Array.BYTES_PER_ELEMENT
 
   private view: DataView
 
   constructor(buffer: ArrayBufferLike, public readonly byteOffset: number) {
     this.view = new DataView(buffer)
+  }
+
+  free(allocator: IAllocator) {
+    allocator.free(this.byteOffset)
   }
 
   get(): number {

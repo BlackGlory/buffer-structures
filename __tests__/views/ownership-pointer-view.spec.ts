@@ -1,38 +1,59 @@
+import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { PointerView } from '@views/pointer-view'
 import { Uint8View } from '@views/uint8-view'
 import { uint8ToBytes } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
-describe('PointerView', () => {
+describe('OwnershipPointerView', () => {
   test('byteLength', () => {
-    const result = PointerView.byteLength
+    const result = OwnershipPointerView.byteLength
 
-    expect(result).toBe(Uint32Array.BYTES_PER_ELEMENT)
+    expect(result).toBe(PointerView.byteLength)
   })
 
   test('byteOffset', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const view = new PointerView(buffer, byteOffset, Uint8View)
+    const view = new OwnershipPointerView(buffer, byteOffset, Uint8View)
 
     const result = view.byteOffset
 
     expect(result).toBe(byteOffset)
   })
 
-  test('free', () => {
-    const allocator = {
-      buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
-    } satisfies IAllocator
-    const byteOffset = 1
-    const view = new PointerView(allocator.buffer, byteOffset, Uint8View)
+  describe('free', () => {
+    test('null', () => {
+      const allocator = {
+        buffer: new ArrayBuffer(100)
+      , allocate: jest.fn()
+      , free: jest.fn()
+      } satisfies IAllocator
+      const pointerView = new OwnershipPointerView(allocator.buffer, 50, Uint8View)
+      pointerView.set(null)
 
-    view.free(allocator)
+      pointerView.free(allocator)
 
-    expect(allocator.free).toBeCalledTimes(1)
-    expect(allocator.free).toBeCalledWith(byteOffset)
+      expect(allocator.free).toBeCalledTimes(1)
+      expect(allocator.free).toBeCalledWith(50)
+    })
+
+    test('non-null', () => {
+      const allocator = {
+        buffer: new ArrayBuffer(100)
+      , allocate: jest.fn()
+      , free: jest.fn()
+      } satisfies IAllocator
+      const dataView = new Uint8View(allocator.buffer, 1)
+      dataView.set(10)
+      const pointerView = new OwnershipPointerView(allocator.buffer, 50, Uint8View)
+      pointerView.set(1)
+
+      pointerView.free(allocator)
+
+      expect(allocator.free).toBeCalledTimes(2)
+      expect(allocator.free).nthCalledWith(1, 1)
+      expect(allocator.free).nthCalledWith(2, 50)
+    })
   })
 
   describe('get', () => {
@@ -42,7 +63,7 @@ describe('PointerView', () => {
       const value = 0
       const dataView = new DataView(buffer)
       dataView.setUint32(byteOffset, value)
-      const pointerView = new PointerView(buffer, byteOffset, Uint8View)
+      const pointerView = new OwnershipPointerView(buffer, byteOffset, Uint8View)
 
       const result = pointerView.get()
 
@@ -55,7 +76,7 @@ describe('PointerView', () => {
       const value = 1000000
       const dataView = new DataView(buffer)
       dataView.setUint32(byteOffset, value)
-      const pointerView = new PointerView(buffer, byteOffset, Uint8View)
+      const pointerView = new OwnershipPointerView(buffer, byteOffset, Uint8View)
 
       const result = pointerView.get()
 
@@ -68,7 +89,7 @@ describe('PointerView', () => {
       const buffer = new ArrayBuffer(100)
       const byteOffset = 1
       const value = null
-      const pointerView = new PointerView(buffer, byteOffset, Uint8View)
+      const pointerView = new OwnershipPointerView(buffer, byteOffset, Uint8View)
 
       pointerView.set(value)
 
@@ -80,7 +101,7 @@ describe('PointerView', () => {
       const buffer = new ArrayBuffer(100)
       const byteOffset = 1
       const value = 1000000
-      const pointerView = new PointerView(buffer, byteOffset, Uint8View)
+      const pointerView = new OwnershipPointerView(buffer, byteOffset, Uint8View)
 
       pointerView.set(value)
 
@@ -97,7 +118,7 @@ describe('PointerView', () => {
       const dataView = new DataView(buffer)
       dataView.setUint8(value, 100)
       dataView.setUint32(byteOffset, value)
-      const pointerView = new PointerView(buffer, byteOffset, Uint8View)
+      const pointerView = new OwnershipPointerView(buffer, byteOffset, Uint8View)
 
       const result = pointerView.deref()
 
@@ -111,7 +132,7 @@ describe('PointerView', () => {
       const dataView = new DataView(buffer)
       dataView.setUint8(value, 100)
       dataView.setUint32(byteOffset, value)
-      const pointerView = new PointerView(buffer, byteOffset, Uint8View)
+      const pointerView = new OwnershipPointerView(buffer, byteOffset, Uint8View)
 
       const result = pointerView.deref()
 
@@ -124,23 +145,9 @@ describe('PointerView', () => {
   describe('hash', () => {
     test('null', () => {
       const buffer = new ArrayBuffer(100)
-      const pointerView = new PointerView(buffer, 50, Uint8View)
-      pointerView.set(1)
-      const hasher = {
-        write: jest.fn()
-      } satisfies IHasher
-
-      pointerView.hash(hasher)
-
-      expect(hasher.write).toBeCalledTimes(1)
-      expect(hasher.write).toBeCalledWith(uint8ToBytes(0))
-    })
-
-    test('non-null', () => {
-      const buffer = new ArrayBuffer(100)
       const dataView = new Uint8View(buffer, 1)
       dataView.set(10)
-      const pointerView = new PointerView(buffer, 50, Uint8View)
+      const pointerView = new OwnershipPointerView(buffer, 50, Uint8View)
       pointerView.set(1)
       const hasher = {
         write: jest.fn()
@@ -150,6 +157,20 @@ describe('PointerView', () => {
 
       expect(hasher.write).toBeCalledTimes(1)
       expect(hasher.write).toBeCalledWith(uint8ToBytes(10))
+    })
+
+    test('non-null', () => {
+      const buffer = new ArrayBuffer(100)
+      const pointerView = new OwnershipPointerView(buffer, 50, Uint8View)
+      pointerView.set(1)
+      const hasher = {
+        write: jest.fn()
+      } satisfies IHasher
+
+      pointerView.hash(hasher)
+
+      expect(hasher.write).toBeCalledTimes(1)
+      expect(hasher.write).toBeCalledWith(uint8ToBytes(0))
     })
   })
 })

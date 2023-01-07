@@ -1,7 +1,7 @@
 import { StringView } from '@views/string-view'
-import { getSlice, setSlice, uint32ToBytes, bufferToBytes } from '@test/utils'
+import { getSlice, setSlice, uint32ToBytes } from '@test/utils'
 import { toArray } from '@blackglory/prelude'
-import { IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/types'
 
 describe('StringView', () => {
   test('getByteLength', () => {
@@ -35,6 +35,21 @@ describe('StringView', () => {
     const result = view.byteOffset
 
     expect(result).toBe(byteOffset)
+  })
+
+  test('free', () => {
+    const allocator = {
+      buffer: new ArrayBuffer(100)
+    , allocate: jest.fn()
+    , free: jest.fn()
+    } satisfies IAllocator
+    const byteOffset = 1
+    const view = new StringView(allocator.buffer, byteOffset)
+
+    view.free(allocator)
+
+    expect(allocator.free).toBeCalledTimes(1)
+    expect(allocator.free).toBeCalledWith(byteOffset)
   })
 
   test('get', () => {

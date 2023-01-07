@@ -1,5 +1,5 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
-import { MapStructureToValue, ViewConstructor, TupleView } from '@views/tuple-view'
+import { IAllocator, ICopy, IClone, IDestroy, IReadableWritable, IHash, IHasher, ISized } from '@src/types'
+import { TupleView, ViewConstructor, MapStructureToValue } from '@views/tuple-view'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
@@ -8,25 +8,39 @@ import { ReturnTypeOfConstructor } from 'hotypes'
 export class Tuple<
   Structure extends NonEmptyArray<ViewConstructor<unknown>>
 > implements ICopy<Tuple<Structure>>
-           , IReferenceCounted<Tuple<Structure>>
+           , IClone<Tuple<Structure>>
            , IReadableWritable<MapStructureToValue<Structure>>
-           , IHash {
+           , IHash
+           , IDestroy {
   readonly _view: TupleView<Structure>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
   private structure: Structure
 
-  constructor(allocator: IAllocator, structure: Structure, value: MapStructureToValue<Structure>)
+  constructor(
+    allocator: IAllocator
+  , structure: Structure
+  , value: MapStructureToValue<Structure>
+  )
   constructor(
     _allocator: IAllocator
   , _structure: Structure
-  , _offset: number
+  , _byteOffset: number
   , _counter: ReferenceCounter
   )
   constructor(...args:
-  | [allocator: IAllocator, structure: Structure, value: MapStructureToValue<Structure>]
-  | [allocator: IAllocator, structure: Structure, offset: number, counter: ReferenceCounter]
+  | [
+      allocator: IAllocator
+    , structure: Structure
+    , value: MapStructureToValue<Structure>
+    ]
+  | [
+      allocator: IAllocator
+    , structure: Structure
+    , byteOffset: number
+    , counter: ReferenceCounter
+    ]
   ) {
     if (args.length === 3) {
       const [allocator, structure, value] = args
@@ -34,16 +48,16 @@ export class Tuple<
       this.structure = structure
       this._counter = new ReferenceCounter()
 
-      const offset = allocator.allocate(TupleView.getByteLength(structure))
-      const view = new TupleView<Structure>(allocator.buffer, offset, structure)
+      const byteOffset = allocator.allocate(TupleView.getByteLength(structure))
+      const view = new TupleView<Structure>(allocator.buffer, byteOffset, structure)
       view.set(value)
       this._view = view
     } else {
-      const [allocator, structure, offset, counter] = args
+      const [allocator, structure, byteOffset, counter] = args
       this.allocator = allocator
       this.structure = structure
 
-      const view = new TupleView<Structure>(allocator.buffer, offset, structure)
+      const view = new TupleView<Structure>(allocator.buffer, byteOffset, structure)
       this._view = view
 
       counter.increment()
@@ -60,7 +74,7 @@ export class Tuple<
 
     this._counter.decrement()
     if (this._counter.isZero()) {
-      this.allocator.free(this._view.byteOffset)
+      this._view.free(this.allocator)
     }
   }
 
@@ -94,7 +108,10 @@ export class Tuple<
     return this._view.getByIndex(index)
   }
 
-  setByIndex<U extends number & keyof Structure>(index: U, value: MapStructureToValue<Structure>[U]): void {
+  setByIndex<U extends number & keyof Structure>(
+    index: U
+  , value: MapStructureToValue<Structure>[U]
+  ): void {
     this._view.setByIndex(index, value)
   }
 

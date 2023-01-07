@@ -1,4 +1,4 @@
-import { IHash, IHasher, IReference, ISized, IReadableWritable } from '@src/types'
+import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree } from '@src/types'
 import { pipe } from 'extra-utils'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import * as Iter from 'iterable-operator'
@@ -23,7 +23,8 @@ export class StructView<
 > implements IReference
            , IReadableWritable<MapStructureToValue<Structure>>
            , ISized
-           , IHash {
+           , IHash
+           , IFree {
   static getByteLength(structure: Record<string, ViewConstructor<unknown>>): number {
     return Object
       .values(structure)
@@ -37,6 +38,10 @@ export class StructView<
   , public readonly byteOffset: number
   , private structure: Structure
   ) {}
+
+  free(allocator: IAllocator): void {
+    allocator.free(this.byteOffset)
+  }
 
   hash(hasher: IHasher): void {
     let offset: number = this.byteOffset

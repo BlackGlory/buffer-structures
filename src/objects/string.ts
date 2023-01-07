@@ -1,22 +1,23 @@
-import { IAllocator, ICopy, IReferenceCounted, IReadable, IHash, IHasher } from '@src/types'
+import { IAllocator, ICopy, IClone, IDestroy, IReadable, IHash, IHasher } from '@src/types'
 import { StringView } from '@views/string-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 
 export class String implements ICopy<String>
-                             , IReferenceCounted<String>
+                             , IClone<String>
                              , IReadable<string>
-                             , IHash {
+                             , IHash
+                             , IDestroy {
   readonly _view: StringView
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
   constructor(allocator: IAllocator, value: string)
-  constructor(_allocator: IAllocator, _offset: number, _counter: ReferenceCounter)
+  constructor(_allocator: IAllocator, _byteOffset: number, _counter: ReferenceCounter)
   constructor(...args:
   | [allocator: IAllocator, value: string]
-  | [allocator: IAllocator, offset: number, counter: ReferenceCounter]
+  | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
     if (args.length === 2) {
       const [allocator, value] = args
@@ -28,10 +29,10 @@ export class String implements ICopy<String>
       view.set(value)
       this._view = view
     } else {
-      const [allocator, offset, counter] = args
+      const [allocator, byteOffset, counter] = args
       this.allocator = allocator
 
-      const view = new StringView(allocator.buffer, offset)
+      const view = new StringView(allocator.buffer, byteOffset)
       this._view = view
 
       counter.increment()
@@ -48,7 +49,7 @@ export class String implements ICopy<String>
 
     this._counter.decrement()
     if (this._counter.isZero()) {
-      this.allocator.free(this._view.byteOffset)
+      this._view.free(this.allocator)
     }
   }
 

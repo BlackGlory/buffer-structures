@@ -1,13 +1,13 @@
-import { IHash, IHasher, ISized, IReference, IReadableWritable } from '@src/types'
-import { StructView, MapStructureToValue } from '@views/struct-view'
+import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFree } from '@src/types'
 import { PointerView } from '@views/pointer-view'
 import { isntNull } from '@blackglory/prelude'
+import { StructView, MapStructureToValue } from '@views/struct-view'
 
 export type ViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
-export type PointerViewConstructor<View extends IHash> =
+type PointerViewConstructor<View extends IHash> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => PointerView<View>)
 
@@ -22,7 +22,8 @@ export class LinkedListView<
 > implements IHash
            , IReference
            , IReadableWritable<MapStructureToValue<Structure<View, Value>>>
-           , ISized {
+           , ISized
+           , IFree {
   static getByteLength(viewConstructor: ViewConstructor<unknown>) {
     return viewConstructor.byteLength + PointerView.byteLength
   }
@@ -54,11 +55,15 @@ export class LinkedListView<
     })
   }
 
+  free(allocator: IAllocator): void {
+    allocator.free(this.byteOffset)
+  }
+
   hash(hasher: IHasher): void {
     const valueView = this.view.getViewByKey('value')
     valueView.hash(hasher)
 
-    const nextView = this.deferNext()
+    const nextView = this.derefNext()
     if (isntNull(nextView)) {
       nextView.hash(hasher)
     } else {
@@ -98,7 +103,7 @@ export class LinkedListView<
     return this.view.getViewByKey('next')
   }
 
-  deferNext(): LinkedListView<View, Value> | null {
+  derefNext(): LinkedListView<View, Value> | null {
     const offset = this.getNext()
     if (isntNull(offset)) {
       return new LinkedListView(this.buffer, offset, this.viewConstructor)

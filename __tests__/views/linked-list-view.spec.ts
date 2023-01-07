@@ -2,7 +2,7 @@ import { LinkedListView } from '@views/linked-list-view'
 import { PointerView } from '@views/pointer-view'
 import { Uint8View } from '@views/uint8-view'
 import { uint8ToBytes } from '@test/utils'
-import { IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/types'
 
 describe('LinkedListView', () => {
   test('getByteLength', () => {
@@ -19,6 +19,21 @@ describe('LinkedListView', () => {
     const result = view.byteOffset
 
     expect(result).toBe(byteOffset)
+  })
+
+  test('free', () => {
+    const allocator = {
+      buffer: new ArrayBuffer(100)
+    , allocate: jest.fn()
+    , free: jest.fn()
+    } satisfies IAllocator
+    const byteOffset = 1
+    const view = new LinkedListView(allocator.buffer, byteOffset, Uint8View)
+
+    view.free(allocator)
+
+    expect(allocator.free).toBeCalledTimes(1)
+    expect(allocator.free).toBeCalledWith(byteOffset)
   })
 
   describe('get', () => {
@@ -180,14 +195,14 @@ describe('LinkedListView', () => {
     expect(result.byteOffset).toBe(byteOffset)
   })
 
-  describe('deferNext', () => {
+  describe('derefNext', () => {
     test('next: null', () => {
       const buffer = new ArrayBuffer(100)
       const byteOffset = 1
       const view = new LinkedListView(buffer, byteOffset, Uint8View)
       view.setNext(null)
 
-      const result = view.deferNext()
+      const result = view.derefNext()
 
       expect(result).toBe(null)
     })
@@ -198,7 +213,7 @@ describe('LinkedListView', () => {
       const view = new LinkedListView(buffer, byteOffset, Uint8View)
       view.setNext(50)
 
-      const result = view.deferNext()
+      const result = view.derefNext()
 
       expect(result).toBeInstanceOf(LinkedListView)
       expect(result!.byteOffset).toBe(50)

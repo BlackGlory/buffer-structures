@@ -2,7 +2,7 @@ import { StructView } from '@views/struct-view'
 import { Uint8View } from '@views/uint8-view'
 import { Uint16View } from '@views/uint16-view'
 import { uint8ToBytes, uint16ToBytes } from '@test/utils'
-import { IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/types'
 
 describe('StructView', () => {
   test('getByteLength', () => {
@@ -38,6 +38,24 @@ describe('StructView', () => {
     const result = view.byteOffset
 
     expect(result).toBe(byteOffset)
+  })
+
+  test('free', () => {
+    const allocator = {
+      buffer: new ArrayBuffer(100)
+    , allocate: jest.fn()
+    , free: jest.fn()
+    } satisfies IAllocator
+    const byteOffset = 1
+    const view = new StructView(allocator.buffer, byteOffset, {
+      foo: Uint8View
+    , bar: Uint16View
+    })
+
+    view.free(allocator)
+
+    expect(allocator.free).toBeCalledTimes(1)
+    expect(allocator.free).toBeCalledWith(byteOffset)
   })
 
   test('get', () => {

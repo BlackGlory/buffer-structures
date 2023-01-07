@@ -1,25 +1,18 @@
-import { IAllocator, ISized, ICopy, IReferenceCounted, IReadableWritable, IHash, IHasher } from '@src/types'
-import { MapStructureToValue } from '@views/struct-view'
+import { IAllocator, ICopy, IClone, IDestroy, IReadableWritable, IHash, IHasher } from '@src/types'
 import { PointerView } from '@views/pointer-view'
-import { LinkedListView, Structure } from '@views/linked-list-view'
+import { LinkedListView, ViewConstructor, Structure } from '@views/linked-list-view'
+import { MapStructureToValue } from '@views/struct-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
-
-export type ViewConstructor<View> =
-  ISized
-& (new (buffer: ArrayBufferLike, byteOffset: number) => View)
-
-export type PointerViewConstructor<View extends IHash> =
-  ISized
-& (new (buffer: ArrayBufferLike, byteOffset: number) => PointerView<View>)
 
 export class LinkedList<
   View extends IHash & IReadableWritable<Value>
 , Value = View extends IReadableWritable<infer T> ? T : never
 > implements ICopy<LinkedList<View, Value>>
-           , IReferenceCounted<LinkedList<View, Value>>
+           , IClone<LinkedList<View, Value>>
            , IReadableWritable<MapStructureToValue<Structure<View, Value>>>
-           , IHash {
+           , IHash
+           , IDestroy {
   readonly _view: LinkedListView<View, Value>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -34,7 +27,7 @@ export class LinkedList<
   constructor(
     _allocator: IAllocator
   , _viewConstructor: ViewConstructor<View>
-  , _offset: number
+  , _byteOffset: number
   , _counter: ReferenceCounter
   )
   constructor(...args:
@@ -46,7 +39,7 @@ export class LinkedList<
   | [
       allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
-    , offset: number
+    , byteOffset: number
     , counter: ReferenceCounter
     ]
   ) {
@@ -56,22 +49,22 @@ export class LinkedList<
       this.viewConstructor = viewConstructor
       this._counter = new ReferenceCounter()
 
-      const offset = allocator.allocate(LinkedListView.getByteLength(viewConstructor))
+      const byteOffset = allocator.allocate(LinkedListView.getByteLength(viewConstructor))
       const view = new LinkedListView<View, Value>(
         allocator.buffer
-      , offset
+      , byteOffset
       , viewConstructor
       )
       view.set(value)
       this._view = view
     } else {
-      const [allocator, viewConstructor, offset, counter] = args
+      const [allocator, viewConstructor, byteOffset, counter] = args
       this.allocator = allocator
       this.viewConstructor = viewConstructor
 
       const view = new LinkedListView<View, Value>(
         allocator.buffer
-      , offset
+      , byteOffset
       , viewConstructor
       )
       this._view = view
@@ -90,7 +83,7 @@ export class LinkedList<
 
     this._counter.decrement()
     if (this._counter.isZero()) {
-      this.allocator.free(this._view.byteOffset)
+      this._view.free(this.allocator)
     }
   }
 
@@ -138,7 +131,7 @@ export class LinkedList<
     return this._view.getViewOfNext()
   }
 
-  deferNext(): LinkedListView<View, Value> | null {
-    return this._view.deferNext()
+  derefNext(): LinkedListView<View, Value> | null {
+    return this._view.derefNext()
   }
 }
