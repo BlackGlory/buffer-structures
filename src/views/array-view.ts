@@ -1,6 +1,7 @@
 import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree } from '@src/types'
 import { FixedLengthArray } from 'justypes'
 import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
+import { each } from 'iterable-operator'
 
 export type ViewConstructor<View> =
   ISized
@@ -32,12 +33,7 @@ export class ArrayView<
   ) {}
 
   free(allocator: IAllocator): void {
-    for (
-      let i = 0, offset = this.byteOffset
-    ; i < this.length
-    ; i++, offset += this.viewConstructor.byteLength
-    ) {
-      const view = new this.viewConstructor(this.buffer, offset)
+    for (const view of this.iterate()) {
       if (isOwnershiptPointer(view)) {
         view.freePointed(allocator)
       }
@@ -47,12 +43,7 @@ export class ArrayView<
   }
 
   hash(hasher: IHasher): void {
-    for (
-      let i = 0, offset = this.byteOffset
-    ; i < this.length
-    ; i++, offset += this.viewConstructor.byteLength
-    ) {
-      const view = new this.viewConstructor(this.buffer, offset)
+    for (const view of this.iterate()) {
       view.hash(hasher)
     }
   }
@@ -60,12 +51,7 @@ export class ArrayView<
   get(): FixedLengthArray<Value, Length> {
     const results: any[] = []
 
-    for (
-      let i = 0, offset = this.byteOffset
-    ; i < this.length
-    ; i++, offset += this.viewConstructor.byteLength
-    ) {
-      const view = new this.viewConstructor(this.buffer, offset)
+    for (const view of this.iterate()) {
       results.push(view.get())
     }
 
@@ -73,14 +59,10 @@ export class ArrayView<
   }
 
   set(values: FixedLengthArray<Value, Length>): void {
-    for (
-      let i = 0, offset = this.byteOffset
-    ; i < this.length
-    ; i++, offset += this.viewConstructor.byteLength
-    ) {
-      const view = new this.viewConstructor(this.buffer, offset)
-      view.set((values as Value[])[i])
-    }
+    each(this.iterate(), (view, i) => {
+      const value = (values as Value[])[i]
+      view.set(value)
+    })
   }
 
   getByIndex(index: number): Value {
@@ -106,5 +88,16 @@ export class ArrayView<
   private getOffsetByIndex(index: number): number {
     return this.byteOffset
          + this.viewConstructor.byteLength * index
+  }
+
+  private * iterate(): IterableIterator<View> {
+    for (
+      let i = 0, offset = this.byteOffset
+    ; i < this.length
+    ; i++, offset += this.viewConstructor.byteLength
+    ) {
+      const view = new this.viewConstructor(this.buffer, offset)
+      yield view
+    }
   }
 }

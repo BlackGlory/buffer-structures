@@ -2,6 +2,7 @@ import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFre
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
+import { each } from 'iterable-operator'
 
 export type ViewConstructor<Value> =
   ISized
@@ -38,50 +39,37 @@ export class TupleView<
   ) {}
 
   free(allocator: IAllocator): void {
-    let offset: number = this.byteOffset
-    for (const constructor of this.structure) {
-      const view = new constructor(this.buffer, offset)
+    for (const view of this.iterate()) {
       if (isOwnershiptPointer(view)) {
         view.freePointed(allocator)
       }
-      offset += constructor.byteLength
     }
 
     allocator.free(this.byteOffset)
   }
 
   hash(hasher: IHasher): void {
-    let offset: number = this.byteOffset
-    for (const constructor of this.structure) {
-      const view = new constructor(this.buffer, offset)
+    for (const view of this.iterate()) {
       view.hash(hasher)
-      offset += constructor.byteLength
     }
   }
 
   get(): MapStructureToValue<Structure> {
     const results: any[] = []
 
-    let offset: number = this.byteOffset
-    for (const constructor of this.structure) {
-      const view = new constructor(this.buffer, offset)
+    for (const view of this.iterate()) {
       const value = view.get()
       results.push(value)
-      offset += constructor.byteLength
     }
 
     return results as MapStructureToValue<Structure>
   }
 
   set(values: MapStructureToValue<Structure>): void {
-    let offset: number = this.byteOffset
-    for (let i = 0; i < this.structure.length; i++) {
-      const constructor = this.structure[i]
-      const view = new constructor(this.buffer, offset)
+    each(this.iterate(), (view, i) => {
       const value = values[i]
       view.set(value)
-      offset += constructor.byteLength
-    }
+    })
   }
 
   getByIndex<U extends number & keyof Structure>(
@@ -116,5 +104,14 @@ export class TupleView<
          + this.structure
              .slice(0, index)
              .reduce((acc, cur) => acc + cur.byteLength, 0)
+  }
+
+  private * iterate(): IterableIterator<IReadableWritable<unknown> & IHash> {
+    let offset: number = this.byteOffset
+    for (const constructor of this.structure) {
+      const view = new constructor(this.buffer, offset)
+      yield view
+      offset += constructor.byteLength
+    }
   }
 }

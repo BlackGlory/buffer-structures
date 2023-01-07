@@ -41,48 +41,36 @@ export class StructView<
   ) {}
 
   free(allocator: IAllocator): void {
-    let offset: number = this.byteOffset
-    for (const constructor of Object.values(this.structure)) {
-      const view = new constructor(this.buffer, offset)
+    for (const { view } of this.iterate()) {
       if (isOwnershiptPointer(view)) {
         view.freePointed(allocator)
       }
-      offset += constructor.byteLength
     }
 
     allocator.free(this.byteOffset)
   }
 
   hash(hasher: IHasher): void {
-    let offset: number = this.byteOffset
-    for (const constructor of Object.values(this.structure)) {
-      const view = new constructor(this.buffer, offset)
+    for (const { view } of this.iterate()) {
       view.hash(hasher)
-      offset += constructor.byteLength
     }
   }
 
   get(): MapStructureToValue<Structure> {
     const results: Record<string, any> = {}
 
-    let offset: number = this.byteOffset
-    for (const [key, constructor] of Object.entries(this.structure)) {
-      const view = new constructor(this.buffer, offset)
+    for (const { key, view } of this.iterate()) {
       const value = view.get()
       results[key] = value
-      offset += constructor.byteLength
     }
 
     return results as MapStructureToValue<Structure>
   }
 
   set(values: MapStructureToValue<Structure>): void {
-    let offset: number = this.byteOffset
-    for (const [key, constructor] of Object.entries(this.structure)) {
-      const view = new constructor(this.buffer, offset)
+    for (const { key, view } of this.iterate()) {
       const value = values[key]
       view.set(value)
-      offset += constructor.byteLength
     }
   }
 
@@ -119,5 +107,17 @@ export class StructView<
            , iter => Iter.map(iter, ([, constructor]) => constructor)
            , iter => Iter.reduce(iter, (acc, cur) => acc + cur.byteLength, 0)
            )
+  }
+
+  private * iterate(): IterableIterator<{
+    key: string
+  , view: IReadableWritable<unknown> & IHash
+  }> {
+    let offset: number = this.byteOffset
+    for (const [key, constructor] of Object.entries(this.structure)) {
+      const view = new constructor(this.buffer, offset)
+      yield { key, view }
+      offset += constructor.byteLength
+    }
   }
 }
