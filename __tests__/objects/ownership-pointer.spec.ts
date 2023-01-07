@@ -67,14 +67,15 @@ describe('OwnershipPointer', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new OwnershipPointer(allocator, Uint8View, 50)
+        const data = new Uint8(allocator, 10)
+        const obj1 = new OwnershipPointer(allocator, Uint8View, data._view.byteOffset)
         const obj2 = obj1.clone()
 
         obj1.destroy()
         obj2.destroy()
 
         expect(free).toBeCalledTimes(2)
-        expect(free).nthCalledWith(1, 50)
+        expect(free).nthCalledWith(1, data._view.byteOffset)
         expect(free).nthCalledWith(2, obj1._view.byteOffset)
       })
     })

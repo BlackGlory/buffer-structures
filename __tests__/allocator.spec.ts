@@ -282,155 +282,74 @@ describe('Allocator', () => {
   })
 
   describe('free', () => {
-    test('the freed block is the only block', () => {
+    test('non-allocated offset', () => {
       const byteOffset = 1
       const buffer = new ArrayBuffer(byteOffset + Allocator.headerByteLength + 1)
       const allocator = new Allocator(buffer, byteOffset)
-      const offset = allocator.allocate(1)
 
-      allocator.free(offset)
+      const err = getError(() => allocator.free(0))
 
-      expect(bufferToBytes(allocator.buffer)).toStrictEqual([
-        0
-        // header
-      , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-      , ...uint32ToBytes(0) // 4
-        // body
-      , 0 // 1
-      ])
+      expect(err).toBeInstanceOf(Error)
+      expect(err!.message).toMatch('The offset is not allocated')
     })
 
-    test('the freed block is the first block', () => {
-      const byteOffset = 1
-      const buffer = new ArrayBuffer(
-        byteOffset
-      + (Allocator.headerByteLength + 1) * 2
-      )
-      const allocator = new Allocator(buffer, byteOffset)
-      const offset = allocator.allocate(1)
-      allocator.allocate(1)
-
-      allocator.free(offset)
-
-      expect(bufferToBytes(allocator.buffer)).toStrictEqual([
-        0
-        // header
-      , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-      , ...uint32ToBytes(0) // 4
-        // body
-      , 0 // 1
-        // header
-      , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
-      , ...uint32ToBytes(1) // 4
-        // body
-      , 0 // 1
-      ])
-    })
-
-    test('the freed block is the last block', () => {
-      const byteOffset = 1
-      const buffer = new ArrayBuffer(
-        byteOffset
-      + (Allocator.headerByteLength + 1) * 2
-      )
-      const allocator = new Allocator(buffer, byteOffset)
-      allocator.allocate(1)
-      const offset = allocator.allocate(1)
-
-      allocator.free(offset)
-
-      expect(bufferToBytes(allocator.buffer)).toStrictEqual([
-        0
-        // header
-      , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-      , ...uint32ToBytes(1) // 4
-        // body
-      , 0 // 1
-        // header
-      , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
-      , ...uint32ToBytes(0) // 4
-      , 0 // 1
-      ])
-    })
-
-    test('the freed block is the middle block', () => {
-      const byteOffset = 1
-      const buffer = new ArrayBuffer(
-        byteOffset
-      + (Allocator.headerByteLength + 1) * 3
-      )
-      const allocator = new Allocator(buffer, byteOffset)
-      allocator.allocate(1)
-      const offset = allocator.allocate(1)
-      allocator.allocate(1)
-
-      allocator.free(offset)
-
-      expect(bufferToBytes(allocator.buffer)).toStrictEqual([
-        0
-        // header
-      , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-      , ...uint32ToBytes(1) // 4
-        // body
-      , 0 // 1
-        // header
-      , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
-      , ...uint32ToBytes(0) // 4
-      , 0 // 1
-        // header
-      , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
-      , ...uint32ToBytes(1) // 4
-        // body
-      , 0 // 1
-      ])
-    })
-
-    describe('merge unallocated blocks', () => {
-      test('[unallocated, free now], allocated', () => {
+    describe('allocated offset', () => {
+      test('the freed block is the only block', () => {
         const byteOffset = 1
-        const buffer = new ArrayBuffer(
-          byteOffset
-        + (Allocator.headerByteLength + 1) * 3
-        )
+        const buffer = new ArrayBuffer(byteOffset + Allocator.headerByteLength + 1)
         const allocator = new Allocator(buffer, byteOffset)
-        const offset1 = allocator.allocate(1)
-        const offset2 = allocator.allocate(1)
-        allocator.allocate(1)
-        allocator.free(offset1)
+        const offset = allocator.allocate(1)
 
-        allocator.free(offset2)
+        allocator.free(offset)
 
         expect(bufferToBytes(allocator.buffer)).toStrictEqual([
           0
-          // freed block header
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
+          // header
+        , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
         , ...uint32ToBytes(0) // 4
-          // freed block body
+          // body
         , 0 // 1
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
+        ])
+      })
+
+      test('the freed block is the first block', () => {
+        const byteOffset = 1
+        const buffer = new ArrayBuffer(
+          byteOffset
+        + (Allocator.headerByteLength + 1) * 2
+        )
+        const allocator = new Allocator(buffer, byteOffset)
+        const offset = allocator.allocate(1)
+        allocator.allocate(1)
+
+        allocator.free(offset)
+
+        expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+          0
+          // header
+        , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
         , ...uint32ToBytes(0) // 4
+          // body
         , 0 // 1
           // header
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
+        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
         , ...uint32ToBytes(1) // 4
           // body
         , 0 // 1
         ])
       })
 
-      test('allocated, [free now, unallocated]', () => {
+      test('the freed block is the last block', () => {
         const byteOffset = 1
         const buffer = new ArrayBuffer(
           byteOffset
-        + (Allocator.headerByteLength + 1) * 3
+        + (Allocator.headerByteLength + 1) * 2
         )
         const allocator = new Allocator(buffer, byteOffset)
         allocator.allocate(1)
-        const offset1 = allocator.allocate(1)
-        const offset2 = allocator.allocate(1)
-        allocator.free(offset2)
+        const offset = allocator.allocate(1)
 
-        allocator.free(offset1)
+        allocator.free(offset)
 
         expect(bufferToBytes(allocator.buffer)).toStrictEqual([
           0
@@ -439,46 +358,140 @@ describe('Allocator', () => {
         , ...uint32ToBytes(1) // 4
           // body
         , 0 // 1
-          // freed block header
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
-        , ...uint32ToBytes(0) // 4
-          // freed block body
-        , 0 // 1
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
+          // header
+        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
         , ...uint32ToBytes(0) // 4
         , 0 // 1
         ])
       })
 
-      test('[unallocated, free now, unallocated]', () => {
+      test('the freed block is the middle block', () => {
         const byteOffset = 1
         const buffer = new ArrayBuffer(
           byteOffset
         + (Allocator.headerByteLength + 1) * 3
         )
         const allocator = new Allocator(buffer, byteOffset)
-        const offset1 = allocator.allocate(1)
-        const offset2 = allocator.allocate(1)
-        const offset3 = allocator.allocate(1)
-        allocator.free(offset1)
-        allocator.free(offset3)
+        allocator.allocate(1)
+        const offset = allocator.allocate(1)
+        allocator.allocate(1)
 
-        allocator.free(offset2)
+        allocator.free(offset)
 
         expect(bufferToBytes(allocator.buffer)).toStrictEqual([
           0
-          // freed block header
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
-        , ...uint32ToBytes(0) // 4
-          // freed block body
+          // header
+        , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
+        , ...uint32ToBytes(1) // 4
+          // body
         , 0 // 1
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
+          // header
+        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
         , ...uint32ToBytes(0) // 4
         , 0 // 1
+          // header
         , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
-        , ...uint32ToBytes(0) // 4
+        , ...uint32ToBytes(1) // 4
+          // body
         , 0 // 1
         ])
+      })
+
+      describe('merge unallocated blocks', () => {
+        test('[unallocated, free now], allocated', () => {
+          const byteOffset = 1
+          const buffer = new ArrayBuffer(
+            byteOffset
+          + (Allocator.headerByteLength + 1) * 3
+          )
+          const allocator = new Allocator(buffer, byteOffset)
+          const offset1 = allocator.allocate(1)
+          const offset2 = allocator.allocate(1)
+          allocator.allocate(1)
+          allocator.free(offset1)
+
+          allocator.free(offset2)
+
+          expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+            0
+            // freed block header
+          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
+          , ...uint32ToBytes(0) // 4
+            // freed block body
+          , 0 // 1
+          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
+          , ...uint32ToBytes(0) // 4
+          , 0 // 1
+            // header
+          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
+          , ...uint32ToBytes(1) // 4
+            // body
+          , 0 // 1
+          ])
+        })
+
+        test('allocated, [free now, unallocated]', () => {
+          const byteOffset = 1
+          const buffer = new ArrayBuffer(
+            byteOffset
+          + (Allocator.headerByteLength + 1) * 3
+          )
+          const allocator = new Allocator(buffer, byteOffset)
+          allocator.allocate(1)
+          const offset1 = allocator.allocate(1)
+          const offset2 = allocator.allocate(1)
+          allocator.free(offset2)
+
+          allocator.free(offset1)
+
+          expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+            0
+            // header
+          , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
+          , ...uint32ToBytes(1) // 4
+            // body
+          , 0 // 1
+            // freed block header
+          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
+          , ...uint32ToBytes(0) // 4
+            // freed block body
+          , 0 // 1
+          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
+          , ...uint32ToBytes(0) // 4
+          , 0 // 1
+          ])
+        })
+
+        test('[unallocated, free now, unallocated]', () => {
+          const byteOffset = 1
+          const buffer = new ArrayBuffer(
+            byteOffset
+          + (Allocator.headerByteLength + 1) * 3
+          )
+          const allocator = new Allocator(buffer, byteOffset)
+          const offset1 = allocator.allocate(1)
+          const offset2 = allocator.allocate(1)
+          const offset3 = allocator.allocate(1)
+          allocator.free(offset1)
+          allocator.free(offset3)
+
+          allocator.free(offset2)
+
+          expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+            0
+            // freed block header
+          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
+          , ...uint32ToBytes(0) // 4
+            // freed block body
+          , 0 // 1
+          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
+          , ...uint32ToBytes(0) // 4
+          , 0 // 1
+          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
+          , ...uint32ToBytes(0) // 4
+          , 0 // 1
+          ])
+        })
       })
     })
   })

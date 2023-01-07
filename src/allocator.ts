@@ -126,7 +126,7 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
           }
         }
 
-        break
+        return
       } else {
         // 对于要释放的块不是缓冲区中的第一个块的情况, 则需要获得"要释放的块"的前一个块的位置,
         // 用于之后可能发生的合并.
@@ -156,10 +156,12 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
             }
           }
 
-          break
+          return
         }
       }
     }
+
+    throw new Error('The offset is not allocated')
   }
 
   private setBlockHeader(
