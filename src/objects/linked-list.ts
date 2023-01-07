@@ -1,5 +1,5 @@
 import { IAllocator, ICopy, IClone, IDestroy, IReadableWritable, IHash, IHasher } from '@src/types'
-import { PointerView } from '@views/pointer-view'
+import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { LinkedListView, ViewConstructor, Structure } from '@views/linked-list-view'
 import { MapStructureToValue } from '@views/struct-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
@@ -90,7 +90,12 @@ export class LinkedList<
   clone(): LinkedList<View, Value> {
     this.fsm.assertAllocated()
 
-    return new LinkedList(this.allocator,this.viewConstructor , this._view.byteOffset, this._counter)
+    return new LinkedList(
+      this.allocator
+    , this.viewConstructor
+    , this._view.byteOffset
+    , this._counter
+    )
   }
 
   copy(): LinkedList<View, Value> {
@@ -127,7 +132,7 @@ export class LinkedList<
     return this._view.getViewOfValue()
   }
 
-  getViewOfNext(): PointerView<LinkedListView<View, Value>> {
+  getViewOfNext(): OwnershipPointerView<LinkedListView<View, Value>> {
     return this._view.getViewOfNext()
   }
 

@@ -1,5 +1,5 @@
 import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFree } from '@src/types'
-import { PointerView } from '@views/pointer-view'
+import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { isntNull } from '@blackglory/prelude'
 import { StructView, MapStructureToValue } from '@views/struct-view'
 
@@ -7,9 +7,9 @@ export type ViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
-type PointerViewConstructor<View extends IHash> =
+type PointerViewConstructor<View extends IHash & IFree> =
   ISized
-& (new (buffer: ArrayBufferLike, byteOffset: number) => PointerView<View>)
+& (new (buffer: ArrayBufferLike, byteOffset: number) => OwnershipPointerView<View>)
 
 export type Structure<View extends IHash & IReadableWritable<Value>, Value> = {
   next: PointerViewConstructor<LinkedListView<View, Value>>
@@ -25,7 +25,7 @@ export class LinkedListView<
            , ISized
            , IFree {
   static getByteLength(viewConstructor: ViewConstructor<unknown>) {
-    return viewConstructor.byteLength + PointerView.byteLength
+    return viewConstructor.byteLength + OwnershipPointerView.byteLength
   }
 
   readonly byteLength = LinkedListView.getByteLength(this.viewConstructor)
@@ -43,20 +43,22 @@ export class LinkedListView<
       }
     }
 
-    class InternalPointerView extends PointerView<LinkedListView<View, Value>> {
+    class InternalOwnershipPointerView extends OwnershipPointerView<
+      LinkedListView<View, Value>
+    > {
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
         super(buffer, byteOffset, InternalLinkedListView)
       }
     }
 
     this.view = new StructView(buffer, byteOffset, {
-      next: InternalPointerView
+      next: InternalOwnershipPointerView
     , value: viewConstructor
     })
   }
 
   free(allocator: IAllocator): void {
-    allocator.free(this.byteOffset)
+    this.view.free(allocator)
   }
 
   hash(hasher: IHasher): void {
@@ -99,7 +101,7 @@ export class LinkedListView<
     return this.view.getViewByKey('value')
   }
 
-  getViewOfNext(): PointerView<LinkedListView<View, Value>> {
+  getViewOfNext(): OwnershipPointerView<LinkedListView<View, Value>> {
     return this.view.getViewByKey('next')
   }
 

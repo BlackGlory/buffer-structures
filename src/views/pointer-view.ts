@@ -14,7 +14,7 @@ export class PointerView<
            , IFree {
   static readonly byteLength = Uint32Array.BYTES_PER_ELEMENT
 
-  private view: DataView
+  protected view: DataView
 
   constructor(
     buffer: ArrayBufferLike

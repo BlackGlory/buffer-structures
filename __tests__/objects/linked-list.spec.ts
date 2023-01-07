@@ -30,11 +30,8 @@ describe('LinkedList', () => {
 
   describe('destory', () => {
     it('calls allocator.free()', () => {
-      const allocator = {
-        buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
-      } satisfies IAllocator
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const free = jest.spyOn(allocator, 'free')
       const result = new LinkedList(
         allocator
       , Uint8View
@@ -46,16 +43,12 @@ describe('LinkedList', () => {
 
       result.destroy()
 
-      expect(allocator.free).toBeCalledTimes(1)
-      expect(allocator.free).toBeCalledWith(result._view.byteOffset)
+      expect(free).toBeCalledTimes(1)
+      expect(free).toBeCalledWith(result._view.byteOffset)
     })
 
     it('cannot destory twice', () => {
-      const allocator = {
-        buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
-      } satisfies IAllocator
+      const allocator = new Allocator(new ArrayBuffer(100))
       const result = new LinkedList(
         allocator
       , Uint8View
@@ -94,11 +87,8 @@ describe('LinkedList', () => {
       })
 
       test('calls allocator.free()', () => {
-        const allocator = {
-          buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
-        } satisfies IAllocator
+        const allocator = new Allocator(new ArrayBuffer(100))
+        const free = jest.spyOn(allocator, 'free')
         const obj1 = new LinkedList(
           allocator
         , Uint8View
@@ -112,8 +102,8 @@ describe('LinkedList', () => {
         obj1.destroy()
         obj2.destroy()
 
-        expect(allocator.free).toBeCalledTimes(1)
-        expect(allocator.free).toBeCalledWith(obj1._view.byteOffset)
+        expect(free).toBeCalledTimes(1)
+        expect(free).toBeCalledWith(obj1._view.byteOffset)
       })
     })
   })
