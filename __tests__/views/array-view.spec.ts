@@ -1,7 +1,7 @@
 import { ArrayView } from '@views/array-view'
 import { Uint8View } from '@views/uint8-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { uint8ToBytes } from '@test/utils'
+import { uint8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
 describe('ArrayView', () => {
@@ -153,7 +153,7 @@ describe('ArrayView', () => {
     view.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(2)
-    expect(hasher.write).nthCalledWith(1, uint8ToBytes(1))
-    expect(hasher.write).nthCalledWith(2, uint8ToBytes(2))
+    expect(hasher.write).nthCalledWith(1, uint8ToBuffer(1))
+    expect(hasher.write).nthCalledWith(2, uint8ToBuffer(2))
   })
 })

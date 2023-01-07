@@ -2,7 +2,7 @@ import { Int16 } from '@objects/int16'
 import { Int16View } from '@views/int16-view'
 import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
-import { int16ToBytes } from '@test/utils'
+import { int16ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 
 describe('Int16', () => {
@@ -133,6 +133,6 @@ describe('Int16', () => {
     obj.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).nthCalledWith(1, int16ToBytes(1))
+    expect(hasher.write).nthCalledWith(1, int16ToBuffer(1))
   })
 })

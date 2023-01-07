@@ -2,7 +2,7 @@ import { TupleView } from '@views/tuple-view'
 import { Uint8View } from '@views/uint8-view'
 import { Uint16View } from '@views/uint16-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { uint8ToBytes, uint16ToBytes } from '@test/utils'
+import { uint8ToBuffer, uint16ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
 describe('TupleView', () => {
@@ -182,7 +182,7 @@ describe('TupleView', () => {
     view.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(2)
-    expect(hasher.write).nthCalledWith(1, uint8ToBytes(10))
-    expect(hasher.write).nthCalledWith(2, uint16ToBytes(20))
+    expect(hasher.write).nthCalledWith(1, uint8ToBuffer(10))
+    expect(hasher.write).nthCalledWith(2, uint16ToBuffer(20))
   })
 })

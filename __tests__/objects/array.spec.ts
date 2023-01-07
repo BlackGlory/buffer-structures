@@ -3,7 +3,7 @@ import { ArrayView } from '@views/array-view'
 import { Uint8View } from '@views/uint8-view'
 import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
-import { uint8ToBytes } from '@test/utils'
+import { uint8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 
 describe('Array', () => {
@@ -163,7 +163,7 @@ describe('Array', () => {
     arr.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(2)
-    expect(hasher.write).nthCalledWith(1, uint8ToBytes(1))
-    expect(hasher.write).nthCalledWith(2, uint8ToBytes(2))
+    expect(hasher.write).nthCalledWith(1, uint8ToBuffer(1))
+    expect(hasher.write).nthCalledWith(2, uint8ToBuffer(2))
   })
 })

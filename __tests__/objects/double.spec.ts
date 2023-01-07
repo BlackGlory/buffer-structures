@@ -2,7 +2,7 @@ import { Double } from '@objects/double'
 import { DoubleView } from '@views/double-view'
 import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
-import { float64ToBytes } from '@test/utils'
+import { float64ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 
 describe('Double', () => {
@@ -133,6 +133,6 @@ describe('Double', () => {
     obj.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).nthCalledWith(1, float64ToBytes(1))
+    expect(hasher.write).nthCalledWith(1, float64ToBuffer(1))
   })
 })

@@ -2,7 +2,7 @@ import { Int8 } from '@objects/int8'
 import { Int8View } from '@views/int8-view'
 import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
-import { int8ToBytes } from '@test/utils'
+import { int8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 
 describe('Int8', () => {
@@ -133,6 +133,6 @@ describe('Int8', () => {
     obj.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).nthCalledWith(1, int8ToBytes(1))
+    expect(hasher.write).nthCalledWith(1, int8ToBuffer(1))
   })
 })

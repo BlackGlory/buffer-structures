@@ -1,5 +1,5 @@
 import { Int32View } from '@views/int32-view'
-import { int32ToBytes } from '@test/utils'
+import { int32ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
 describe('Int32View', () => {
@@ -72,6 +72,6 @@ describe('Int32View', () => {
     view.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).toBeCalledWith(int32ToBytes(-1000000))
+    expect(hasher.write).toBeCalledWith(int32ToBuffer(-1000000))
   })
 })

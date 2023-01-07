@@ -1,5 +1,5 @@
 import { StringView } from '@views/string-view'
-import { getSlice, setSlice, uint32ToBytes } from '@test/utils'
+import { bufferToArray, getSlice, setSlice, uint32ToBuffer } from '@test/utils'
 import { toArray } from '@blackglory/prelude'
 import { IAllocator, IHasher } from '@src/types'
 
@@ -79,16 +79,15 @@ describe('StringView', () => {
 
     stringView.set(value)
 
-    const dataView = new DataView(buffer)
     expect(
-      getSlice(
-        dataView
+      bufferToArray(getSlice(
+        buffer
       , byteOffset
       , Uint32Array.BYTES_PER_ELEMENT + Buffer.from(value, 'utf-8').byteLength
-      )
+      ))
     ).toStrictEqual([
-      ...uint32ToBytes(Buffer.from(value, 'utf-8').byteLength)
-    , ...Buffer.from(value, 'utf-8')
+      ...bufferToArray(uint32ToBuffer(Buffer.from(value, 'utf-8').byteLength))
+    , ...bufferToArray(Buffer.from(value, 'utf-8'))
     ])
   })
 
@@ -104,6 +103,6 @@ describe('StringView', () => {
     view.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).toBeCalledWith([...Buffer.from('foo')])
+    expect(hasher.write).toBeCalledWith(Buffer.from('foo').buffer)
   })
 })

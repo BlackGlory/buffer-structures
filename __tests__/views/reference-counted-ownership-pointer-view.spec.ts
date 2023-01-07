@@ -2,7 +2,7 @@ import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-o
 import { PointerView } from '@views/pointer-view'
 import { Uint8View } from '@views/uint8-view'
 import { Uint32View } from '@views/uint32-view'
-import { uint8ToBytes } from '@test/utils'
+import { uint8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
 describe('ReferenceCountedOwnershipPointerView', () => {
@@ -392,7 +392,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       pointerView.hash(hasher)
 
       expect(hasher.write).toBeCalledTimes(1)
-      expect(hasher.write).toBeCalledWith(uint8ToBytes(0))
+      expect(hasher.write).toBeCalledWith([0])
     })
 
     test('non-null', () => {
@@ -408,7 +408,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       pointerView.hash(hasher)
 
       expect(hasher.write).toBeCalledTimes(1)
-      expect(hasher.write).toBeCalledWith(uint8ToBytes(10))
+      expect(hasher.write).toBeCalledWith(uint8ToBuffer(10))
     })
   })
 })

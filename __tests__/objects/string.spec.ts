@@ -123,6 +123,6 @@ describe('String', () => {
     obj.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).nthCalledWith(1, [...Buffer.from('foo')])
+    expect(hasher.write).nthCalledWith(1, Buffer.from('foo').buffer)
   })
 })

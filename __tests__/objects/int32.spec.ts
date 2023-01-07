@@ -2,7 +2,7 @@ import { Int32 } from '@objects/int32'
 import { Int32View } from '@views/int32-view'
 import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
-import { int32ToBytes } from '@test/utils'
+import { int32ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 
 describe('Int32', () => {
@@ -133,6 +133,6 @@ describe('Int32', () => {
     obj.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).nthCalledWith(1, int32ToBytes(1))
+    expect(hasher.write).nthCalledWith(1, int32ToBuffer(1))
   })
 })

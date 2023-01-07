@@ -1,6 +1,6 @@
 import { PointerView } from '@views/pointer-view'
 import { Uint8View } from '@views/uint8-view'
-import { uint8ToBytes } from '@test/utils'
+import { uint8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
 describe('PointerView', () => {
@@ -133,7 +133,7 @@ describe('PointerView', () => {
       pointerView.hash(hasher)
 
       expect(hasher.write).toBeCalledTimes(1)
-      expect(hasher.write).toBeCalledWith(uint8ToBytes(0))
+      expect(hasher.write).toBeCalledWith(uint8ToBuffer(0))
     })
 
     test('non-null', () => {
@@ -149,7 +149,7 @@ describe('PointerView', () => {
       pointerView.hash(hasher)
 
       expect(hasher.write).toBeCalledTimes(1)
-      expect(hasher.write).toBeCalledWith(uint8ToBytes(10))
+      expect(hasher.write).toBeCalledWith(uint8ToBuffer(10))
     })
   })
 })

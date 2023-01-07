@@ -1,5 +1,5 @@
 import { IAllocator, IHash, IHasher, IReference, IReadableWritable, IFree } from '@src/types'
-import { readBytes } from '@utils/read-bytes'
+import { getSlice } from '@utils/get-slice'
 
 export class Int16View implements IHash
                                 , IReference
@@ -26,7 +26,8 @@ export class Int16View implements IHash
   }
 
   hash(hasher: IHasher): void {
-    const bytes = readBytes(this.view.buffer, this.byteOffset, Int16View.byteLength)
-    hasher.write(bytes)
+    const slice = getSlice(this.view.buffer, this.byteOffset, Int16View.byteLength)
+
+    hasher.write(slice)
   }
 }

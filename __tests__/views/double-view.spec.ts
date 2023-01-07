@@ -1,5 +1,5 @@
 import { DoubleView } from '@views/double-view'
-import { float64ToBytes } from '@test/utils'
+import { float64ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
 describe('DoubleView', () => {
@@ -72,6 +72,6 @@ describe('DoubleView', () => {
     view.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).toBeCalledWith(float64ToBytes(3.14))
+    expect(hasher.write).toBeCalledWith(float64ToBuffer(3.14))
   })
 })

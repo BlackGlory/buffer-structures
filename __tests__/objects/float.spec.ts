@@ -2,7 +2,7 @@ import { Float } from '@objects/float'
 import { FloatView } from '@views/float-view'
 import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
-import { float32ToBytes } from '@test/utils'
+import { float32ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 
 describe('Float', () => {
@@ -133,6 +133,6 @@ describe('Float', () => {
     obj.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).nthCalledWith(1, float32ToBytes(1))
+    expect(hasher.write).nthCalledWith(1, float32ToBuffer(1))
   })
 })

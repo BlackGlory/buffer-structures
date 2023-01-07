@@ -206,6 +206,9 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
   }
 }
 
+/**
+ * 该函数的性能很差, 但理论上不会成为应用的性能瓶颈, 因为在生产中不太可能频繁创建分配器.
+ */
 function allZeros(view: DataView): boolean {
   for (let i = 0; i < view.byteLength; i++) {
     if (view.getUint8(i) !== 0) return false

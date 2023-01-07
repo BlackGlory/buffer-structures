@@ -1,7 +1,7 @@
 import { LinkedListView } from '@views/linked-list-view'
 import { PointerView } from '@views/pointer-view'
 import { Uint8View } from '@views/uint8-view'
-import { uint8ToBytes } from '@test/utils'
+import { uint8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
 describe('LinkedListView', () => {
@@ -162,9 +162,9 @@ describe('LinkedListView', () => {
     view1.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(3)
-    expect(hasher.write).nthCalledWith(1, uint8ToBytes(10))
-    expect(hasher.write).nthCalledWith(2, uint8ToBytes(20))
-    expect(hasher.write).nthCalledWith(3, uint8ToBytes(0))
+    expect(hasher.write).nthCalledWith(1, uint8ToBuffer(10))
+    expect(hasher.write).nthCalledWith(2, uint8ToBuffer(20))
+    expect(hasher.write).nthCalledWith(3, [0])
   })
 
   test('getViewOfValue', () => {

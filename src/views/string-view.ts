@@ -1,6 +1,6 @@
 import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFree } from '@src/types'
 import { Uint32View } from '@views/uint32-view'
-import { readBytes } from '@utils/read-bytes'
+import { getSlice } from '@utils/get-slice'
 
 export class StringView implements IHash
                                  , IReference
@@ -60,12 +60,12 @@ export class StringView implements IHash
   }
 
   hash(hasher: IHasher): void {
-    const length = this.lengthView.get()
-    const bytes = readBytes(
+    const slice = getSlice(
       this.valueView.buffer
     , this.byteOffset + Uint32View.byteLength
-    , length
+    , this.lengthView.get()
     )
-    hasher.write(bytes)
+
+    hasher.write(slice)
   }
 }

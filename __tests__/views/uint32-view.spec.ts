@@ -1,5 +1,5 @@
 import { Uint32View } from '@views/uint32-view'
-import { uint32ToBytes } from '@test/utils'
+import { uint32ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
 describe('Uint32View', () => {
@@ -72,6 +72,6 @@ describe('Uint32View', () => {
     view.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).toBeCalledWith(uint32ToBytes(1000000))
+    expect(hasher.write).toBeCalledWith(uint32ToBuffer(1000000))
   })
 })

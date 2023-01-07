@@ -1,7 +1,7 @@
 import { Allocator } from '@src/allocator'
 import { getError } from 'return-style'
 import { repeat } from 'extra-generator'
-import { setSlice, bufferToBytes, uint32ToBytes } from '@test/utils'
+import { setSlice, bufferToArray, uint32ToBuffer } from '@test/utils'
 
 describe('Allocator', () => {
   describe('create', () => {
@@ -20,11 +20,11 @@ describe('Allocator', () => {
       const allocator = new Allocator(buffer)
 
       expect(
-        bufferToBytes(allocator.buffer)
+        bufferToArray(allocator.buffer)
       ).toStrictEqual([
         // header
-        ...uint32ToBytes(Allocator.headerByteLength) // 4
-      , ...uint32ToBytes(0) // 4
+        ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength)) // 4
+      , ...bufferToArray(uint32ToBuffer(0)) // 4
         // body
       ])
     })
@@ -36,12 +36,12 @@ describe('Allocator', () => {
       const allocator = new Allocator(buffer, byteOffset)
 
       expect(
-        bufferToBytes(allocator.buffer)
+        bufferToArray(allocator.buffer)
       ).toStrictEqual([
         0
       , // header
-        ...uint32ToBytes(Allocator.headerByteLength) // 4
-      , ...uint32ToBytes(0) // 4
+        ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength)) // 4
+      , ...bufferToArray(uint32ToBuffer(0)) // 4
         // body
       ])
     })
@@ -53,11 +53,11 @@ describe('Allocator', () => {
       const allocator = new Allocator(buffer, 0, byteLength)
 
       expect(
-        bufferToBytes(allocator.buffer)
+        bufferToArray(allocator.buffer)
       ).toStrictEqual([
         // header
-        ...uint32ToBytes(Allocator.headerByteLength) // 4
-      , ...uint32ToBytes(0) // 4
+        ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength)) // 4
+      , ...bufferToArray(uint32ToBuffer(0)) // 4
         // body
         // out of bounds
       , 0
@@ -69,8 +69,8 @@ describe('Allocator', () => {
         const buffer = new ArrayBuffer(Allocator.headerByteLength)
         const view = new DataView(buffer)
         setSlice(view, 0, [
-          ...uint32ToBytes(Allocator.headerByteLength)
-        , ...uint32ToBytes(0)
+          ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength))
+        , ...bufferToArray(uint32ToBuffer(0))
         ])
 
         new Allocator(buffer)
@@ -113,11 +113,11 @@ describe('Allocator', () => {
             const result = allocator.allocate(1)
 
             expect(result).toBe(byteOffset + Allocator.headerByteLength)
-            expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+            expect(bufferToArray(allocator.buffer)).toStrictEqual([
               0
               // header
-            , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-            , ...uint32ToBytes(1) // 4
+            , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
+            , ...bufferToArray(uint32ToBuffer(1)) // 4
               // body
             , 0 // 1
             ])
@@ -136,11 +136,11 @@ describe('Allocator', () => {
               const result = allocator.allocate(1)
 
               expect(result).toBe(byteOffset + Allocator.headerByteLength)
-              expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+              expect(bufferToArray(allocator.buffer)).toStrictEqual([
                 0
                 // header
-              , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-              , ...uint32ToBytes(1) // 4
+              , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
+              , ...bufferToArray(uint32ToBuffer(1)) // 4
                 // body
               , 0 // 1
               , 0
@@ -159,11 +159,11 @@ describe('Allocator', () => {
               const result = allocator.allocate(1)
 
               expect(result).toBe(byteOffset + Allocator.headerByteLength)
-              expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+              expect(bufferToArray(allocator.buffer)).toStrictEqual([
                 0
                 // header
-              , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-              , ...uint32ToBytes(1) // 4
+              , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
+              , ...bufferToArray(uint32ToBuffer(1)) // 4
                 // body
               , 0 // 1
               , ...repeat(0, Allocator.headerByteLength)
@@ -182,16 +182,16 @@ describe('Allocator', () => {
               const result = allocator.allocate(1)
 
               expect(result).toBe(byteOffset + Allocator.headerByteLength)
-              expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+              expect(bufferToArray(allocator.buffer)).toStrictEqual([
                 0
                 // header
-              , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-              , ...uint32ToBytes(1) // 4
+              , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
+              , ...bufferToArray(uint32ToBuffer(1)) // 4
                 // body
               , 0 // 1
                 // header
-              , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
-              , ...uint32ToBytes(0) // 4
+              , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
+              , ...bufferToArray(uint32ToBuffer(0)) // 4
               , 0
               ])
             })
@@ -214,19 +214,19 @@ describe('Allocator', () => {
           + Allocator.headerByteLength + 1
           + Allocator.headerByteLength
           )
-          expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+          expect(bufferToArray(allocator.buffer)).toStrictEqual([
             0
             // header
-          , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-          , ...uint32ToBytes(1) // 4
+          , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
+          , ...bufferToArray(uint32ToBuffer(1)) // 4
             // body
           , 0 // 1
             // header
-          , ...uint32ToBytes(
+          , ...bufferToArray(uint32ToBuffer(
               Allocator.headerByteLength + 1
             + Allocator.headerByteLength + 1
-            ) // 4
-          , ...uint32ToBytes(1) // 4
+            )) // 4
+          , ...bufferToArray(uint32ToBuffer(1)) // 4
             // body
           , 0 // 1
           ])
@@ -249,21 +249,21 @@ describe('Allocator', () => {
         const result = allocator.allocate(1)
 
         expect(result).toBe(offset1)
-        expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+        expect(bufferToArray(allocator.buffer)).toStrictEqual([
           0
           // header
-        , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-        , ...uint32ToBytes(1) // 4
+        , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
+        , ...bufferToArray(uint32ToBuffer(1)) // 4
           // body
         , 0 // 1
           // header
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
-        , ...uint32ToBytes(1) // 4
+        , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
+        , ...bufferToArray(uint32ToBuffer(1)) // 4
           // body
         , 0 // 1
           // header
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
-        , ...uint32ToBytes(0) // 4
+        , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
+        , ...bufferToArray(uint32ToBuffer(0)) // 4
           // body
         , 0 // 1
         ])
@@ -302,11 +302,11 @@ describe('Allocator', () => {
 
         allocator.free(offset)
 
-        expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+        expect(bufferToArray(allocator.buffer)).toStrictEqual([
           0
           // header
-        , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-        , ...uint32ToBytes(0) // 4
+        , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
+        , ...bufferToArray(uint32ToBuffer(0)) // 4
           // body
         , 0 // 1
         ])
@@ -324,16 +324,16 @@ describe('Allocator', () => {
 
         allocator.free(offset)
 
-        expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+        expect(bufferToArray(allocator.buffer)).toStrictEqual([
           0
           // header
-        , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-        , ...uint32ToBytes(0) // 4
+        , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
+        , ...bufferToArray(uint32ToBuffer(0)) // 4
           // body
         , 0 // 1
           // header
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
-        , ...uint32ToBytes(1) // 4
+        , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
+        , ...bufferToArray(uint32ToBuffer(1)) // 4
           // body
         , 0 // 1
         ])
@@ -351,16 +351,16 @@ describe('Allocator', () => {
 
         allocator.free(offset)
 
-        expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+        expect(bufferToArray(allocator.buffer)).toStrictEqual([
           0
           // header
-        , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-        , ...uint32ToBytes(1) // 4
+        , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
+        , ...bufferToArray(uint32ToBuffer(1)) // 4
           // body
         , 0 // 1
           // header
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
-        , ...uint32ToBytes(0) // 4
+        , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
+        , ...bufferToArray(uint32ToBuffer(0)) // 4
         , 0 // 1
         ])
       })
@@ -378,20 +378,20 @@ describe('Allocator', () => {
 
         allocator.free(offset)
 
-        expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+        expect(bufferToArray(allocator.buffer)).toStrictEqual([
           0
           // header
-        , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-        , ...uint32ToBytes(1) // 4
+        , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
+        , ...bufferToArray(uint32ToBuffer(1)) // 4
           // body
         , 0 // 1
           // header
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
-        , ...uint32ToBytes(0) // 4
+        , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
+        , ...bufferToArray(uint32ToBuffer(0)) // 4
         , 0 // 1
           // header
-        , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
-        , ...uint32ToBytes(1) // 4
+        , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
+        , ...bufferToArray(uint32ToBuffer(1)) // 4
           // body
         , 0 // 1
         ])
@@ -412,19 +412,19 @@ describe('Allocator', () => {
 
           allocator.free(offset2)
 
-          expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+          expect(bufferToArray(allocator.buffer)).toStrictEqual([
             0
             // freed block header
-          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
-          , ...uint32ToBytes(0) // 4
+          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
+          , ...bufferToArray(uint32ToBuffer(0)) // 4
             // freed block body
           , 0 // 1
-          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 2) // 4
-          , ...uint32ToBytes(0) // 4
+          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
+          , ...bufferToArray(uint32ToBuffer(0)) // 4
           , 0 // 1
             // header
-          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
-          , ...uint32ToBytes(1) // 4
+          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
+          , ...bufferToArray(uint32ToBuffer(1)) // 4
             // body
           , 0 // 1
           ])
@@ -444,20 +444,20 @@ describe('Allocator', () => {
 
           allocator.free(offset1)
 
-          expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+          expect(bufferToArray(allocator.buffer)).toStrictEqual([
             0
             // header
-          , ...uint32ToBytes(Allocator.headerByteLength + 1) // 4
-          , ...uint32ToBytes(1) // 4
+          , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
+          , ...bufferToArray(uint32ToBuffer(1)) // 4
             // body
           , 0 // 1
             // freed block header
-          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
-          , ...uint32ToBytes(0) // 4
+          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
+          , ...bufferToArray(uint32ToBuffer(0)) // 4
             // freed block body
           , 0 // 1
-          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
-          , ...uint32ToBytes(0) // 4
+          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
+          , ...bufferToArray(uint32ToBuffer(0)) // 4
           , 0 // 1
           ])
         })
@@ -477,18 +477,18 @@ describe('Allocator', () => {
 
           allocator.free(offset2)
 
-          expect(bufferToBytes(allocator.buffer)).toStrictEqual([
+          expect(bufferToArray(allocator.buffer)).toStrictEqual([
             0
             // freed block header
-          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
-          , ...uint32ToBytes(0) // 4
+          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
+          , ...bufferToArray(uint32ToBuffer(0)) // 4
             // freed block body
           , 0 // 1
-          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
-          , ...uint32ToBytes(0) // 4
+          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
+          , ...bufferToArray(uint32ToBuffer(0)) // 4
           , 0 // 1
-          , ...uint32ToBytes((Allocator.headerByteLength + 1) * 3) // 4
-          , ...uint32ToBytes(0) // 4
+          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
+          , ...bufferToArray(uint32ToBuffer(0)) // 4
           , 0 // 1
           ])
         })

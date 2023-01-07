@@ -2,7 +2,7 @@ import { Uint16 } from '@objects/uint16'
 import { Uint16View } from '@views/uint16-view'
 import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
-import { uint16ToBytes } from '@test/utils'
+import { uint16ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 
 describe('Uint16', () => {
@@ -133,6 +133,6 @@ describe('Uint16', () => {
     obj.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).nthCalledWith(1, uint16ToBytes(1))
+    expect(hasher.write).nthCalledWith(1, uint16ToBuffer(1))
   })
 })

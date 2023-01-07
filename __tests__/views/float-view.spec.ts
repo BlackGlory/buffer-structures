@@ -1,5 +1,5 @@
 import { FloatView } from '@views/float-view'
-import { float32ToBytes } from '@test/utils'
+import { float32ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
 describe('FloatView', () => {
@@ -72,6 +72,6 @@ describe('FloatView', () => {
     view.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).toBeCalledWith(float32ToBytes(-3))
+    expect(hasher.write).toBeCalledWith(float32ToBuffer(-3))
   })
 })

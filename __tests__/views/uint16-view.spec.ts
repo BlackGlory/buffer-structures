@@ -1,5 +1,5 @@
 import { Uint16View } from '@views/uint16-view'
-import { uint16ToBytes } from '@test/utils'
+import { uint16ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
 describe('Uint16View', () => {
@@ -72,6 +72,6 @@ describe('Uint16View', () => {
     view.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).toBeCalledWith(uint16ToBytes(10000))
+    expect(hasher.write).toBeCalledWith(uint16ToBuffer(10000))
   })
 })

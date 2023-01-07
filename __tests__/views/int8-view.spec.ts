@@ -1,5 +1,5 @@
 import { Int8View } from '@views/int8-view'
-import { int8ToBytes } from '@test/utils'
+import { int8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
 describe('Int8View', () => {
@@ -72,6 +72,6 @@ describe('Int8View', () => {
     view.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).toBeCalledWith(int8ToBytes(-127))
+    expect(hasher.write).toBeCalledWith(int8ToBuffer(-127))
   })
 })
