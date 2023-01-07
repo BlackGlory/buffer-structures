@@ -14,6 +14,7 @@
     , "@views/*": ["src/views/*"]
     , "@pointers/*": ["src/pointers/*"]
     , "@objects/*": ["src/objects/*"]
+    , "@literals/*": ["src/literals/*"]
     , "@utils/*": ["src/utils/*"]
     , "@test/*": ["__tests__/*"]
     }
