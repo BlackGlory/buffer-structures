@@ -1,5 +1,6 @@
 import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree } from '@src/types'
 import { FixedLengthArray } from 'justypes'
+import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
 
 export type ViewConstructor<View> =
   ISized
@@ -31,6 +32,17 @@ export class ArrayView<
   ) {}
 
   free(allocator: IAllocator): void {
+    for (
+      let i = 0, offset = this.byteOffset
+    ; i < this.length
+    ; i++, offset += this.viewConstructor.byteLength
+    ) {
+      const view = new this.viewConstructor(this.buffer, offset)
+      if (isOwnershiptPointer(view)) {
+        view.freePointed(allocator)
+      }
+    }
+
     allocator.free(this.byteOffset)
   }
 

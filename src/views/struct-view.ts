@@ -2,6 +2,7 @@ import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFre
 import { pipe } from 'extra-utils'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import * as Iter from 'iterable-operator'
+import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
 
 export type ViewConstructor<Value> =
   ISized
@@ -40,6 +41,15 @@ export class StructView<
   ) {}
 
   free(allocator: IAllocator): void {
+    let offset: number = this.byteOffset
+    for (const constructor of Object.values(this.structure)) {
+      const view = new constructor(this.buffer, offset)
+      if (isOwnershiptPointer(view)) {
+        view.freePointed(allocator)
+      }
+      offset += constructor.byteLength
+    }
+
     allocator.free(this.byteOffset)
   }
 

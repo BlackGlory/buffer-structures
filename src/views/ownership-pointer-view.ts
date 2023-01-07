@@ -1,4 +1,4 @@
-import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFree } from '@src/types'
+import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFree, IOwnershipPointer } from '@src/types'
 import { PointerView, ViewConstructor } from '@views/pointer-view'
 
 export type PointerViewConstructor<View extends IHash> =
@@ -14,7 +14,8 @@ export class OwnershipPointerView<
 > implements IHash
            , IReference
            , IReadableWritable<number | null>
-           , IFree {
+           , IFree
+           , IOwnershipPointer {
   static readonly byteLength = PointerView.byteLength
 
   private view: PointerView<View>
@@ -31,6 +32,10 @@ export class OwnershipPointerView<
     this.deref()?.free(allocator)
 
     this.view.free(allocator)
+  }
+
+  freePointed(allocator: IAllocator): void {
+    this.deref()?.free(allocator)
   }
 
   hash(hasher: IHasher): void {

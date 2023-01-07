@@ -1,6 +1,7 @@
 import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree } from '@src/types'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ReturnTypeOfConstructor } from 'hotypes'
+import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
 
 export type ViewConstructor<Value> =
   ISized
@@ -37,6 +38,15 @@ export class TupleView<
   ) {}
 
   free(allocator: IAllocator): void {
+    let offset: number = this.byteOffset
+    for (const constructor of this.structure) {
+      const view = new constructor(this.buffer, offset)
+      if (isOwnershiptPointer(view)) {
+        view.freePointed(allocator)
+      }
+      offset += constructor.byteLength
+    }
+
     allocator.free(this.byteOffset)
   }
 

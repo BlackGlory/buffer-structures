@@ -56,6 +56,39 @@ describe('OwnershipPointerView', () => {
     })
   })
 
+  describe('freePointed', () => {
+    test('null', () => {
+      const allocator = {
+        buffer: new ArrayBuffer(100)
+      , allocate: jest.fn()
+      , free: jest.fn()
+      } satisfies IAllocator
+      const pointerView = new OwnershipPointerView(allocator.buffer, 50, Uint8View)
+      pointerView.set(null)
+
+      pointerView.freePointed(allocator)
+
+      expect(allocator.free).not.toBeCalled()
+    })
+
+    test('non-null', () => {
+      const allocator = {
+        buffer: new ArrayBuffer(100)
+      , allocate: jest.fn()
+      , free: jest.fn()
+      } satisfies IAllocator
+      const dataView = new Uint8View(allocator.buffer, 1)
+      dataView.set(10)
+      const pointerView = new OwnershipPointerView(allocator.buffer, 50, Uint8View)
+      pointerView.set(10)
+
+      pointerView.freePointed(allocator)
+
+      expect(allocator.free).toBeCalledTimes(1)
+      expect(allocator.free).toBeCalledWith(10)
+    })
+  })
+
   describe('get', () => {
     test('null', () => {
       const buffer = new ArrayBuffer(100)

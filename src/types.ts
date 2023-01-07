@@ -41,7 +41,19 @@ export interface IDestroy {
 }
 
 export interface IFree {
+  /**
+   * 释放该视图相关的数据.
+   * 
+   * 如果视图拥有其他数据的所有权, 则调用该函数时应能实现级联释放.
+   */
   free(allocator: IAllocator): void
+}
+
+export interface IOwnershipPointer {
+  /**
+   * 释放指向的数据.
+   */
+  freePointed(allocator: IAllocator): void
 }
 
 export interface IClone<T> {

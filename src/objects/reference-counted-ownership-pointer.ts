@@ -1,4 +1,4 @@
-import { IAllocator, IHash, IFree, IHasher, IReadable, IClone, IDestroy } from '@src/types'
+import { IAllocator, IHash, IFree, IHasher, IClone, IDestroy } from '@src/types'
 import { ViewConstructor } from '@views/pointer-view'
 import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-ownership-pointer-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
@@ -92,10 +92,7 @@ export class ReferenceCountedOwnershipPointer<
   destroy(): void {
     this.fsm.free()
 
-    this._view.decrementCount()
-    if (this._view.getCount() === 0) {
-      this._view.free(this.allocator)
-    }
+    this._view.free(this.allocator)
   }
 
   deref(): View | null {

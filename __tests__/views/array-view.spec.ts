@@ -1,5 +1,6 @@
 import { ArrayView } from '@views/array-view'
 import { Uint8View } from '@views/uint8-view'
+import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { uint8ToBytes } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
@@ -30,19 +31,44 @@ describe('ArrayView', () => {
     expect(result).toBe(byteOffset)
   })
 
-  test('free', () => {
-    const allocator = {
-      buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
-    } satisfies IAllocator
-    const byteOffset = 1
-    const view = new ArrayView(allocator.buffer, byteOffset, Uint8View, 3)
+  describe('free', () => {
+    test('without ownership pointers', () => {
+      const allocator = {
+        buffer: new ArrayBuffer(100)
+      , allocate: jest.fn()
+      , free: jest.fn()
+      } satisfies IAllocator
+      const byteOffset = 1
+      const view = new ArrayView(allocator.buffer, byteOffset, Uint8View, 3)
 
-    view.free(allocator)
+      view.free(allocator)
 
-    expect(allocator.free).toBeCalledTimes(1)
-    expect(allocator.free).toBeCalledWith(byteOffset)
+      expect(allocator.free).toBeCalledTimes(1)
+      expect(allocator.free).toBeCalledWith(byteOffset)
+    })
+
+    test('with ownership pointers', () => {
+      const allocator = {
+        buffer: new ArrayBuffer(100)
+      , allocate: jest.fn()
+      , free: jest.fn()
+      } satisfies IAllocator
+      class Uint8OwnershipPointerView extends OwnershipPointerView<Uint8View> {
+        constructor(buffer: ArrayBufferLike, byteOffset: number) {
+          super(buffer, byteOffset, Uint8View)
+        }
+      }
+      const view = new ArrayView(allocator.buffer, 10, Uint8OwnershipPointerView, 2)
+      view.setByIndex(0, 20)
+      view.setByIndex(1, 30)
+
+      view.free(allocator)
+
+      expect(allocator.free).toBeCalledTimes(3)
+      expect(allocator.free).nthCalledWith(1, 20)
+      expect(allocator.free).nthCalledWith(2, 30)
+      expect(allocator.free).nthCalledWith(3, 10)
+    })
   })
 
   test('get', () => {

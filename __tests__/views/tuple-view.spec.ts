@@ -1,6 +1,7 @@
 import { TupleView } from '@views/tuple-view'
 import { Uint8View } from '@views/uint8-view'
 import { Uint16View } from '@views/uint16-view'
+import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { uint8ToBytes, uint16ToBytes } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 
@@ -40,22 +41,48 @@ describe('TupleView', () => {
     expect(result).toBe(byteOffset)
   })
 
-  test('free', () => {
-    const allocator = {
-      buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
-    } satisfies IAllocator
-    const byteOffset = 1
-    const view = new TupleView(allocator.buffer, byteOffset, [
-      Uint8View
-    , Uint16View
-    ])
+  describe('free', () => {
+    test('without ownership pointers', () => {
+      const allocator = {
+        buffer: new ArrayBuffer(100)
+      , allocate: jest.fn()
+      , free: jest.fn()
+      } satisfies IAllocator
+      const byteOffset = 1
+      const view = new TupleView(allocator.buffer, byteOffset, [
+        Uint8View
+      , Uint16View
+      ])
 
-    view.free(allocator)
+      view.free(allocator)
 
-    expect(allocator.free).toBeCalledTimes(1)
-    expect(allocator.free).toBeCalledWith(byteOffset)
+      expect(allocator.free).toBeCalledTimes(1)
+      expect(allocator.free).toBeCalledWith(byteOffset)
+    })
+
+    test('with ownership pointers', () => {
+      const allocator = {
+        buffer: new ArrayBuffer(100)
+      , allocate: jest.fn()
+      , free: jest.fn()
+      } satisfies IAllocator
+      class Uint8OwnershipPointerView extends OwnershipPointerView<Uint8View> {
+        constructor(buffer: ArrayBufferLike, byteOffset: number) {
+          super(buffer, byteOffset, Uint8View)
+        }
+      }
+      const view = new TupleView(allocator.buffer, 10, [
+        Uint8View
+      , Uint8OwnershipPointerView
+      ])
+      view.setByIndex(1, 20)
+
+      view.free(allocator)
+
+      expect(allocator.free).toBeCalledTimes(2)
+      expect(allocator.free).nthCalledWith(1, 20)
+      expect(allocator.free).nthCalledWith(2, 10)
+    })
   })
 
   test('get', () => {

@@ -1,5 +1,5 @@
 import { assert } from '@blackglory/prelude'
-import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFree } from '@src/types'
+import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFree, IOwnershipPointer } from '@src/types'
 import { StructView } from '@views/struct-view'
 import { ViewConstructor } from '@views/pointer-view'
 import { Uint32View } from '@views/uint32-view'
@@ -18,7 +18,8 @@ export class ReferenceCountedOwnershipPointerView<
 > implements IHash
            , IReference
            , IReadableWritable<{ count: number; value: number | null }>
-           , IFree {
+           , IFree
+           , IOwnershipPointer {
   static readonly byteLength = Uint32View.byteLength + OwnershipPointerView.byteLength
 
   private view: StructView<{
@@ -44,9 +45,19 @@ export class ReferenceCountedOwnershipPointerView<
   }
 
   free(allocator: IAllocator): void {
-    this.deref()?.free(allocator)
+    this.decrementCount()
+    if (this.getCount() === 0) {
+      this.deref()?.free(allocator)
 
-    allocator.free(this.byteOffset)
+      allocator.free(this.byteOffset)
+    }
+  }
+
+  freePointed(allocator: IAllocator): void {
+    this.decrementCount()
+    if (this.getCount() === 0) {
+      this.deref()?.free(allocator)
+    }
   }
 
   hash(hasher: IHasher): void {

@@ -39,6 +39,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       , byteOffset
       , Uint8View
       )
+      pointerView.setCount(1)
 
       pointerView.free(allocator)
 
@@ -69,6 +70,51 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       expect(allocator.free).toBeCalledTimes(2)
       expect(allocator.free).nthCalledWith(1, 1)
       expect(allocator.free).nthCalledWith(2, 50)
+    })
+  })
+
+  describe('freePointed', () => {
+    test('value: null', () => {
+      const allocator = {
+        buffer: new ArrayBuffer(100)
+      , allocate: jest.fn()
+      , free: jest.fn()
+      } satisfies IAllocator
+      const byteOffset = 1
+      const pointerView = new ReferenceCountedOwnershipPointerView(
+        allocator.buffer
+      , byteOffset
+      , Uint8View
+      )
+      pointerView.setCount(1)
+
+      pointerView.freePointed(allocator)
+
+      expect(allocator.free).not.toBeCalled()
+    })
+
+    test('value: non-null', () => {
+      const allocator = {
+        buffer: new ArrayBuffer(100)
+      , allocate: jest.fn()
+      , free: jest.fn()
+      } satisfies IAllocator
+      const uint8View = new Uint8View(allocator.buffer, 1)
+      uint8View.set(10)
+      const pointerView = new ReferenceCountedOwnershipPointerView(
+        allocator.buffer
+      , 50
+      , Uint8View
+      )
+      pointerView.set({
+        count: 1
+      , value: 10
+      })
+
+      pointerView.freePointed(allocator)
+
+      expect(allocator.free).toBeCalledTimes(1)
+      expect(allocator.free).toBeCalledWith(10)
     })
   })
 
