@@ -2,7 +2,7 @@ import { IAllocator, ISized, IHash, IReadableWritable, IClone, IDestroy } from '
 import { ArrayView } from '@views/array-view'
 import { LinkedListView } from '@views/linked-list-view'
 import { Uint32View } from '@views/uint32-view'
-import { PointerView } from '@views/pointer-view'
+import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { StructView } from '@views/struct-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
@@ -19,7 +19,7 @@ export class HashMap<
 > implements IClone<HashMap<KeyView, ValueView, Value>>
            , IDestroy {
   readonly _view: ArrayView<
-    PointerView<
+    OwnershipPointerView<
       LinkedListView<
         StructView<{
           keyHash: typeof Uint32View
@@ -94,14 +94,16 @@ export class HashMap<
       }
       this.InternalLinkedListView = InternalLinkedListView
 
-      class InternalPointerView extends PointerView<InternalLinkedListView> {
+      class InternalOwnershipPointerView extends OwnershipPointerView<
+        InternalLinkedListView
+      > {
         constructor(buffer: ArrayBufferLike, byteOffset: number) {
           super(buffer, byteOffset, InternalLinkedListView)
         }
       }
 
       const view = new ArrayView<
-        PointerView<
+        OwnershipPointerView<
           LinkedListView<
             StructView<{
               keyHash: typeof Uint32View
@@ -113,7 +115,7 @@ export class HashMap<
       >(
         allocator.buffer
       , byteOffset
-      , InternalPointerView
+      , InternalOwnershipPointerView
       , capacity
       )
       this._view = view
@@ -153,17 +155,19 @@ export class HashMap<
       }
       this.InternalLinkedListView = InternalLinkedListView
 
-      class InternalPointerView extends PointerView<InternalLinkedListView> {
+      class InternalOwnershipPointerView extends OwnershipPointerView<
+        InternalLinkedListView
+      > {
         constructor(buffer: ArrayBufferLike, byteOffset: number) {
           super(buffer, byteOffset, InternalLinkedListView)
         }
       }
 
       const byteOffset = allocator.allocate(
-        ArrayView.getByteLength(InternalPointerView, capacity)
+        ArrayView.getByteLength(InternalOwnershipPointerView, capacity)
       )
       const view = new ArrayView<
-        PointerView<
+        OwnershipPointerView<
           LinkedListView<
             StructView<{
               keyHash: typeof Uint32View
@@ -175,7 +179,7 @@ export class HashMap<
       >(
         allocator.buffer
       , byteOffset
-      , InternalPointerView
+      , InternalOwnershipPointerView
       , capacity
       )
       // 初始化每一个指针, 防止指向错误的位置.
@@ -289,7 +293,7 @@ export class HashMap<
     const pointer = this._view.getViewByIndex(index)
 
     let previous:
-    | PointerView<
+    | OwnershipPointerView<
         LinkedListView<
           StructView<{
             keyHash: typeof Uint32View
@@ -309,13 +313,14 @@ export class HashMap<
       const struct = linkedList.getViewOfValue()
       const keyHash = struct.getByKey('keyHash')
       if (hash === keyHash) {
-        // 当前的设计会产生内存泄漏, 因为删除只是断开了链表的连接, 没有释放相应的缓冲区.
         const next = linkedList.getNext()
-        if (previous instanceof PointerView) {
+        if (previous instanceof OwnershipPointerView) {
           previous.set(next)
         } else {
           previous.setNext(next)
         }
+        linkedList.setNext(null)
+        linkedList.free(this.allocator)
         return
       } else {
         previous = linkedList
