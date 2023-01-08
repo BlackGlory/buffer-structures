@@ -2,12 +2,15 @@ import { IAllocator, ICopy, IClone, IDestroy, IReadable, IHash, IHasher } from '
 import { StringView } from '@views/string-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
+import { BaseObject } from './base-object'
 
-export class String implements ICopy<String>
-                             , IClone<String>
-                             , IReadable<string>
-                             , IHash
-                             , IDestroy {
+export class String
+extends BaseObject
+implements ICopy<String>
+         , IClone<String>
+         , IReadable<string>
+         , IHash
+         , IDestroy {
   readonly _view: StringView
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -19,6 +22,8 @@ export class String implements ICopy<String>
   | [allocator: IAllocator, value: string]
   | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
+    super()
+
     if (args.length === 2) {
       const [allocator, value] = args
       this.allocator = allocator

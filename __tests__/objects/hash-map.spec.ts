@@ -5,19 +5,18 @@ import { Uint8View } from '@views/uint8-view'
 import { PointerView } from '@views/pointer-view'
 import { Allocator } from '@src/allocator'
 import { getError } from 'return-style'
+import { BaseObject } from '@objects/base-object'
 
 describe('HashMap', () => {
   test('create', () => {
-    const allocator = {
-      buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
-    } satisfies IAllocator
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const allocate = jest.spyOn(allocator, 'allocate')
 
-    new HashMap(allocator, Uint8View, 10)
+    const result = new HashMap(allocator, Uint8View, 10)
 
-    expect(allocator.allocate).toBeCalledTimes(1)
-    expect(allocator.allocate).toBeCalledWith(PointerView.byteLength * 10)
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(allocate).toBeCalledTimes(1)
+    expect(allocate).toBeCalledWith(PointerView.byteLength * 10)
   })
 
   describe('destory', () => {

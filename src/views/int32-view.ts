@@ -1,14 +1,19 @@
-import { IAllocator, IHash, IHasher, IReference, IReadableWritable, IFree } from '@src/types'
+import { IAllocator, IHash, IHasher, IReference, IReadableWritable } from '@src/types'
 import { getSlice } from '@utils/get-slice'
+import { BaseView } from './base-view'
 
-export class Int32View implements IHash
-                                , IReference
-                                , IReadableWritable<number> {
+export class Int32View
+extends BaseView
+implements IHash
+         , IReference
+         , IReadableWritable<number> {
   static readonly byteLength = Int32Array.BYTES_PER_ELEMENT
 
   private view: DataView
 
   constructor(buffer: ArrayBufferLike, public readonly byteOffset: number) {
+    super()
+
     this.view = new DataView(buffer)
   }
 

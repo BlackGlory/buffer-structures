@@ -3,12 +3,15 @@ import { ViewConstructor } from '@views/pointer-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
+import { BaseObject } from './base-object'
 
 export class OwnershipPointer<
   View extends IHash & IFree
-> implements IClone<OwnershipPointer<View>>
-           , IHash
-           , IDestroy {
+>
+extends BaseObject
+implements IClone<OwnershipPointer<View>>
+         , IHash
+         , IDestroy {
   readonly _view: OwnershipPointerView<View>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -39,6 +42,8 @@ export class OwnershipPointer<
     , counter: ReferenceCounter
     ]
   ) {
+    super()
+
     if (args.length === 3) {
       const [allocator, viewConstructor, valueByteOffset] = args
       this.allocator = allocator

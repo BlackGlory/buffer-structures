@@ -1,5 +1,6 @@
 import { StringLiteral, string } from '@literals/string'
 import { IHasher } from '@src/types'
+import { BaseLiteral } from '@literals/base-literal'
 
 test('string', () => {
   const result = string('foo')
@@ -9,6 +10,13 @@ test('string', () => {
 })
 
 describe('StringLiteral', () => {
+  test('create', () => {
+    const result = new StringLiteral('foo')
+
+    expect(result).toBeInstanceOf(BaseLiteral)
+    expect(result.get()).toBe('foo')
+  })
+
   test('get', () => {
     const literal = new StringLiteral('foo')
 

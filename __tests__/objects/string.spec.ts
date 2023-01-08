@@ -3,19 +3,19 @@ import { StringView } from '@views/string-view'
 import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
 import { Allocator } from '@src/allocator'
+import { BaseObject } from '@objects/base-object'
 
 describe('String', () => {
   test('create', () => {
-    const allocator = {
-      buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
-    } satisfies IAllocator
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const allocate = jest.spyOn(allocator, 'allocate')
 
-    new String(allocator, 'foo')
+    const result = new String(allocator, 'foo')
 
-    expect(allocator.allocate).toBeCalledTimes(1)
-    expect(allocator.allocate).toBeCalledWith(StringView.getByteLength('foo'))
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(result.get()).toBe('foo')
+    expect(allocate).toBeCalledTimes(1)
+    expect(allocate).toBeCalledWith(StringView.getByteLength('foo'))
   })
 
   describe('destory', () => {

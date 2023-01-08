@@ -1,6 +1,7 @@
 import { Int16Literal, int16 } from '@literals/int16'
 import { IHasher } from '@src/types'
 import { int16ToBuffer } from '@test/utils'
+import { BaseLiteral } from '@literals/base-literal'
 
 test('int16', () => {
   const result = int16(1)
@@ -10,6 +11,13 @@ test('int16', () => {
 })
 
 describe('Int16Literal', () => {
+  test('create', () => {
+    const result = new Int16Literal(1)
+
+    expect(result).toBeInstanceOf(BaseLiteral)
+    expect(result.get()).toBe(1)
+  })
+
   test('get', () => {
     const literal = new Int16Literal(1)
 

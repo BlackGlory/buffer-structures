@@ -5,7 +5,7 @@ import { PointerView } from '@views/pointer-view'
  * OwnershipPointerView与PointerView的区别:
  * 除了语义上的区别以外, 调用OwnershipPointer的free方法调用还会一并销毁它指向的数据.
  */
-export class OwnershipPointerView< View extends IHash & IFree>
+export class OwnershipPointerView<View extends IHash & IFree>
 extends PointerView<View>
 implements IHash
          , IReference

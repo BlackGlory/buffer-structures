@@ -4,19 +4,19 @@ import { IAllocator, IHasher } from '@src/types'
 import { getError } from 'return-style'
 import { float64ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
+import { BaseObject } from '@objects/base-object'
 
 describe('Double', () => {
   test('create', () => {
-    const allocator = {
-      buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
-    } satisfies IAllocator
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const allocate = jest.spyOn(allocator, 'allocate')
 
-    new Double(allocator, 1)
+    const result = new Double(allocator, 1)
 
-    expect(allocator.allocate).toBeCalledTimes(1)
-    expect(allocator.allocate).toBeCalledWith(DoubleView.byteLength)
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(result.get()).toBe(1)
+    expect(allocate).toBeCalledTimes(1)
+    expect(allocate).toBeCalledWith(DoubleView.byteLength)
   })
 
   describe('destory', () => {

@@ -3,6 +3,7 @@ import { pipe } from 'extra-utils'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import * as Iter from 'iterable-operator'
 import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
+import { BaseView } from './base-view'
 
 export type ViewConstructor<Value> =
   ISized
@@ -19,13 +20,13 @@ export type MapStructureToValue<T extends Record<string, ViewConstructor<unknown
     : never
 }
 
-export class StructView<
-  Structure extends Record<string, ViewConstructor<unknown>>
-> implements IReference
-           , IReadableWritable<MapStructureToValue<Structure>>
-           , ISized
-           , IHash
-           , IFree {
+export class StructView<Structure extends Record<string, ViewConstructor<unknown>>>
+extends BaseView
+implements IReference
+         , IReadableWritable<MapStructureToValue<Structure>>
+         , ISized
+         , IHash
+         , IFree {
   static getByteLength(structure: Record<string, ViewConstructor<unknown>>): number {
     return Object
       .values(structure)
@@ -38,7 +39,9 @@ export class StructView<
     private buffer: ArrayBufferLike
   , public readonly byteOffset: number
   , private structure: Structure
-  ) {}
+  ) {
+    super()
+  }
 
   free(allocator: IAllocator): void {
     for (const { view } of this.iterate()) {

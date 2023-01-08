@@ -2,12 +2,15 @@ import { IAllocator, ICopy, IClone, IDestroy, IReadableWritable, IHash, IHasher 
 import { FloatView } from '@views/float-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
+import { BaseObject } from './base-object'
 
-export class Float implements ICopy<Float>
-                            , IClone<Float>
-                            , IReadableWritable<number>
-                            , IHash
-                            , IDestroy {
+export class Float
+extends BaseObject
+implements ICopy<Float>
+         , IClone<Float>
+         , IReadableWritable<number>
+         , IHash
+         , IDestroy {
   readonly _view: FloatView
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -19,6 +22,8 @@ export class Float implements ICopy<Float>
   | [allocator: IAllocator, value: number]
   | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
+    super()
+
     if (args.length === 2) {
       const [allocator, value] = args
       this.allocator = allocator

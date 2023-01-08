@@ -2,12 +2,15 @@ import { IAllocator, ICopy, IClone, IDestroy, IReadableWritable, IHash, IHasher 
 import { Uint8View } from '@views/uint8-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
+import { BaseObject } from './base-object'
 
-export class Uint8 implements ICopy<Uint8>
-                            , IClone<Uint8>
-                            , IReadableWritable<number>
-                            , IHash
-                            , IDestroy {
+export class Uint8
+extends BaseObject
+implements ICopy<Uint8>
+         , IClone<Uint8>
+         , IReadableWritable<number>
+         , IHash
+         , IDestroy {
   readonly _view: Uint8View
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -19,6 +22,8 @@ export class Uint8 implements ICopy<Uint8>
   | [allocator: IAllocator, value: number]
   | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
+    super()
+
     if (args.length === 2) {
       const [allocator, value] = args
       this.allocator = allocator

@@ -4,8 +4,17 @@ import { Uint8View } from '@views/uint8-view'
 import { Uint32View } from '@views/uint32-view'
 import { uint8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
+import { BaseView } from '@views/base-view'
 
 describe('ReferenceCountedOwnershipPointerView', () => {
+  test('create', () => {
+    const buffer = new ArrayBuffer(100)
+
+    const result = new ReferenceCountedOwnershipPointerView(buffer, 0, Uint8View)
+
+    expect(result).toBeInstanceOf(BaseView)
+  })
+
   test('byteLength', () => {
     const result = ReferenceCountedOwnershipPointerView.byteLength
 

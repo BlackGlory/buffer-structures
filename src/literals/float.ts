@@ -1,11 +1,17 @@
 import { IReadableWritable, IHash, IHasher } from '@src/types'
+import { BaseLiteral } from './base-literal'
 
 export function float(val: number): FloatLiteral {
   return new FloatLiteral(val)
 }
 
-export class FloatLiteral implements IReadableWritable<number>, IHash {
-  constructor(private value: number) {}
+export class FloatLiteral
+extends BaseLiteral
+implements IReadableWritable<number>
+         , IHash {
+  constructor(private value: number) {
+    super()
+  }
 
   hash(hasher: IHasher): void {
     const buffer = new ArrayBuffer(Float32Array.BYTES_PER_ELEMENT)

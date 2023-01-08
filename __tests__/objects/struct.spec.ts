@@ -6,16 +6,14 @@ import { IAllocator, IHasher } from '@src/types'
 import { uint8ToBuffer, uint16ToBuffer } from '@test/utils'
 import { getError } from 'return-style'
 import { Allocator } from '@src/allocator'
+import { BaseObject } from '@objects/base-object'
 
 describe('Struct', () => {
   test('create', () => {
-    const allocator = {
-      buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
-    } satisfies IAllocator
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const allocate = jest.spyOn(allocator, 'allocate')
 
-    new Struct(
+    const result = new Struct(
       allocator
     , {
         foo: Uint8View
@@ -24,8 +22,13 @@ describe('Struct', () => {
     , { foo: 1, bar: 2 }
     )
 
-    expect(allocator.allocate).toBeCalledTimes(1)
-    expect(allocator.allocate).toBeCalledWith(StructView.getByteLength({
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(result.get()).toStrictEqual({
+      foo: 1
+    , bar: 2
+    })
+    expect(allocate).toBeCalledTimes(1)
+    expect(allocate).toBeCalledWith(StructView.getByteLength({
       foo: Uint8View
     , bar: Uint16View
     }))

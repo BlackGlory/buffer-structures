@@ -3,6 +3,7 @@ import { NonEmptyArray } from '@blackglory/prelude'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
 import { each } from 'iterable-operator'
+import { BaseView } from './base-view'
 
 export type ViewConstructor<Value> =
   ISized
@@ -19,13 +20,13 @@ export type MapStructureToValue<T extends NonEmptyArray<ViewConstructor<unknown>
     : never
 }
 
-export class TupleView<
-  Structure extends NonEmptyArray<ViewConstructor<unknown>>
-> implements IReference
-           , IReadableWritable<MapStructureToValue<Structure>>
-           , ISized
-           , IHash
-           , IFree {
+export class TupleView<Structure extends NonEmptyArray<ViewConstructor<unknown>>>
+extends BaseView
+implements IReference
+         , IReadableWritable<MapStructureToValue<Structure>>
+         , ISized
+         , IHash
+         , IFree {
   static getByteLength(structure: NonEmptyArray<ViewConstructor<unknown>>): number {
     return structure.reduce((acc, cur) => acc + cur.byteLength, 0)
   }
@@ -36,7 +37,9 @@ export class TupleView<
     private buffer: ArrayBufferLike
   , public readonly byteOffset: number
   , private structure: Structure
-  ) {}
+  ) {
+    super()
+  }
 
   free(allocator: IAllocator): void {
     for (const view of this.iterate()) {

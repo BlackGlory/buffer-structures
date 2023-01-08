@@ -1,8 +1,17 @@
 import { FloatView } from '@views/float-view'
 import { float32ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
+import { BaseView } from '@views/base-view'
 
 describe('FloatView', () => {
+  test('create', () => {
+    const buffer = new ArrayBuffer(100)
+
+    const result = new FloatView(buffer, 0)
+
+    expect(result).toBeInstanceOf(BaseView)
+  })
+
   test('byteLength', () => {
     const result = FloatView.byteLength
 

@@ -1,6 +1,7 @@
 import { FloatLiteral, float } from '@literals/float'
 import { IHasher } from '@src/types'
 import { float64ToBuffer } from '@test/utils'
+import { BaseLiteral } from '@literals/base-literal'
 
 test('float', () => {
   const result = float(1)
@@ -10,6 +11,13 @@ test('float', () => {
 })
 
 describe('FloatLiteral', () => {
+  test('create', () => {
+    const result = new FloatLiteral(1)
+
+    expect(result).toBeInstanceOf(BaseLiteral)
+    expect(result.get()).toBe(1)
+  })
+
   test('get', () => {
     const literal = new FloatLiteral(1)
 

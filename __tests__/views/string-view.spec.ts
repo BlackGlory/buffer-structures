@@ -2,8 +2,17 @@ import { StringView } from '@views/string-view'
 import { bufferToArray, getSlice, setSlice, uint32ToBuffer } from '@test/utils'
 import { toArray } from '@blackglory/prelude'
 import { IAllocator, IHasher } from '@src/types'
+import { BaseView } from '@views/base-view'
 
 describe('StringView', () => {
+  test('create', () => {
+    const buffer = new ArrayBuffer(100)
+
+    const result = new StringView(buffer, 0)
+
+    expect(result).toBeInstanceOf(BaseView)
+  })
+
   test('getByteLength', () => {
     const value = 'foo'
 

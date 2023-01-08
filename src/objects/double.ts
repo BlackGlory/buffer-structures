@@ -2,12 +2,15 @@ import { IAllocator, ICopy, IClone, IDestroy, IReadableWritable, IHash, IHasher 
 import { DoubleView } from '@views/double-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
+import { BaseObject } from './base-object'
 
-export class Double implements ICopy<Double>
-                             , IClone<Double>
-                             , IReadableWritable<number>
-                             , IHash
-                             , IDestroy {
+export class Double
+extends BaseObject
+implements ICopy<Double>
+         , IClone<Double>
+         , IReadableWritable<number>
+         , IHash
+         , IDestroy {
   readonly _view: DoubleView
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -19,6 +22,8 @@ export class Double implements ICopy<Double>
   | [allocator: IAllocator, value: number]
   | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
+    super()
+
     if (args.length === 2) {
       const [allocator, value] = args
       this.allocator = allocator

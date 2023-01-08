@@ -2,14 +2,17 @@ import { IAllocator, IHash, IFree, IHasher, IClone, IDestroy } from '@src/types'
 import { ViewConstructor } from '@views/pointer-view'
 import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-ownership-pointer-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
+import { BaseObject } from './base-object'
 
 const internalOverrideSymbol = Symbol()
 
 export class ReferenceCountedOwnershipPointer<
   View extends IHash & IFree
-> implements IClone<ReferenceCountedOwnershipPointer<View>>
-           , IHash
-           , IDestroy {
+>
+extends BaseObject
+implements IClone<ReferenceCountedOwnershipPointer<View>>
+         , IHash
+         , IDestroy {
   readonly _view: ReferenceCountedOwnershipPointerView<View>
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
@@ -39,6 +42,8 @@ export class ReferenceCountedOwnershipPointer<
     , byteOffset: number
     ]
   ) {
+    super()
+
     if (args.length === 3) {
       const [allocator, viewConstructor, valueByteOffset] = args
       this.allocator = allocator

@@ -1,6 +1,7 @@
 import { DoubleLiteral, double } from '@literals/double'
 import { IHasher } from '@src/types'
 import { float64ToBuffer } from '@test/utils'
+import { BaseLiteral } from '@literals/base-literal'
 
 test('double', () => {
   const result = double(1)
@@ -10,6 +11,13 @@ test('double', () => {
 })
 
 describe('DoubleLiteral', () => {
+  test('create', () => {
+    const result = new DoubleLiteral(1)
+
+    expect(result).toBeInstanceOf(BaseLiteral)
+    expect(result.get()).toBe(1)
+  })
+
   test('get', () => {
     const literal = new DoubleLiteral(1)
 

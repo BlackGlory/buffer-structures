@@ -3,15 +3,18 @@ import { ViewConstructor, ArrayView } from '@views/array-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { FixedLengthArray } from 'justypes'
+import { BaseObject } from './base-object'
 
 export class Array<
   View extends IReadableWritable<Value> & IHash
 , Length extends number
 , Value = View extends IReadableWritable<infer T> ? T : never
-> implements ICopy<Array<View, Length, Value>>
-           , IClone<Array<View, Length, Value>>
-           , IHash
-           , IDestroy {
+>
+extends BaseObject
+implements ICopy<Array<View, Length, Value>>
+         , IClone<Array<View, Length, Value>>
+         , IHash
+         , IDestroy {
   readonly _view: ArrayView<View, Length, Value>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -47,6 +50,8 @@ export class Array<
     , counter: ReferenceCounter
     ]
   ) {
+    super()
+
     if (args.length === 5) {
       const [allocator, viewConstructor, length, byteOffset, counter] = args
       this.allocator = allocator

@@ -1,3 +1,4 @@
+export { BaseView as View } from './base-view'
 export { DoubleView } from './double-view'
 export { FloatView } from './float-view'
 export { Int8View } from './int8-view'

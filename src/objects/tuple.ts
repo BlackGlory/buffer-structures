@@ -4,14 +4,15 @@ import { NonEmptyArray } from '@blackglory/prelude'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { ReturnTypeOfConstructor } from 'hotypes'
+import { BaseObject } from './base-object'
 
-export class Tuple<
-  Structure extends NonEmptyArray<ViewConstructor<unknown>>
-> implements ICopy<Tuple<Structure>>
-           , IClone<Tuple<Structure>>
-           , IReadableWritable<MapStructureToValue<Structure>>
-           , IHash
-           , IDestroy {
+export class Tuple<Structure extends NonEmptyArray<ViewConstructor<unknown>>>
+extends BaseObject
+implements ICopy<Tuple<Structure>>
+         , IClone<Tuple<Structure>>
+         , IReadableWritable<MapStructureToValue<Structure>>
+         , IHash
+         , IDestroy {
   readonly _view: TupleView<Structure>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -42,6 +43,8 @@ export class Tuple<
     , counter: ReferenceCounter
     ]
   ) {
+    super()
+
     if (args.length === 3) {
       const [allocator, structure, value] = args
       this.allocator = allocator

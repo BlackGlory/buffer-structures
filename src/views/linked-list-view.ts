@@ -2,6 +2,7 @@ import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFre
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { isntNull } from '@blackglory/prelude'
 import { StructView, MapStructureToValue } from '@views/struct-view'
+import { BaseView } from './base-view'
 
 export type ViewConstructor<View> =
   ISized
@@ -19,11 +20,13 @@ export type Structure<View extends IHash & IReadableWritable<Value>, Value> = {
 export class LinkedListView<
   View extends IReadableWritable<Value> & IHash
 , Value = View extends IReadableWritable<infer T> ? T : never
-> implements IHash
-           , IReference
-           , IReadableWritable<MapStructureToValue<Structure<View, Value>>>
-           , ISized
-           , IFree {
+>
+extends BaseView
+implements IHash
+         , IReference
+         , IReadableWritable<MapStructureToValue<Structure<View, Value>>>
+         , ISized
+         , IFree {
   static getByteLength(viewConstructor: ViewConstructor<unknown>) {
     return viewConstructor.byteLength + OwnershipPointerView.byteLength
   }
@@ -37,6 +40,8 @@ export class LinkedListView<
   , public readonly byteOffset: number
   , private viewConstructor: ViewConstructor<View>
   ) {
+    super()
+
     class InternalLinkedListView extends LinkedListView<View, Value> {
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
         super(buffer, byteOffset, viewConstructor)

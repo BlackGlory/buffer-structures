@@ -4,6 +4,7 @@ import { StructView } from '@views/struct-view'
 import { ViewConstructor } from '@views/pointer-view'
 import { Uint32View } from '@views/uint32-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
+import { BaseView } from './base-view'
 
 type PointerViewConstructor<View extends IHash & IFree> =
   ISized
@@ -13,9 +14,9 @@ type PointerViewConstructor<View extends IHash & IFree> =
  * ReferenceCountedOwnershipPointerView与OwnershipPointerView的区别:
  * ReferenceCountedOwnershipPointerView附带引用计数.
  */
-export class ReferenceCountedOwnershipPointerView<
-  View extends IHash & IFree
-> implements IHash
+export class ReferenceCountedOwnershipPointerView<View extends IHash & IFree>
+extends BaseView
+implements IHash
            , IReference
            , IReadableWritable<{ count: number; value: number | null }>
            , IFree
@@ -32,6 +33,8 @@ export class ReferenceCountedOwnershipPointerView<
   , public readonly byteOffset: number
   , viewConstruct: ViewConstructor<View>
   ) {
+    super()
+
     class InternalOwnershipPointerView extends OwnershipPointerView<View> {
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
         super(buffer, byteOffset, viewConstruct)

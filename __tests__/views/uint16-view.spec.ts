@@ -1,8 +1,17 @@
 import { Uint16View } from '@views/uint16-view'
 import { uint16ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
+import { BaseView } from '@views/base-view'
 
 describe('Uint16View', () => {
+  test('create', () => {
+    const buffer = new ArrayBuffer(100)
+
+    const result = new Uint16View(buffer, 0)
+
+    expect(result).toBeInstanceOf(BaseView)
+  })
+
   test('byteLength', () => {
     const result = Uint16View.byteLength
 

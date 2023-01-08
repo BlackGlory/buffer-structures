@@ -2,6 +2,7 @@ import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFre
 import { FixedLengthArray } from 'justypes'
 import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
 import { each } from 'iterable-operator'
+import { BaseView } from './base-view'
 
 export type ViewConstructor<View> =
   ISized
@@ -11,11 +12,13 @@ export class ArrayView<
   View extends IReadableWritable<Value> & IHash
 , Length extends number
 , Value = View extends IReadableWritable<infer T> ? T : never
-> implements IHash
-           , IReference
-           , IReadableWritable<FixedLengthArray<Value, Length>>
-           , ISized
-           , IFree {
+>
+extends BaseView
+implements IHash
+         , IReference
+         , IReadableWritable<FixedLengthArray<Value, Length>>
+         , ISized
+         , IFree {
   static getByteLength(
     viewConstructor: ViewConstructor<unknown>
   , length: number
@@ -30,7 +33,9 @@ export class ArrayView<
   , public readonly byteOffset: number
   , private viewConstructor: ViewConstructor<View>
   , private length: Length
-  ) {}
+  ) {
+    super()
+  }
 
   free(allocator: IAllocator): void {
     for (const view of this.iterate()) {

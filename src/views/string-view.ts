@@ -1,12 +1,15 @@
 import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFree } from '@src/types'
 import { Uint32View } from '@views/uint32-view'
 import { getSlice } from '@utils/get-slice'
+import { View } from '@src/views'
 
-export class StringView implements IHash
-                                 , IReference
-                                 , IReadableWritable<string>
-                                 , ISized
-                                 , IFree {
+export class StringView
+extends View
+implements IHash
+         , IReference
+         , IReadableWritable<string>
+         , ISized
+         , IFree {
   static getByteLength(value: string): number {
     const encoder = new TextEncoder()
     const valueLength = encoder.encode(value).byteLength
@@ -22,6 +25,8 @@ export class StringView implements IHash
   }
 
   constructor(buffer: ArrayBufferLike, public readonly byteOffset: number) {
+    super()
+
     this.lengthView = new Uint32View(buffer, byteOffset)
     this.valueView = new DataView(buffer)
   }

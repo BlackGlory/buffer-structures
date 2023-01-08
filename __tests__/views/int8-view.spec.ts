@@ -1,8 +1,17 @@
 import { Int8View } from '@views/int8-view'
 import { int8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
+import { BaseView } from '@views/base-view'
 
 describe('Int8View', () => {
+  test('create', () => {
+    const buffer = new ArrayBuffer(100)
+
+    const result = new Int8View(buffer, 0)
+
+    expect(result).toBeInstanceOf(BaseView)
+  })
+
   test('byteLength', () => {
     const result = Int8View.byteLength
 

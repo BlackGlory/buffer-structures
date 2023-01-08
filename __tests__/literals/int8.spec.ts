@@ -1,6 +1,7 @@
 import { Int8Literal, int8 } from '@literals/int8'
 import { IHasher } from '@src/types'
 import { int8ToBuffer } from '@test/utils'
+import { BaseLiteral } from '@literals/base-literal'
 
 test('int8', () => {
   const result = int8(1)
@@ -10,6 +11,13 @@ test('int8', () => {
 })
 
 describe('Int8Literal', () => {
+  test('create', () => {
+    const result = new Int8Literal(1)
+
+    expect(result).toBeInstanceOf(BaseLiteral)
+    expect(result.get()).toBe(1)
+  })
+
   test('get', () => {
     const literal = new Int8Literal(1)
 

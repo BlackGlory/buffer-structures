@@ -3,14 +3,17 @@ import { StructView, ViewConstructor, MapStructureToValue } from '@views/struct-
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { ReturnTypeOfConstructor } from 'hotypes'
+import { BaseObject } from './base-object'
 
 export class Struct<
   Structure extends Record<string, ViewConstructor<unknown>>
-> implements ICopy<Struct<Structure>>
-           , IClone<Struct<Structure>>
-           , IReadableWritable<MapStructureToValue<Structure>>
-           , IHash
-           , IDestroy {
+>
+extends BaseObject
+implements ICopy<Struct<Structure>>
+         , IClone<Struct<Structure>>
+         , IReadableWritable<MapStructureToValue<Structure>>
+         , IHash
+         , IDestroy {
   readonly _view: StructView<Structure>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -37,6 +40,8 @@ export class Struct<
     , counter: ReferenceCounter
     ]
   ) {
+    super()
+
     if (args.length === 3) {
       const [allocator, structure, value] = args
       this.allocator = allocator

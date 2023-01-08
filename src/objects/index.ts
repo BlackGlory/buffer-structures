@@ -1,3 +1,4 @@
+export * from './base-object'
 export * from './double'
 export * from './float'
 export * from './int8'

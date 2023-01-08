@@ -7,6 +7,7 @@ import { StructView } from '@views/struct-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { Hasher } from '@src/hasher'
+import { BaseObject } from './base-object'
 
 type ViewConstructor<View> =
   ISized
@@ -16,8 +17,10 @@ export class HashMap<
   KeyView extends IHash
 , ValueView extends IReadableWritable<Value> & IHash
 , Value = ValueView extends IReadableWritable<infer T> ? T : never
-> implements IClone<HashMap<KeyView, ValueView, Value>>
-           , IDestroy {
+>
+extends BaseObject
+implements IClone<HashMap<KeyView, ValueView, Value>>
+         , IDestroy {
   readonly _view: ArrayView<
     OwnershipPointerView<
       LinkedListView<
@@ -62,6 +65,8 @@ export class HashMap<
     , counter: ReferenceCounter
     ]
   ) {
+    super()
+
     if (args.length === 5) {
       const [allocator, valueViewConstructor, capacity, byteOffset, counter] = args
       this.allocator = allocator

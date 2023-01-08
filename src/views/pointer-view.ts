@@ -1,17 +1,18 @@
 import { IAllocator, IHash, IHasher, IReference, IReadableWritable, IFree } from '@src/types'
 import { isntNull } from '@blackglory/prelude'
+import { BaseView } from './base-view'
 
 export type ViewConstructor<View> = new (
   buffer: ArrayBufferLike
 , byteOffset: number
 ) => View
 
-export class PointerView<
-  View extends IHash
-> implements IHash
-           , IReference
-           , IReadableWritable<number | null>
-           , IFree {
+export class PointerView<View extends IHash>
+extends BaseView
+implements IHash
+         , IReference
+         , IReadableWritable<number | null>
+         , IFree {
   static readonly byteLength = Uint32Array.BYTES_PER_ELEMENT
 
   protected view: DataView
@@ -21,6 +22,8 @@ export class PointerView<
   , public readonly byteOffset: number
   , private viewConstruct: ViewConstructor<View>
   ) {
+    super()
+
     this.view = new DataView(buffer)
   }
 

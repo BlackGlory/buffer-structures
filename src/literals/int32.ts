@@ -1,11 +1,17 @@
 import { IReadableWritable, IHash, IHasher } from '@src/types'
+import { BaseLiteral } from './base-literal'
 
 export function int32(val: number): Int32Literal {
   return new Int32Literal(val)
 }
 
-export class Int32Literal implements IReadableWritable<number>, IHash {
-  constructor(private value: number) {}
+export class Int32Literal
+extends BaseLiteral
+implements IReadableWritable<number>
+         , IHash {
+  constructor(private value: number) {
+    super()
+  }
 
   hash(hasher: IHasher): void {
     const buffer = new ArrayBuffer(Int32Array.BYTES_PER_ELEMENT)

@@ -4,15 +4,18 @@ import { LinkedListView, ViewConstructor, Structure } from '@views/linked-list-v
 import { MapStructureToValue } from '@views/struct-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
+import { BaseObject } from './base-object'
 
 export class LinkedList<
   View extends IHash & IReadableWritable<Value>
 , Value = View extends IReadableWritable<infer T> ? T : never
-> implements ICopy<LinkedList<View, Value>>
-           , IClone<LinkedList<View, Value>>
-           , IReadableWritable<MapStructureToValue<Structure<View, Value>>>
-           , IHash
-           , IDestroy {
+>
+extends BaseObject
+implements ICopy<LinkedList<View, Value>>
+         , IClone<LinkedList<View, Value>>
+         , IReadableWritable<MapStructureToValue<Structure<View, Value>>>
+         , IHash
+         , IDestroy {
   readonly _view: LinkedListView<View, Value>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
@@ -43,6 +46,8 @@ export class LinkedList<
     , counter: ReferenceCounter
     ]
   ) {
+    super()
+
     if (args.length === 3) {
       const [allocator, viewConstructor, value] = args
       this.allocator = allocator

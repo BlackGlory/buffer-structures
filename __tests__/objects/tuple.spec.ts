@@ -6,23 +6,23 @@ import { IAllocator, IHasher } from '@src/types'
 import { uint8ToBuffer, uint16ToBuffer } from '@test/utils'
 import { getError } from 'return-style'
 import { Allocator } from '@src/allocator'
+import { BaseObject } from '@objects/base-object'
 
 describe('Tuple', () => {
   test('create', () => {
-    const allocator = {
-      buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
-    } satisfies IAllocator
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const allocate = jest.spyOn(allocator, 'allocate')
 
-    new Tuple(
+    const result = new Tuple(
       allocator
     , [Uint8View, Uint16View]
     , [1, 2]
     )
 
-    expect(allocator.allocate).toBeCalledTimes(1)
-    expect(allocator.allocate).toBeCalledWith(TupleView.getByteLength([
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(result.get()).toStrictEqual([1, 2])
+    expect(allocate).toBeCalledTimes(1)
+    expect(allocate).toBeCalledWith(TupleView.getByteLength([
       Uint8View
     , Uint16View
     ]))

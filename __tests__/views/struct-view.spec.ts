@@ -4,8 +4,20 @@ import { Uint16View } from '@views/uint16-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { uint8ToBuffer, uint16ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
+import { BaseView } from '@views/base-view'
 
 describe('StructView', () => {
+  test('create', () => {
+    const buffer = new ArrayBuffer(100)
+
+    const result = new StructView(buffer, 0, {
+      foo: Uint8View
+    , bar: Uint16View
+    })
+
+    expect(result).toBeInstanceOf(BaseView)
+  })
+
   test('getByteLength', () => {
     const result = StructView.getByteLength({
       foo: Uint8View

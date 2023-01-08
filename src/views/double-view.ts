@@ -1,15 +1,20 @@
 import { IAllocator, IHash, IHasher, IReference, IReadableWritable, IFree } from '@src/types'
 import { getSlice } from '@utils/get-slice'
+import { BaseView } from './base-view'
 
-export class DoubleView implements IHash
-                                 , IReference
-                                 , IReadableWritable<number>
-                                 , IFree {
+export class DoubleView
+extends BaseView
+implements IHash
+         , IReference
+         , IReadableWritable<number>
+         , IFree {
   static readonly byteLength = Float64Array.BYTES_PER_ELEMENT
 
   private view: DataView
 
   constructor(buffer: ArrayBufferLike, public readonly byteOffset: number) {
+    super()
+
     this.view = new DataView(buffer)
   }
 

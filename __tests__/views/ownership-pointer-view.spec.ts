@@ -3,8 +3,17 @@ import { PointerView } from '@views/pointer-view'
 import { Uint8View } from '@views/uint8-view'
 import { uint8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
+import { BaseView } from '@views/base-view'
 
 describe('OwnershipPointerView', () => {
+  test('create', () => {
+    const buffer = new ArrayBuffer(100)
+
+    const result = new OwnershipPointerView(buffer, 0, Uint8View)
+
+    expect(result).toBeInstanceOf(BaseView)
+  })
+
   test('byteLength', () => {
     const result = OwnershipPointerView.byteLength
 

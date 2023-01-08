@@ -6,16 +6,14 @@ import { getError } from 'return-style'
 import { uint8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 import { PointerView } from '@src/views/pointer-view'
+import { BaseObject } from '@objects/base-object'
 
 describe('LinkedList', () => {
   test('create', () => {
-    const allocator = {
-      buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
-    } satisfies IAllocator
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const allocate = jest.spyOn(allocator, 'allocate')
 
-    new LinkedList(
+    const result = new LinkedList(
       allocator
     , Uint8View
     , {
@@ -24,8 +22,13 @@ describe('LinkedList', () => {
       }
     )
 
-    expect(allocator.allocate).toBeCalledTimes(1)
-    expect(allocator.allocate).toBeCalledWith(LinkedListView.getByteLength(Uint8View))
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(result.get()).toStrictEqual({
+      next: null
+    , value: 1
+    })
+    expect(allocate).toBeCalledTimes(1)
+    expect(allocate).toBeCalledWith(LinkedListView.getByteLength(Uint8View))
   })
 
   describe('destory', () => {

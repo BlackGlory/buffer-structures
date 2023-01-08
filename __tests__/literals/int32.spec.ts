@@ -1,6 +1,7 @@
 import { Int32Literal, int32 } from '@literals/int32'
 import { IHasher } from '@src/types'
 import { int32ToBuffer } from '@test/utils'
+import { BaseLiteral } from '@literals/base-literal'
 
 test('int32', () => {
   const result = int32(1)
@@ -10,6 +11,13 @@ test('int32', () => {
 })
 
 describe('Int32Literal', () => {
+  test('create', () => {
+    const result = new Int32Literal(1)
+
+    expect(result).toBeInstanceOf(BaseLiteral)
+    expect(result.get()).toBe(1)
+  })
+
   test('get', () => {
     const literal = new Int32Literal(1)
 

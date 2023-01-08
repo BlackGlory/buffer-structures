@@ -1,11 +1,17 @@
 import { IReadableWritable, IHash, IHasher } from '@src/types'
+import { BaseLiteral } from './base-literal'
 
 export function string(val: string): StringLiteral {
   return new StringLiteral(val)
 }
 
-export class StringLiteral implements IReadableWritable<string>, IHash {
-  constructor(private value: string) {}
+export class StringLiteral
+extends BaseLiteral
+implements IReadableWritable<string>
+         , IHash {
+  constructor(private value: string) {
+    super()
+  }
 
   hash(hasher: IHasher): void {
     const encoder = new TextEncoder()
