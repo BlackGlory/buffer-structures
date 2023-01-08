@@ -52,7 +52,7 @@ implements IHash
     if (this.getCount() === 0) {
       this.deref()?.free(allocator)
 
-      allocator.free(this.byteOffset)
+      allocator.free(this.byteOffset, ReferenceCountedOwnershipPointerView.byteLength)
     }
   }
 

@@ -22,17 +22,14 @@ describe('Array', () => {
 
   describe('destory', () => {
     it('calls allocator.free()', () => {
-      const allocator = {
-        buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
-      } satisfies IAllocator
-      const result = new Array(allocator, Uint8View, 3)
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const free = jest.spyOn(allocator, 'free')
+      const obj = new Array(allocator, Uint8View, 3)
 
-      result.destroy()
+      obj.destroy()
 
-      expect(allocator.free).toBeCalledTimes(1)
-      expect(allocator.free).toBeCalledWith(result._view.byteOffset)
+      expect(free).toBeCalledTimes(1)
+      expect(free).toBeCalledWith(obj._view.byteOffset, obj._view.byteLength)
     })
 
     it('cannot destory twice', () => {
@@ -41,10 +38,10 @@ describe('Array', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const result = new Array(allocator, Uint8View, 3)
-      result.destroy()
+      const obj = new Array(allocator, Uint8View, 3)
+      obj.destroy()
 
-      const err = getError(() => result.destroy())
+      const err = getError(() => obj.destroy())
 
       expect(err).toBeInstanceOf(Error)
     })
@@ -56,98 +53,95 @@ describe('Array', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const arr1 = new Array(allocator, Uint8View, 3)
-        const arr2 = arr1.clone()
+        const obj1 = new Array(allocator, Uint8View, 3)
+        const obj2 = obj1.clone()
 
-        arr1.destroy()
+        obj1.destroy()
 
         expect(allocator.free).not.toBeCalled()
       })
 
       test('calls allocator.free()', () => {
-        const allocator = {
-          buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
-        } satisfies IAllocator
-        const arr1 = new Array(allocator, Uint8View, 3)
-        const arr2 = arr1.clone()
+        const allocator = new Allocator(new ArrayBuffer(100))
+        const free = jest.spyOn(allocator, 'free')
+        const obj1 = new Array(allocator, Uint8View, 3)
+        const obj2 = obj1.clone()
 
-        arr1.destroy()
-        arr2.destroy()
+        obj1.destroy()
+        obj2.destroy()
 
-        expect(allocator.free).toBeCalledTimes(1)
-        expect(allocator.free).toBeCalledWith(arr1._view.byteOffset)
+        expect(free).toBeCalledTimes(1)
+        expect(free).toBeCalledWith(obj1._view.byteOffset, obj1._view.byteLength)
       })
     })
   })
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const arr = new Array(allocator, Uint8View, 3)
+    const obj = new Array(allocator, Uint8View, 3)
 
-    const result = arr.clone()
+    const result = obj.clone()
 
-    expect(result).not.toBe(arr)
-    expect(result._view.byteOffset).toBe(arr._view.byteOffset)
-    expect(result._counter).toBe(arr._counter)
+    expect(result).not.toBe(obj)
+    expect(result._view.byteOffset).toBe(obj._view.byteOffset)
+    expect(result._counter).toBe(obj._counter)
     expect(result._counter._count).toBe(2)
   })
 
   test('copy', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const arr = new Array(allocator, Uint8View, 3)
+    const obj = new Array(allocator, Uint8View, 3)
 
-    const result = arr.copy()
+    const result = obj.copy()
 
-    expect(result).not.toBe(arr)
-    expect(result._view.byteOffset).not.toBe(arr._view.byteOffset)
-    expect(result._counter).not.toBe(arr._counter)
+    expect(result).not.toBe(obj)
+    expect(result._view.byteOffset).not.toBe(obj._view.byteOffset)
+    expect(result._counter).not.toBe(obj._counter)
     expect(result._counter._count).toBe(1)
   })
 
   test('get', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const arr = new Array(allocator, Uint8View, 3, [1, 2, 3])
+    const obj = new Array(allocator, Uint8View, 3, [1, 2, 3])
 
-    const result = arr.get()
+    const result = obj.get()
 
     expect(result).toStrictEqual([1, 2, 3])
   })
 
   test('set', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const arr = new Array(allocator, Uint8View, 3, [1, 2, 3])
+    const obj = new Array(allocator, Uint8View, 3, [1, 2, 3])
 
-    arr.set([10, 20, 30])
+    obj.set([10, 20, 30])
 
-    expect(arr.get()).toStrictEqual([10, 20, 30])
+    expect(obj.get()).toStrictEqual([10, 20, 30])
   })
 
   test('getByIndex', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const arr = new Array(allocator, Uint8View, 3, [1, 2, 3])
+    const obj = new Array(allocator, Uint8View, 3, [1, 2, 3])
 
-    const result = arr.getByIndex(1)
+    const result = obj.getByIndex(1)
 
     expect(result).toBe(2)
   })
 
   test('setByIndex', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const arr = new Array(allocator, Uint8View, 3, [1, 2, 3])
+    const obj = new Array(allocator, Uint8View, 3, [1, 2, 3])
 
-    arr.setByIndex(1, 10)
+    obj.setByIndex(1, 10)
 
-    expect(arr.get()).toStrictEqual([1, 10, 3])
+    expect(obj.get()).toStrictEqual([1, 10, 3])
   })
 
   test('getViewByIndex', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const arr = new Array(allocator, Uint8View, 2, [1, 2])
+    const obj = new Array(allocator, Uint8View, 2, [1, 2])
 
-    const view1 = arr.getViewByIndex(0)
-    const view2 = arr.getViewByIndex(1)
+    const view1 = obj.getViewByIndex(0)
+    const view2 = obj.getViewByIndex(1)
 
     expect(view1).toBeInstanceOf(Uint8View)
     expect(view2).toBeInstanceOf(Uint8View)
@@ -155,12 +149,12 @@ describe('Array', () => {
 
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const arr = new Array(allocator, Uint8View, 2, [1, 2])
+    const obj = new Array(allocator, Uint8View, 2, [1, 2])
     const hasher = {
       write: jest.fn()
     } satisfies IHasher
 
-    arr.hash(hasher)
+    obj.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(2)
     expect(hasher.write).nthCalledWith(1, uint8ToBuffer(1))

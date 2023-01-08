@@ -40,7 +40,7 @@ describe('Uint8View', () => {
     view.free(allocator)
 
     expect(allocator.free).toBeCalledTimes(1)
-    expect(allocator.free).toBeCalledWith(byteOffset)
+    expect(allocator.free).toBeCalledWith(byteOffset, Uint8View.byteLength)
   })
 
   test('get', () => {

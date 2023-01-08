@@ -14,23 +14,23 @@ describe('Allocator', () => {
 
       expect(bufferToArray(allocator.buffer)).toStrictEqual([0, 0])
       expect(allocator.metadata).toStrictEqual({
-        blocks: [
-          { allocated: false, byteLength: 1 }
+        freeLists: [
+          { byteOffset: nullSize, byteLength: 1 }
         ]
       })
     })
 
     test('with metadata', () => {
-      const buffer = new ArrayBuffer(nullSize + 1)
+      const buffer = new ArrayBuffer(nullSize + 3)
 
       const allocator = new Allocator(buffer, {
-        blocks: [{ allocated: false, byteLength: 1 }]
+        freeLists: [{ byteOffset: 2, byteLength: 2 }]
       })
 
-      expect(bufferToArray(allocator.buffer)).toStrictEqual([0, 0])
+      expect(bufferToArray(allocator.buffer)).toStrictEqual([0, 0, 0, 0])
       expect(allocator.metadata).toStrictEqual({
-        blocks: [
-          { allocated: false, byteLength: 1 }
+        freeLists: [
+          { byteOffset: 2, byteLength: 2 }
         ]
       })
     })
@@ -58,9 +58,7 @@ describe('Allocator', () => {
 
             expect(result).toBe(nullSize)
             expect(allocator.metadata).toStrictEqual({
-              blocks: [
-                { allocated: true, byteLength: 1 }
-              ]
+              freeLists: []
             })
           })
 
@@ -72,9 +70,8 @@ describe('Allocator', () => {
 
             expect(result).toBe(nullSize)
             expect(allocator.metadata).toStrictEqual({
-              blocks: [
-                { allocated: true, byteLength: 1 }
-              , { allocated: false, byteLength: 1 }
+              freeLists: [
+                { byteOffset: nullSize + 1, byteLength: 1 }
               ]
             })
           })
@@ -89,10 +86,7 @@ describe('Allocator', () => {
 
           expect(result).toBe(nullSize + 1)
           expect(allocator.metadata).toStrictEqual({
-            blocks: [
-              { allocated: true, byteLength: 1 }
-            , { allocated: true, byteLength: 1 }
-            ]
+            freeLists: []
           })
         })
       })
@@ -103,17 +97,15 @@ describe('Allocator', () => {
         const offset1 = allocator.allocate(1)
         const offset2 = allocator.allocate(1)
         const offset3 = allocator.allocate(1)
-        allocator.free(offset1)
-        allocator.free(offset3)
+        allocator.free(offset1, 1)
+        allocator.free(offset3, 1)
 
         const result = allocator.allocate(1)
 
         expect(result).toBe(offset1)
         expect(allocator.metadata).toStrictEqual({
-          blocks: [
-            { allocated: true, byteLength: 1 }
-          , { allocated: true, byteLength: 1 }
-          , { allocated: false, byteLength: 1 }
+          freeLists: [
+            { byteOffset: offset3, byteLength: 1 }
           ]
         })
       })
@@ -135,7 +127,7 @@ describe('Allocator', () => {
       const buffer = new ArrayBuffer(nullSize + 1)
       const allocator = new Allocator(buffer)
 
-      const err = getError(() => allocator.free(0))
+      const err = getError(() => allocator.free(nullSize, 1))
 
       expect(err).toBeInstanceOf(Error)
       expect(err!.message).toMatch('The offset is not allocated')
@@ -147,11 +139,11 @@ describe('Allocator', () => {
         const allocator = new Allocator(buffer)
         const offset = allocator.allocate(1)
 
-        allocator.free(offset)
+        allocator.free(offset, 1)
 
         expect(allocator.metadata).toStrictEqual({
-          blocks: [
-            { allocated: false, byteLength: 1 }
+          freeLists: [
+            { byteOffset: nullSize, byteLength: 1 }
           ]
         })
       })
@@ -162,12 +154,11 @@ describe('Allocator', () => {
         const offset = allocator.allocate(1)
         allocator.allocate(1)
 
-        allocator.free(offset)
+        allocator.free(offset, 1)
 
         expect(allocator.metadata).toStrictEqual({
-          blocks: [
-            { allocated: false, byteLength: 1 }
-          , { allocated: true, byteLength: 1 }
+          freeLists: [
+            { byteOffset: nullSize, byteLength: 1 }
           ]
         })
       })
@@ -178,12 +169,11 @@ describe('Allocator', () => {
         allocator.allocate(1)
         const offset = allocator.allocate(1)
 
-        allocator.free(offset)
+        allocator.free(offset, 1)
 
         expect(allocator.metadata).toStrictEqual({
-          blocks: [
-            { allocated: true, byteLength: 1 }
-          , { allocated: false, byteLength: 1 }
+          freeLists: [
+            { byteOffset: offset, byteLength: 1 }
           ]
         })
       })
@@ -191,36 +181,33 @@ describe('Allocator', () => {
       test('the freed block is the middle block', () => {
         const buffer = new ArrayBuffer(nullSize + 1 * 3)
         const allocator = new Allocator(buffer)
-        allocator.allocate(1)
-        const offset = allocator.allocate(1)
-        allocator.allocate(1)
+        const offset1 = allocator.allocate(1)
+        const offset2 = allocator.allocate(1)
+        const offset3 = allocator.allocate(1)
 
-        allocator.free(offset)
+        allocator.free(offset2, 1)
 
         expect(allocator.metadata).toStrictEqual({
-          blocks: [
-            { allocated: true, byteLength: 1 }
-          , { allocated: false, byteLength: 1 }
-          , { allocated: true, byteLength: 1 }
+          freeLists: [
+            { byteOffset: offset2, byteLength: 1 }
           ]
         })
       })
 
-      describe('merge unallocated blocks', () => {
+      describe('merge unallocated freeLists', () => {
         test('[unallocated, free now], allocated', () => {
           const buffer = new ArrayBuffer(nullSize + 1 * 3)
           const allocator = new Allocator(buffer)
           const offset1 = allocator.allocate(1)
           const offset2 = allocator.allocate(1)
-          allocator.allocate(1)
-          allocator.free(offset1)
+          const offset3 = allocator.allocate(1)
+          allocator.free(offset1, 1)
 
-          allocator.free(offset2)
+          allocator.free(offset2, 1)
 
           expect(allocator.metadata).toStrictEqual({
-            blocks: [
-              { allocated: false, byteLength: 2 }
-            , { allocated: true, byteLength: 1 }
+            freeLists: [
+              { byteOffset: offset1, byteLength: 2 }
             ]
           })
         })
@@ -228,17 +215,16 @@ describe('Allocator', () => {
         test('allocated, [free now, unallocated]', () => {
           const buffer = new ArrayBuffer(nullSize + 1 * 3)
           const allocator = new Allocator(buffer)
-          allocator.allocate(1)
           const offset1 = allocator.allocate(1)
           const offset2 = allocator.allocate(1)
-          allocator.free(offset2)
+          const offset3 = allocator.allocate(1)
+          allocator.free(offset3, 1)
 
-          allocator.free(offset1)
+          allocator.free(offset2, 1)
 
           expect(allocator.metadata).toStrictEqual({
-            blocks: [
-              { allocated: true, byteLength: 1 }
-            , { allocated: false, byteLength: 2 }
+            freeLists: [
+              { byteOffset: offset2, byteLength: 2 }
             ]
           })
         })
@@ -249,14 +235,14 @@ describe('Allocator', () => {
           const offset1 = allocator.allocate(1)
           const offset2 = allocator.allocate(1)
           const offset3 = allocator.allocate(1)
-          allocator.free(offset1)
-          allocator.free(offset3)
+          allocator.free(offset1, 1)
+          allocator.free(offset3, 1)
 
-          allocator.free(offset2)
+          allocator.free(offset2, 1)
 
           expect(allocator.metadata).toStrictEqual({
-            blocks: [
-              { allocated: false, byteLength: 3 }
+            freeLists: [
+              { byteOffset: offset1, byteLength: 3 }
             ]
           })
         })

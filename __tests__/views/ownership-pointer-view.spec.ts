@@ -43,7 +43,7 @@ describe('OwnershipPointerView', () => {
       pointerView.free(allocator)
 
       expect(allocator.free).toBeCalledTimes(1)
-      expect(allocator.free).toBeCalledWith(50)
+      expect(allocator.free).toBeCalledWith(50, OwnershipPointerView.byteLength)
     })
 
     test('non-null', () => {
@@ -60,8 +60,8 @@ describe('OwnershipPointerView', () => {
       pointerView.free(allocator)
 
       expect(allocator.free).toBeCalledTimes(2)
-      expect(allocator.free).nthCalledWith(1, 1)
-      expect(allocator.free).nthCalledWith(2, 50)
+      expect(allocator.free).nthCalledWith(1, 1, Uint8View.byteLength)
+      expect(allocator.free).nthCalledWith(2, 50, OwnershipPointerView.byteLength)
     })
   })
 
@@ -94,7 +94,7 @@ describe('OwnershipPointerView', () => {
       pointerView.freePointed(allocator)
 
       expect(allocator.free).toBeCalledTimes(1)
-      expect(allocator.free).toBeCalledWith(10)
+      expect(allocator.free).toBeCalledWith(10, Uint8View.byteLength)
     })
   })
 

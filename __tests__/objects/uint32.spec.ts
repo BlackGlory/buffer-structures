@@ -21,17 +21,14 @@ describe('Uint32', () => {
 
   describe('destory', () => {
     it('calls allocator.free()', () => {
-      const allocator = {
-        buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
-      } satisfies IAllocator
-      const result = new Uint32(allocator, 1)
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const free = jest.spyOn(allocator, 'free')
+      const obj = new Uint32(allocator, 1)
 
-      result.destroy()
+      obj.destroy()
 
-      expect(allocator.free).toBeCalledTimes(1)
-      expect(allocator.free).toBeCalledWith(result._view.byteOffset)
+      expect(free).toBeCalledTimes(1)
+      expect(free).toBeCalledWith(obj._view.byteOffset, Uint32View.byteLength)
     })
 
     it('cannot destory twice', () => {
@@ -64,19 +61,16 @@ describe('Uint32', () => {
       })
 
       test('calls allocator.free()', () => {
-        const allocator = {
-          buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
-        } satisfies IAllocator
+        const allocator = new Allocator(new ArrayBuffer(100))
+        const free = jest.spyOn(allocator, 'free')
         const obj1 = new Uint32(allocator, 1)
         const obj2 = obj1.clone()
 
         obj1.destroy()
         obj2.destroy()
 
-        expect(allocator.free).toBeCalledTimes(1)
-        expect(allocator.free).toBeCalledWith(obj1._view.byteOffset)
+        expect(free).toBeCalledTimes(1)
+        expect(free).toBeCalledWith(obj1._view.byteOffset, Uint32View.byteLength)
       })
     })
   })

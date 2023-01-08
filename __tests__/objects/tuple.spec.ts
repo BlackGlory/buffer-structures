@@ -30,21 +30,18 @@ describe('Tuple', () => {
 
   describe('destory', () => {
     it('calls allocator.free()', () => {
-      const allocator = {
-        buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
-      } satisfies IAllocator
-      const result = new Tuple(
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const free = jest.spyOn(allocator, 'free')
+      const obj = new Tuple(
         allocator
       , [Uint8View, Uint16View]
       , [1, 2]
       )
 
-      result.destroy()
+      obj.destroy()
 
-      expect(allocator.free).toBeCalledTimes(1)
-      expect(allocator.free).toBeCalledWith(result._view.byteOffset)
+      expect(free).toBeCalledTimes(1)
+      expect(free).toBeCalledWith(obj._view.byteOffset, obj._view.byteLength)
     })
 
     it('cannot destory twice', () => {
@@ -53,14 +50,14 @@ describe('Tuple', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const result = new Tuple(
+      const obj = new Tuple(
         allocator
       , [Uint8View, Uint16View]
       , [1, 2]
       )
-      result.destroy()
+      obj.destroy()
 
-      const err = getError(() => result.destroy())
+      const err = getError(() => obj.destroy())
 
       expect(err).toBeInstanceOf(Error)
     })
@@ -85,11 +82,8 @@ describe('Tuple', () => {
       })
 
       test('calls allocator.free()', () => {
-        const allocator = {
-          buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
-        } satisfies IAllocator
+        const allocator = new Allocator(new ArrayBuffer(100))
+        const free = jest.spyOn(allocator, 'free')
         const obj1 = new Tuple(
           allocator
         , [Uint8View, Uint16View]
@@ -100,8 +94,8 @@ describe('Tuple', () => {
         obj1.destroy()
         obj2.destroy()
 
-        expect(allocator.free).toBeCalledTimes(1)
-        expect(allocator.free).toBeCalledWith(obj1._view.byteOffset)
+        expect(free).toBeCalledTimes(1)
+        expect(free).toBeCalledWith(obj1._view.byteOffset, obj1._view.byteLength)
       })
     })
   })

@@ -45,7 +45,7 @@ implements IReference
       }
     }
 
-    allocator.free(this.byteOffset)
+    allocator.free(this.byteOffset, this.byteLength)
   }
 
   hash(hasher: IHasher): void {

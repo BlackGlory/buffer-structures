@@ -34,8 +34,16 @@ describe('ReferenceCountedOwnershipPointer', () => {
       pointer.destroy()
 
       expect(free).toBeCalledTimes(2)
-      expect(free).nthCalledWith(1, data._view.byteOffset)
-      expect(free).nthCalledWith(2, pointer._view.byteOffset)
+      expect(free).nthCalledWith(
+        1
+      , data._view.byteOffset
+      , Uint8View.byteLength
+      )
+      expect(free).nthCalledWith(
+        2
+      , pointer._view.byteOffset
+      , ReferenceCountedOwnershipPointerView.byteLength
+      )
     })
 
     it('cannot destory twice', () => {
@@ -82,8 +90,12 @@ describe('ReferenceCountedOwnershipPointer', () => {
         obj2.destroy()
 
         expect(free).toBeCalledTimes(2)
-        expect(free).nthCalledWith(1, data._view.byteOffset)
-        expect(free).nthCalledWith(2, obj1._view.byteOffset)
+        expect(free).nthCalledWith(1, data._view.byteOffset, Uint8View.byteLength)
+        expect(free).nthCalledWith(
+          2
+        , obj1._view.byteOffset
+        , ReferenceCountedOwnershipPointerView.byteLength
+        )
       })
     })
   })

@@ -21,7 +21,7 @@ implements IHash
 
   get byteLength() {
     const byteLenght = this.valueView.getUint32(this.byteOffset)
-    return byteLenght
+    return Uint32View.byteLength + byteLenght
   }
 
   constructor(buffer: ArrayBufferLike, public readonly byteOffset: number) {
@@ -32,7 +32,7 @@ implements IHash
   }
 
   free(allocator: IAllocator): void {
-    allocator.free(this.byteOffset)
+    allocator.free(this.byteOffset, this.byteLength)
   }
 
   get(): string {

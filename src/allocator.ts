@@ -3,11 +3,11 @@ import { IAllocator } from '@src/types'
 import { NonEmptyArray } from '@blackglory/prelude'
 
 interface IMetadata {
-  blocks: NonEmptyArray<IBlock>
+  freeLists: NonEmptyArray<IFreeList>
 }
 
-interface IBlock {
-  allocated: boolean
+interface IFreeList {
+  byteOffset: number
   byteLength: number
 }
 
@@ -20,91 +20,127 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
   constructor(
     public readonly buffer: T
   , public readonly metadata: IMetadata = {
-      blocks: [{ allocated: false, byteLength: buffer.byteLength - nullSize }]
+      freeLists: [
+        {
+          byteOffset: nullSize
+        , byteLength: buffer.byteLength - nullSize
+        }
+      ]
     }
   ) {
     assert(buffer.byteLength >= nullSize, `The minimal byteLength of buffer is ${nullSize}`)
   }
 
   /**
-   * @returns 字节单位的绝对偏移值
+   * @returns 字节单位的偏移值
    */
   allocate(size: number): number {
     assert(Number.isInteger(size), 'The size should be an integer')
     assert(size > 0, 'The size should be greater than zero')
 
-    for (const [byteOffset, block, index] of this.blocks()) {
-      if (!block.allocated && block.byteLength >= size) {
-        const oldByteLength = block.byteLength
-
-        // 将当前块分配.
-        block.allocated = true
-        block.byteLength = size
-
-        //  如果可分配主体长度超过用户请求的长度, 将多余的部分拆分成新块.
-        const restByteLength = oldByteLength - size
-        if (restByteLength > 0) {
-          // 如果原本的下一个块是未分配的, 则将原本的下一个块和剩余空间合并成新块.
-          const nextBlock = this.metadata.blocks[index + 1]
-          if (nextBlock && !nextBlock.allocated) {
-            nextBlock.byteLength += restByteLength
-          } else {
-            this.metadata.blocks.splice(index + 1, 0, {
-              allocated: false
-            , byteLength: restByteLength
-            })
-          }
-        }
-
-        return byteOffset
+    for (const [index, freeList] of this.freeLists()) {
+      if (freeList.byteLength === size) {
+        // 如果空闲链表的长度等于用户请求的长度, 移除此空闲链表.
+        this.metadata.freeLists.splice(index, 1)
+        return freeList.byteOffset
+      } else if (freeList.byteLength > size) {
+        // 如果空闲链表的长度超过用户请求的长度, 将多余的部分拆分成新的空闲链表.
+        const oldFreeListByteOffset = freeList.byteOffset
+        freeList.byteOffset += size
+        freeList.byteLength -= size
+        return oldFreeListByteOffset
       }
     }
 
     throw new Error('Out of bounds')
   }
 
-  /**
-   * @param byteOffset 绝对偏移值
-   */
-  free(offset: number): void {
-    for (const [byteOffset, block, index] of this.blocks()) {
-      if (byteOffset === offset) {
-        assert(block.allocated, 'The offset is not allocated')
+  free(byteOffset: number, byteLength: number): void {
+    assert(Number.isInteger(byteOffset), 'The byteOffset should be an integer')
+    assert(Number.isInteger(byteLength), 'The byteLength should be an integer')
+    assert(
+      byteOffset >= nullSize
+    , `The byteOffset should be greater than or equal to ${nullSize}`
+    )
+    assert(byteLength > 0, 'The byteLength should be greater than zero')
+    assert(
+      byteOffset + byteLength <= this.buffer.byteLength
+    , 'The byteOffsset + byteLength should be less than or equal to buffer.byteLength'
+    )
 
-        // 将当前块设置为未分配.
-        block.allocated = false
-
-        // 如果下一个块是未分配的, 则将下一个块合并进当前块.
-        const nextBlock = this.metadata.blocks[index + 1]
-        if (nextBlock && !nextBlock.allocated) {
-          block.byteLength += nextBlock.byteLength
-
-          this.metadata.blocks.splice(index + 1, 1)
-        }
-
-        // 如果上一个块是未分配的, 则将当前块合并进上一个块.
-        const previousBlock = this.metadata.blocks[index - 1]
-        if (previousBlock && !previousBlock.allocated) {
-          previousBlock.byteLength += block.byteLength
-
-          this.metadata.blocks.splice(index, 1)
-        }
-
-        return
+    if (this.metadata.freeLists.length === 0) {
+      // 创建一个新的空闲链表.
+      const newFreeList: IFreeList = {
+        byteOffset
+      , byteLength
       }
-    }
+      this.metadata.freeLists.push(newFreeList)
+      return
+    } else {
+      let previousFreeList: IFreeList | undefined = undefined
+      for (const [index, nextFreeList] of this.freeLists()) {
+        if (
+          (
+            byteOffset >= nextFreeList.byteOffset &&
+            byteOffset < nextFreeList.byteOffset + nextFreeList.byteLength
+          ) || (
+            byteOffset + byteLength > nextFreeList.byteOffset &&
+            byteOffset + byteLength <= nextFreeList.byteOffset + nextFreeList.byteLength
+          )
+        ) {
+          throw new Error('The offset is not allocated')
+        } else if (nextFreeList.byteOffset > byteOffset) {
+          // 如果nextFreeListbyteOffset大于用户提交的offset,
+          // 说明需要被释放的区域位于previousFreeList和nextFreeList之间.
 
-    throw new Error('The offset is not allocated')
+          // 创建一个新的空闲链表.
+          const newFreeList: IFreeList = {
+            byteOffset
+          , byteLength
+          }
+          this.metadata.freeLists.splice(index, 0, newFreeList)
+
+          // 如果下一个空闲链表刚好接上新的空闲链表, 合并两个链表.
+          if (newFreeList.byteOffset + newFreeList.byteLength === nextFreeList.byteOffset) {
+            newFreeList.byteLength += nextFreeList.byteLength
+            this.metadata.freeLists.splice(index, 2, newFreeList)
+          }
+
+          // 如果上一个空闲链表刚好接上新的空闲链表, 合并两个链表.
+          if (
+            previousFreeList &&
+            previousFreeList.byteOffset + previousFreeList.byteLength === newFreeList.byteOffset
+          ) {
+            previousFreeList.byteLength += newFreeList.byteLength
+            this.metadata.freeLists.splice(index, 1)
+          }
+
+          return
+        } else {
+          previousFreeList = nextFreeList
+        }
+      }
+
+      // 如果代码运行到此处, 说明释放的区域比最后一个空闲链表还要靠后.
+      // 创建一个新的空闲链表.
+      const newFreeList: IFreeList = {
+        byteOffset
+      , byteLength
+      }
+      this.metadata.freeLists.push(newFreeList)
+
+      // 如果上一个空闲链表刚好接上新的空闲链表, 合并两个链表.
+      if (
+        previousFreeList!.byteOffset + previousFreeList!.byteLength === newFreeList.byteOffset
+      ) {
+        previousFreeList!.byteLength += newFreeList.byteLength
+        this.metadata.freeLists.pop()
+      }
+      return
+    }
   }
 
-  private * blocks(): IterableIterator<[byteOffset: number, block: IBlock, index: number]> {
-    // 总是跳过第一个字节, 因为它的地址被视作指针的空值.
-    let byteOffset: number = nullSize
-    for (let i = 0; i < this.metadata.blocks.length; i++) {
-      const block = this.metadata.blocks[i]
-      yield [byteOffset, block, i]
-
-      byteOffset += block.byteLength
-    }
+  private freeLists(): IterableIterator<[index: number, freeBlock: IFreeList]> {
+    return this.metadata.freeLists.entries()
   }
 }

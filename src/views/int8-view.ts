@@ -19,7 +19,7 @@ implements IHash
   }
 
   free(allocator: IAllocator): void {
-    allocator.free(this.byteOffset)
+    allocator.free(this.byteOffset, Int8View.byteLength)
   }
 
   get(): number {

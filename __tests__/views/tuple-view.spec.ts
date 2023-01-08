@@ -69,7 +69,7 @@ describe('TupleView', () => {
       view.free(allocator)
 
       expect(allocator.free).toBeCalledTimes(1)
-      expect(allocator.free).toBeCalledWith(byteOffset)
+      expect(allocator.free).toBeCalledWith(byteOffset, view.byteLength)
     })
 
     test('with ownership pointers', () => {
@@ -92,8 +92,8 @@ describe('TupleView', () => {
       view.free(allocator)
 
       expect(allocator.free).toBeCalledTimes(2)
-      expect(allocator.free).nthCalledWith(1, 20)
-      expect(allocator.free).nthCalledWith(2, 10)
+      expect(allocator.free).nthCalledWith(1, 20, Uint8View.byteLength)
+      expect(allocator.free).nthCalledWith(2, 10, view.byteLength)
     })
   })
 

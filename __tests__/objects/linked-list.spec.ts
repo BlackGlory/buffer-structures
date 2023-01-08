@@ -47,7 +47,7 @@ describe('LinkedList', () => {
       result.destroy()
 
       expect(free).toBeCalledTimes(1)
-      expect(free).toBeCalledWith(result._view.byteOffset)
+      expect(free).toBeCalledWith(result._view.byteOffset, result._view.byteLength)
     })
 
     it('cannot destory twice', () => {
@@ -106,7 +106,7 @@ describe('LinkedList', () => {
         obj2.destroy()
 
         expect(free).toBeCalledTimes(1)
-        expect(free).toBeCalledWith(obj1._view.byteOffset)
+        expect(free).toBeCalledWith(obj1._view.byteOffset, obj1._view.byteLength)
       })
     })
   })

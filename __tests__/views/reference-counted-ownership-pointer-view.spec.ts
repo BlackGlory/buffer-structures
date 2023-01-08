@@ -53,7 +53,10 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       pointerView.free(allocator)
 
       expect(allocator.free).toBeCalledTimes(1)
-      expect(allocator.free).toBeCalledWith(byteOffset)
+      expect(allocator.free).toBeCalledWith(
+        byteOffset
+      , ReferenceCountedOwnershipPointerView.byteLength
+      )
     })
 
     test('value: non-null', () => {
@@ -77,8 +80,8 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       pointerView.free(allocator)
 
       expect(allocator.free).toBeCalledTimes(2)
-      expect(allocator.free).nthCalledWith(1, 1)
-      expect(allocator.free).nthCalledWith(2, 50)
+      expect(allocator.free).nthCalledWith(1, 1, Uint8View.byteLength)
+      expect(allocator.free).nthCalledWith(2, 50, ReferenceCountedOwnershipPointerView.byteLength)
     })
   })
 
@@ -123,7 +126,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       pointerView.freePointed(allocator)
 
       expect(allocator.free).toBeCalledTimes(1)
-      expect(allocator.free).toBeCalledWith(10)
+      expect(allocator.free).toBeCalledWith(10, Uint8View.byteLength)
     })
   })
 

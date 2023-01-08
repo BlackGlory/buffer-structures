@@ -28,7 +28,7 @@ implements IHash
   }
 
   free(allocator: IAllocator): void {
-    allocator.free(this.byteOffset)
+    allocator.free(this.byteOffset, PointerView.byteLength)
   }
 
   hash(hasher: IHasher): void {

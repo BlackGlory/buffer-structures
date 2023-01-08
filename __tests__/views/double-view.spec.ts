@@ -40,7 +40,7 @@ describe('DoubleView', () => {
     view.free(allocator)
 
     expect(allocator.free).toBeCalledTimes(1)
-    expect(allocator.free).toBeCalledWith(byteOffset)
+    expect(allocator.free).toBeCalledWith(byteOffset, DoubleView.byteLength)
   })
 
   test('get', () => {

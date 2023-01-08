@@ -33,7 +33,7 @@ describe('StringView', () => {
 
     const result = view.byteLength
 
-    expect(result).toBe(50)
+    expect(result).toBe(Uint32Array.BYTES_PER_ELEMENT + 50)
   })
 
   test('byteOffset', () => {
@@ -58,7 +58,7 @@ describe('StringView', () => {
     view.free(allocator)
 
     expect(allocator.free).toBeCalledTimes(1)
-    expect(allocator.free).toBeCalledWith(byteOffset)
+    expect(allocator.free).toBeCalledWith(byteOffset, view.byteLength)
   })
 
   test('get', () => {
