@@ -4,19 +4,17 @@ import { LinkedListView, ViewConstructor, Structure } from '@views/linked-list-v
 import { MapStructureToValue } from '@views/struct-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
-import { BaseObject } from './base-object'
+import { BaseObject } from '@objects/base-object'
+import { BaseView } from '@views/base-view'
 
-export class LinkedList<
-  View extends IHash & IReadableWritable<Value>
-, Value = View extends IReadableWritable<infer T> ? T : never
->
+export class LinkedList<View extends BaseView & IHash & IReadableWritable<unknown>>
 extends BaseObject
-implements ICopy<LinkedList<View, Value>>
-         , IClone<LinkedList<View, Value>>
-         , IReadableWritable<MapStructureToValue<Structure<View, Value>>>
+implements ICopy<LinkedList<View>>
+         , IClone<LinkedList<View>>
+         , IReadableWritable<MapStructureToValue<Structure<View>>>
          , IHash
          , IDestroy {
-  readonly _view: LinkedListView<View, Value>
+  readonly _view: LinkedListView<View>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
@@ -25,7 +23,7 @@ implements ICopy<LinkedList<View, Value>>
   constructor(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
-  , value: MapStructureToValue<Structure<View, Value>>
+  , value: MapStructureToValue<Structure<View>>
   )
   constructor(
     _allocator: IAllocator
@@ -37,7 +35,7 @@ implements ICopy<LinkedList<View, Value>>
   | [
       allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
-    , value: MapStructureToValue<Structure<View, Value>>
+    , value: MapStructureToValue<Structure<View>>
     ]
   | [
       allocator: IAllocator
@@ -55,7 +53,7 @@ implements ICopy<LinkedList<View, Value>>
       this._counter = new ReferenceCounter()
 
       const byteOffset = allocator.allocate(LinkedListView.getByteLength(viewConstructor))
-      const view = new LinkedListView<View, Value>(
+      const view = new LinkedListView<View>(
         allocator.buffer
       , byteOffset
       , viewConstructor
@@ -67,7 +65,7 @@ implements ICopy<LinkedList<View, Value>>
       this.allocator = allocator
       this.viewConstructor = viewConstructor
 
-      const view = new LinkedListView<View, Value>(
+      const view = new LinkedListView<View>(
         allocator.buffer
       , byteOffset
       , viewConstructor
@@ -92,7 +90,7 @@ implements ICopy<LinkedList<View, Value>>
     }
   }
 
-  clone(): LinkedList<View, Value> {
+  clone(): LinkedList<View> {
     this.fsm.assertAllocated()
 
     return new LinkedList(
@@ -103,33 +101,33 @@ implements ICopy<LinkedList<View, Value>>
     )
   }
 
-  copy(): LinkedList<View, Value> {
+  copy(): LinkedList<View> {
     this.fsm.assertAllocated()
 
     return new LinkedList(this.allocator, this.viewConstructor, this.get())
   }
 
-  get(): MapStructureToValue<Structure<View, Value>> {
+  get(): MapStructureToValue<Structure<View>> {
     return this._view.get()
   }
 
-  set(value: MapStructureToValue<Structure<View, Value>>): void {
+  set(value: MapStructureToValue<Structure<View>>): void {
     this._view.set(value)
   }
 
-  setNext(value: MapStructureToValue<Structure<View, Value>>['next']): void {
+  setNext(value: MapStructureToValue<Structure<View>>['next']): void {
     this._view.setNext(value)
   }
 
-  getNext(): MapStructureToValue<Structure<View, Value>>['next'] {
+  getNext(): MapStructureToValue<Structure<View>>['next'] {
     return this._view.getNext()
   }
 
-  setValue(value: MapStructureToValue<Structure<View, Value>>['value']): void {
+  setValue(value: MapStructureToValue<Structure<View>>['value']): void {
     this._view.setValue(value)
   }
 
-  getValue(): MapStructureToValue<Structure<View, Value>>['value'] {
+  getValue(): MapStructureToValue<Structure<View>>['value'] {
     return this._view.getValue()
   }
 
@@ -137,11 +135,11 @@ implements ICopy<LinkedList<View, Value>>
     return this._view.getViewOfValue()
   }
 
-  getViewOfNext(): OwnershipPointerView<LinkedListView<View, Value>> {
+  getViewOfNext(): OwnershipPointerView<LinkedListView<View>> {
     return this._view.getViewOfNext()
   }
 
-  derefNext(): LinkedListView<View, Value> | null {
+  derefNext(): LinkedListView<View> | null {
     return this._view.derefNext()
   }
 }

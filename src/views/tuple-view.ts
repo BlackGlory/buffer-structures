@@ -1,26 +1,23 @@
-import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree } from '@src/types'
+import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree, UnpackedReadableWritable } from '@src/types'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
 import { each } from 'iterable-operator'
-import { BaseView } from './base-view'
+import { BaseView } from '@views/base-view'
 
-export type ViewConstructor<Value> =
+export type ViewConstructor<View> =
   ISized
-& (
-    new (buffer: ArrayBufferLike, byteOffset: number) =>
-      IReadableWritable<Value>
-    & IHash
-  )
+& (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
-export type MapStructureToValue<T extends NonEmptyArray<ViewConstructor<unknown>>> = {
-  [Index in keyof T]:
-    ReturnTypeOfConstructor<T[Index]> extends IReadableWritable<infer U>
-    ? U
-    : never
+export type MapStructureToValue<
+  T extends NonEmptyArray<ViewConstructor<IReadableWritable<unknown> & IHash>>
+> = {
+  [Index in keyof T]: UnpackedReadableWritable<ReturnTypeOfConstructor<T[Index]>>
 }
 
-export class TupleView<Structure extends NonEmptyArray<ViewConstructor<unknown>>>
+export class TupleView<
+  Structure extends NonEmptyArray<ViewConstructor<IReadableWritable<unknown> & IHash>>
+>
 extends BaseView
 implements IReference
          , IReadableWritable<MapStructureToValue<Structure>>

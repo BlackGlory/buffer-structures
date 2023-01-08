@@ -1,4 +1,4 @@
-import { IAllocator, ISized, IHash, IReadableWritable, IClone, IDestroy } from '@src/types'
+import { IAllocator, ISized, IHash, IReadableWritable, IClone, IDestroy, PickReadableWritable } from '@src/types'
 import { ArrayView } from '@views/array-view'
 import { LinkedListView } from '@views/linked-list-view'
 import { Uint32View } from '@views/uint32-view'
@@ -7,19 +7,19 @@ import { StructView } from '@views/struct-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { Hasher } from '@src/hasher'
-import { BaseObject } from './base-object'
+import { BaseObject } from '@objects/base-object'
+import { BaseView } from '@views/base-view'
 
 type ViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
 export class HashMap<
-  KeyView extends IHash
-, ValueView extends IReadableWritable<Value> & IHash
-, Value = ValueView extends IReadableWritable<infer T> ? T : never
+  KeyView extends BaseView & IHash
+, ValueView extends BaseView & IReadableWritable<unknown> & IHash
 >
 extends BaseObject
-implements IClone<HashMap<KeyView, ValueView, Value>>
+implements IClone<HashMap<KeyView, ValueView>>
          , IDestroy {
   readonly _view: ArrayView<
     OwnershipPointerView<
@@ -204,7 +204,7 @@ implements IClone<HashMap<KeyView, ValueView, Value>>
     }
   }
 
-  clone(): HashMap<KeyView, ValueView, Value> {
+  clone(): HashMap<KeyView, ValueView> {
     this.fsm.assertAllocated()
 
     return new HashMap(
@@ -216,10 +216,10 @@ implements IClone<HashMap<KeyView, ValueView, Value>>
     )
   }
 
-  has(keyView: KeyView): boolean {
+  has(key: IHash): boolean {
     this.fsm.assertAllocated()
 
-    const hash = this.getHash(keyView)
+    const hash = this.getHash(key)
     const index = this.getIndex(hash)
     const pointer = this._view.getViewByIndex(index)
 
@@ -237,10 +237,10 @@ implements IClone<HashMap<KeyView, ValueView, Value>>
     return false
   }
 
-  get(keyView: KeyView): ValueView | undefined {
+  get(key: IHash): ValueView | undefined {
     this.fsm.assertAllocated()
 
-    const hash = this.getHash(keyView)
+    const hash = this.getHash(key)
     const index = this.getIndex(hash)
     const pointer = this._view.getViewByIndex(index)
 
@@ -257,10 +257,10 @@ implements IClone<HashMap<KeyView, ValueView, Value>>
     }
   }
 
-  set(keyView: KeyView, valueView: ValueView): void {
+  set(key: IHash, value: PickReadableWritable<ValueView>): void {
     this.fsm.assertAllocated()
 
-    const hash = this.getHash(keyView)
+    const hash = this.getHash(key)
     const index = this.getIndex(hash)
     const pointer = this._view.getViewByIndex(index)
 
@@ -270,30 +270,29 @@ implements IClone<HashMap<KeyView, ValueView, Value>>
         const struct = linkedList.getViewOfValue()
         const keyHash = struct.getByKey('keyHash')
         if (hash === keyHash) {
-          // @ts-ignore
-          struct.setByKey('value', valueView.get())
+          struct.setByKey('value', value.get())
           return
         } else {
           const nextLinkedList = linkedList.derefNext()
           if (nextLinkedList) {
             linkedList = nextLinkedList
           } else {
-            const newLinkedList = this.createNewLinkedList(hash, valueView)
+            const newLinkedList = this.createNewLinkedList(hash, value)
             linkedList.setNext(newLinkedList.byteOffset)
             return
           }
         }
       }
     } else {
-      const newLinkedList = this.createNewLinkedList(hash, valueView)
+      const newLinkedList = this.createNewLinkedList(hash, value)
       pointer.set(newLinkedList.byteOffset)
     }
   }
 
-  delete(keyView: KeyView): void {
+  delete(key: IHash): void {
     this.fsm.assertAllocated()
 
-    const hash = this.getHash(keyView)
+    const hash = this.getHash(key)
     const index = this.getIndex(hash)
     const pointer = this._view.getViewByIndex(index)
 
@@ -334,7 +333,7 @@ implements IClone<HashMap<KeyView, ValueView, Value>>
     }
   }
 
-  private getHash(key: KeyView): number {
+  private getHash(key: IHash): number {
     const hasher = new Hasher()
     key.hash(hasher)
     const hash = hasher.finish()
@@ -346,7 +345,7 @@ implements IClone<HashMap<KeyView, ValueView, Value>>
     return index
   }
 
-  private createNewLinkedList(keyHash: number, valueView: ValueView) {
+  private createNewLinkedList(keyHash: number, value: PickReadableWritable<ValueView>) {
     const byteOffset = this.allocator.allocate(this.InternalLinkedListView.byteLength)
     const linkedList = new this.InternalLinkedListView(
       this.allocator.buffer
@@ -356,8 +355,7 @@ implements IClone<HashMap<KeyView, ValueView, Value>>
       next: null
     , value: {
         keyHash
-        // @ts-ignore
-      , value: valueView.get()
+      , value: value.get()
       }
     })
     return linkedList

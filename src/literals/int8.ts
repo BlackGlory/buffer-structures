@@ -1,5 +1,5 @@
 import { IReadableWritable, IHash, IHasher } from '@src/types'
-import { BaseLiteral } from './base-literal'
+import { BaseLiteral } from '@literals/base-literal'
 
 export function int8(val: number): Int8Literal {
   return new Int8Literal(val)

@@ -4,9 +4,13 @@ import { NonEmptyArray } from '@blackglory/prelude'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { ReturnTypeOfConstructor } from 'hotypes'
-import { BaseObject } from './base-object'
+import { BaseObject } from '@objects/base-object'
 
-export class Tuple<Structure extends NonEmptyArray<ViewConstructor<unknown>>>
+export class Tuple<
+  Structure extends NonEmptyArray<
+    ViewConstructor<IReadableWritable<unknown> & IHash>
+  >
+>
 extends BaseObject
 implements ICopy<Tuple<Structure>>
          , IClone<Tuple<Structure>>

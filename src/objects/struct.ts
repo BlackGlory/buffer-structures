@@ -3,10 +3,13 @@ import { StructView, ViewConstructor, MapStructureToValue } from '@views/struct-
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { ReturnTypeOfConstructor } from 'hotypes'
-import { BaseObject } from './base-object'
+import { BaseObject } from '@objects/base-object'
 
 export class Struct<
-  Structure extends Record<string, ViewConstructor<unknown>>
+  Structure extends Record<
+    string
+  , ViewConstructor<IReadableWritable<unknown> & IHash>
+  >
 >
 extends BaseObject
 implements ICopy<Struct<Structure>>

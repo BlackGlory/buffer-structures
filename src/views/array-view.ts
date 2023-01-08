@@ -1,26 +1,25 @@
-import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree } from '@src/types'
+import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree, UnpackedReadableWritable } from '@src/types'
 import { FixedLengthArray } from 'justypes'
 import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
 import { each } from 'iterable-operator'
-import { BaseView } from './base-view'
+import { BaseView } from '@views/base-view'
 
-export type ViewConstructor<View> =
+export type ViewConstructor<View extends BaseView> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
 export class ArrayView<
-  View extends IReadableWritable<Value> & IHash
+  View extends BaseView & IReadableWritable<unknown> & IHash
 , Length extends number
-, Value = View extends IReadableWritable<infer T> ? T : never
 >
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<FixedLengthArray<Value, Length>>
+         , IReadableWritable<FixedLengthArray<UnpackedReadableWritable<View>, Length>>
          , ISized
          , IFree {
   static getByteLength(
-    viewConstructor: ViewConstructor<unknown>
+    viewConstructor: ViewConstructor<BaseView>
   , length: number
   ): number {
     return viewConstructor.byteLength * length
@@ -53,29 +52,29 @@ implements IHash
     }
   }
 
-  get(): FixedLengthArray<Value, Length> {
+  get(): FixedLengthArray<UnpackedReadableWritable<View>, Length> {
     const results: any[] = []
 
     for (const view of this.iterate()) {
       results.push(view.get())
     }
 
-    return results as FixedLengthArray<Value, Length>
+    return results as FixedLengthArray<UnpackedReadableWritable<View>, Length>
   }
 
-  set(values: FixedLengthArray<Value, Length>): void {
+  set(values: FixedLengthArray<UnpackedReadableWritable<View>, Length>): void {
     each(this.iterate(), (view, i) => {
-      const value = (values as Value[])[i]
+      const value = (values as Array<UnpackedReadableWritable<View>>)[i]
       view.set(value)
     })
   }
 
-  getByIndex(index: number): Value {
+  getByIndex(index: number): UnpackedReadableWritable<View> {
     const view = this.getViewByIndex(index)
-    return view.get()
+    return view.get() as UnpackedReadableWritable<View>
   }
 
-  setByIndex(index: number, value: Value): void {
+  setByIndex(index: number, value: UnpackedReadableWritable<View>): void {
     const view = this.getViewByIndex(index)
     view.set(value)
   }

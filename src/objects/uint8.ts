@@ -2,7 +2,7 @@ import { IAllocator, ICopy, IClone, IDestroy, IReadableWritable, IHash, IHasher 
 import { Uint8View } from '@views/uint8-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
-import { BaseObject } from './base-object'
+import { BaseObject } from '@objects/base-object'
 
 export class Uint8
 extends BaseObject

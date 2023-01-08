@@ -2,13 +2,12 @@ import { IAllocator, IHash, IFree, IHasher, IClone, IDestroy } from '@src/types'
 import { ViewConstructor } from '@views/pointer-view'
 import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-ownership-pointer-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
-import { BaseObject } from './base-object'
+import { BaseObject } from '@objects/base-object'
+import { BaseView } from '@views/base-view'
 
 const internalOverrideSymbol = Symbol()
 
-export class ReferenceCountedOwnershipPointer<
-  View extends IHash & IFree
->
+export class ReferenceCountedOwnershipPointer<View extends BaseView & IHash & IFree>
 extends BaseObject
 implements IClone<ReferenceCountedOwnershipPointer<View>>
          , IHash

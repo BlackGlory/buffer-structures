@@ -2,7 +2,7 @@ import { IAllocator, ICopy, IClone, IDestroy, IReadableWritable, IHash, IHasher 
 import { Int32View } from '@views/int32-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
-import { BaseObject } from './base-object'
+import { BaseObject } from '@objects/base-object'
 
 export class Int32
 extends BaseObject

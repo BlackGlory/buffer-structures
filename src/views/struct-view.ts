@@ -1,26 +1,26 @@
-import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree } from '@src/types'
+import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree, UnpackedReadableWritable } from '@src/types'
 import { pipe } from 'extra-utils'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import * as Iter from 'iterable-operator'
 import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
-import { BaseView } from './base-view'
+import { BaseView } from '@views/base-view'
 
-export type ViewConstructor<Value> =
+export type ViewConstructor<View> =
   ISized
-& (
-    new (buffer: ArrayBufferLike, byteOffset: number) =>
-      IReadableWritable<Value>
-    & IHash
-  )
+& (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
-export type MapStructureToValue<T extends Record<string, ViewConstructor<unknown>>> = {
-  [Key in keyof T]:
-    ReturnTypeOfConstructor<T[Key]> extends IReadableWritable<infer U>
-    ? U
-    : never
+export type MapStructureToValue<
+  Structure extends Record<
+    string
+  , ViewConstructor<IReadableWritable<unknown> & IHash>
+  >
+> = {
+  [Key in keyof Structure]: UnpackedReadableWritable<ReturnTypeOfConstructor<Structure[Key]>>
 }
 
-export class StructView<Structure extends Record<string, ViewConstructor<unknown>>>
+export class StructView<
+  Structure extends Record<string, ViewConstructor<IReadableWritable<unknown> & IHash>>
+>
 extends BaseView
 implements IReference
          , IReadableWritable<MapStructureToValue<Structure>>

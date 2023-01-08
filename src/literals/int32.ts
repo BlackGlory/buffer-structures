@@ -1,5 +1,5 @@
 import { IReadableWritable, IHash, IHasher } from '@src/types'
-import { BaseLiteral } from './base-literal'
+import { BaseLiteral } from '@literals/base-literal'
 
 export function int32(val: number): Int32Literal {
   return new Int32Literal(val)

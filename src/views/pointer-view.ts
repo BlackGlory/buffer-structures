@@ -1,13 +1,13 @@
 import { IAllocator, IHash, IHasher, IReference, IReadableWritable, IFree } from '@src/types'
 import { isntNull } from '@blackglory/prelude'
-import { BaseView } from './base-view'
+import { BaseView } from '@views/base-view'
 
-export type ViewConstructor<View> = new (
+export type ViewConstructor<View extends BaseView> = new (
   buffer: ArrayBufferLike
 , byteOffset: number
 ) => View
 
-export class PointerView<View extends IHash>
+export class PointerView<View extends BaseView & IHash>
 extends BaseView
 implements IHash
          , IReference

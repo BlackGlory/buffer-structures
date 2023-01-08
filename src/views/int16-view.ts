@@ -1,6 +1,6 @@
 import { IAllocator, IHash, IHasher, IReference, IReadableWritable, IFree } from '@src/types'
 import { getSlice } from '@utils/get-slice'
-import { BaseView } from './base-view'
+import { BaseView } from '@views/base-view'
 
 export class Int16View
 extends BaseView

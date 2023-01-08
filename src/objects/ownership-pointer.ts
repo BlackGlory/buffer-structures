@@ -3,11 +3,10 @@ import { ViewConstructor } from '@views/pointer-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
-import { BaseObject } from './base-object'
+import { BaseObject } from '@objects/base-object'
+import { BaseView } from '@views/base-view'
 
-export class OwnershipPointer<
-  View extends IHash & IFree
->
+export class OwnershipPointer<View extends BaseView & IHash & IFree>
 extends BaseObject
 implements IClone<OwnershipPointer<View>>
          , IHash
