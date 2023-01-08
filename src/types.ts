@@ -6,7 +6,7 @@ export interface IAllocator {
   readonly buffer: ArrayBufferLike
 
   allocate(size: number): number
-  free(offset: number): void
+  free(byteOffset: number): void
 }
 
 export interface ISized {

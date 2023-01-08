@@ -1,99 +1,44 @@
 import { Allocator } from '@src/allocator'
 import { getError } from 'return-style'
-import { repeat } from 'extra-generator'
-import { setSlice, bufferToArray, uint32ToBuffer } from '@test/utils'
+import { bufferToArray } from '@test/utils'
+
+// 固定跳过缓冲区的第一个字节, 因为它被视作NULL.
+const nullSize = 1
 
 describe('Allocator', () => {
   describe('create', () => {
-    test('too small to initialize', () => {
-      const buffer = new ArrayBuffer(Allocator.headerByteLength - 1)
-
-      const err = getError(() => new Allocator(buffer))
-
-      expect(err).toBeInstanceOf(Error)
-      expect(err?.message).toMatch('too small to initialize')
-    })
-
-    test('empty buffer', () => {
-      const buffer = new ArrayBuffer(Allocator.headerByteLength)
+    test('without metadata', () => {
+      const buffer = new ArrayBuffer(nullSize + 1)
 
       const allocator = new Allocator(buffer)
 
-      expect(
-        bufferToArray(allocator.buffer)
-      ).toStrictEqual([
-        // header
-        ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength)) // 4
-      , ...bufferToArray(uint32ToBuffer(0)) // 4
-        // body
-      ])
+      expect(bufferToArray(allocator.buffer)).toStrictEqual([0, 0])
+      expect(allocator.metadata).toStrictEqual({
+        blocks: [
+          { allocated: false, byteLength: 1 }
+        ]
+      })
     })
 
-    test('byteOffset', () => {
-      const byteOffset = 1
-      const buffer = new ArrayBuffer(byteOffset + Allocator.headerByteLength)
+    test('with metadata', () => {
+      const buffer = new ArrayBuffer(nullSize + 1)
 
-      const allocator = new Allocator(buffer, byteOffset)
-
-      expect(
-        bufferToArray(allocator.buffer)
-      ).toStrictEqual([
-        0
-      , // header
-        ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength)) // 4
-      , ...bufferToArray(uint32ToBuffer(0)) // 4
-        // body
-      ])
-    })
-
-    test('byteLength', () => {
-      const byteLength = Allocator.headerByteLength
-      const buffer = new ArrayBuffer(Allocator.headerByteLength + 1)
-
-      const allocator = new Allocator(buffer, 0, byteLength)
-
-      expect(
-        bufferToArray(allocator.buffer)
-      ).toStrictEqual([
-        // header
-        ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength)) // 4
-      , ...bufferToArray(uint32ToBuffer(0)) // 4
-        // body
-        // out of bounds
-      , 0
-      ])
-    })
-
-    describe('non-empty buffer', () => {
-      test('valid buffer', () => {
-        const buffer = new ArrayBuffer(Allocator.headerByteLength)
-        const view = new DataView(buffer)
-        setSlice(view, 0, [
-          ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength))
-        , ...bufferToArray(uint32ToBuffer(0))
-        ])
-
-        new Allocator(buffer)
+      const allocator = new Allocator(buffer, {
+        blocks: [{ allocated: false, byteLength: 1 }]
       })
 
-      test('invalid buffer', () => {
-        const buffer = new ArrayBuffer(Allocator.headerByteLength)
-        const view = new DataView(buffer)
-        for (let i = buffer.byteLength; i--;) {
-          view.setUint8(i, i)
-        }
-
-        const err = getError(() => new Allocator(buffer))
-
-        expect(err).toBeInstanceOf(Error)
-        expect(err?.message).toMatch('invalid')
+      expect(bufferToArray(allocator.buffer)).toStrictEqual([0, 0])
+      expect(allocator.metadata).toStrictEqual({
+        blocks: [
+          { allocated: false, byteLength: 1 }
+        ]
       })
     })
   })
 
   describe('allocate', () => {
     test('size === 0', () => {
-      const buffer = new ArrayBuffer(Allocator.headerByteLength)
+      const buffer = new ArrayBuffer(nullSize + 1)
       const allocator = new Allocator(buffer)
 
       const err = getError(() => allocator.allocate(0))
@@ -106,140 +51,55 @@ describe('Allocator', () => {
       describe('use the unallocated block', () => {
         describe('the unallocated block is the only block', () => {
           test('exhausts the buffer', () => {
-            const byteOffset = 1
-            const buffer = new ArrayBuffer(byteOffset + Allocator.headerByteLength + 1)
-            const allocator = new Allocator(buffer, byteOffset)
+            const buffer = new ArrayBuffer(nullSize + 1)
+            const allocator = new Allocator(buffer)
 
             const result = allocator.allocate(1)
 
-            expect(result).toBe(byteOffset + Allocator.headerByteLength)
-            expect(bufferToArray(allocator.buffer)).toStrictEqual([
-              0
-              // header
-            , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
-            , ...bufferToArray(uint32ToBuffer(1)) // 4
-              // body
-            , 0 // 1
-            ])
+            expect(result).toBe(nullSize)
+            expect(allocator.metadata).toStrictEqual({
+              blocks: [
+                { allocated: true, byteLength: 1 }
+              ]
+            })
           })
 
-          describe('does not exhausts the buffer', () => {
-            test('remaining size < headerByteLength', () => {
-              const byteOffset = 1
-              const buffer = new ArrayBuffer(
-                byteOffset
-              + Allocator.headerByteLength + 1
-              + 1
-              )
-              const allocator = new Allocator(buffer, byteOffset)
+          test('does not exhausts the buffer', () => {
+            const buffer = new ArrayBuffer(nullSize + 1 * 2)
+            const allocator = new Allocator(buffer)
 
-              const result = allocator.allocate(1)
+            const result = allocator.allocate(1)
 
-              expect(result).toBe(byteOffset + Allocator.headerByteLength)
-              expect(bufferToArray(allocator.buffer)).toStrictEqual([
-                0
-                // header
-              , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
-              , ...bufferToArray(uint32ToBuffer(1)) // 4
-                // body
-              , 0 // 1
-              , 0
-              ])
-            })
-
-            test('remaining size = headerByteLength', () => {
-              const byteOffset = 1
-              const buffer = new ArrayBuffer(
-                byteOffset
-              + Allocator.headerByteLength + 1
-              + Allocator.headerByteLength
-              )
-              const allocator = new Allocator(buffer, byteOffset)
-
-              const result = allocator.allocate(1)
-
-              expect(result).toBe(byteOffset + Allocator.headerByteLength)
-              expect(bufferToArray(allocator.buffer)).toStrictEqual([
-                0
-                // header
-              , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
-              , ...bufferToArray(uint32ToBuffer(1)) // 4
-                // body
-              , 0 // 1
-              , ...repeat(0, Allocator.headerByteLength)
-              ])
-            })
-
-            test('remaining size > headerByteLength', () => {
-              const byteOffset = 1
-              const buffer = new ArrayBuffer(
-                byteOffset
-              + Allocator.headerByteLength + 1
-              + Allocator.headerByteLength + 1
-              )
-              const allocator = new Allocator(buffer, byteOffset)
-
-              const result = allocator.allocate(1)
-
-              expect(result).toBe(byteOffset + Allocator.headerByteLength)
-              expect(bufferToArray(allocator.buffer)).toStrictEqual([
-                0
-                // header
-              , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
-              , ...bufferToArray(uint32ToBuffer(1)) // 4
-                // body
-              , 0 // 1
-                // header
-              , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
-              , ...bufferToArray(uint32ToBuffer(0)) // 4
-              , 0
-              ])
+            expect(result).toBe(nullSize)
+            expect(allocator.metadata).toStrictEqual({
+              blocks: [
+                { allocated: true, byteLength: 1 }
+              , { allocated: false, byteLength: 1 }
+              ]
             })
           })
         })
 
         test('the unallocated block is not the only block', () => {
-          const byteOffset = 1
-          const buffer = new ArrayBuffer(
-            byteOffset
-          + (Allocator.headerByteLength + 1) * 2
-          )
-          const allocator = new Allocator(buffer, byteOffset)
+          const buffer = new ArrayBuffer(nullSize + 1 * 2)
+          const allocator = new Allocator(buffer)
           allocator.allocate(1)
 
           const result = allocator.allocate(1)
 
-          expect(result).toBe(
-            byteOffset
-          + Allocator.headerByteLength + 1
-          + Allocator.headerByteLength
-          )
-          expect(bufferToArray(allocator.buffer)).toStrictEqual([
-            0
-            // header
-          , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
-          , ...bufferToArray(uint32ToBuffer(1)) // 4
-            // body
-          , 0 // 1
-            // header
-          , ...bufferToArray(uint32ToBuffer(
-              Allocator.headerByteLength + 1
-            + Allocator.headerByteLength + 1
-            )) // 4
-          , ...bufferToArray(uint32ToBuffer(1)) // 4
-            // body
-          , 0 // 1
-          ])
+          expect(result).toBe(nullSize + 1)
+          expect(allocator.metadata).toStrictEqual({
+            blocks: [
+              { allocated: true, byteLength: 1 }
+            , { allocated: true, byteLength: 1 }
+            ]
+          })
         })
       })
 
       test('reuse the first freed block that bigger than or equal to size', () => {
-        const byteOffset = 1
-        const buffer = new ArrayBuffer(
-          byteOffset
-        + (Allocator.headerByteLength + 1) * 3
-        )
-        const allocator = new Allocator(buffer, byteOffset)
+        const buffer = new ArrayBuffer(nullSize + 1 * 3)
+        const allocator = new Allocator(buffer)
         const offset1 = allocator.allocate(1)
         const offset2 = allocator.allocate(1)
         const offset3 = allocator.allocate(1)
@@ -249,31 +109,20 @@ describe('Allocator', () => {
         const result = allocator.allocate(1)
 
         expect(result).toBe(offset1)
-        expect(bufferToArray(allocator.buffer)).toStrictEqual([
-          0
-          // header
-        , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
-        , ...bufferToArray(uint32ToBuffer(1)) // 4
-          // body
-        , 0 // 1
-          // header
-        , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
-        , ...bufferToArray(uint32ToBuffer(1)) // 4
-          // body
-        , 0 // 1
-          // header
-        , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
-        , ...bufferToArray(uint32ToBuffer(0)) // 4
-          // body
-        , 0 // 1
-        ])
+        expect(allocator.metadata).toStrictEqual({
+          blocks: [
+            { allocated: true, byteLength: 1 }
+          , { allocated: true, byteLength: 1 }
+          , { allocated: false, byteLength: 1 }
+          ]
+        })
       })
 
       test('out of bounds', () => {
-        const buffer = new ArrayBuffer(100)
+        const buffer = new ArrayBuffer(nullSize)
         const allocator = new Allocator(buffer)
 
-        const err = getError(() => allocator.allocate(100))
+        const err = getError(() => allocator.allocate(1))
 
         expect(err).toBeInstanceOf(Error)
         expect(err?.message).toMatch('Out of bounds')
@@ -283,9 +132,8 @@ describe('Allocator', () => {
 
   describe('free', () => {
     test('non-allocated offset', () => {
-      const byteOffset = 1
-      const buffer = new ArrayBuffer(byteOffset + Allocator.headerByteLength + 1)
-      const allocator = new Allocator(buffer, byteOffset)
+      const buffer = new ArrayBuffer(nullSize + 1)
+      const allocator = new Allocator(buffer)
 
       const err = getError(() => allocator.free(0))
 
@@ -295,116 +143,73 @@ describe('Allocator', () => {
 
     describe('allocated offset', () => {
       test('the freed block is the only block', () => {
-        const byteOffset = 1
-        const buffer = new ArrayBuffer(byteOffset + Allocator.headerByteLength + 1)
-        const allocator = new Allocator(buffer, byteOffset)
+        const buffer = new ArrayBuffer(nullSize + 1)
+        const allocator = new Allocator(buffer)
         const offset = allocator.allocate(1)
 
         allocator.free(offset)
 
-        expect(bufferToArray(allocator.buffer)).toStrictEqual([
-          0
-          // header
-        , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
-        , ...bufferToArray(uint32ToBuffer(0)) // 4
-          // body
-        , 0 // 1
-        ])
+        expect(allocator.metadata).toStrictEqual({
+          blocks: [
+            { allocated: false, byteLength: 1 }
+          ]
+        })
       })
 
       test('the freed block is the first block', () => {
-        const byteOffset = 1
-        const buffer = new ArrayBuffer(
-          byteOffset
-        + (Allocator.headerByteLength + 1) * 2
-        )
-        const allocator = new Allocator(buffer, byteOffset)
+        const buffer = new ArrayBuffer(nullSize + 1 * 2)
+        const allocator = new Allocator(buffer)
         const offset = allocator.allocate(1)
         allocator.allocate(1)
 
         allocator.free(offset)
 
-        expect(bufferToArray(allocator.buffer)).toStrictEqual([
-          0
-          // header
-        , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
-        , ...bufferToArray(uint32ToBuffer(0)) // 4
-          // body
-        , 0 // 1
-          // header
-        , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
-        , ...bufferToArray(uint32ToBuffer(1)) // 4
-          // body
-        , 0 // 1
-        ])
+        expect(allocator.metadata).toStrictEqual({
+          blocks: [
+            { allocated: false, byteLength: 1 }
+          , { allocated: true, byteLength: 1 }
+          ]
+        })
       })
 
       test('the freed block is the last block', () => {
-        const byteOffset = 1
-        const buffer = new ArrayBuffer(
-          byteOffset
-        + (Allocator.headerByteLength + 1) * 2
-        )
-        const allocator = new Allocator(buffer, byteOffset)
+        const buffer = new ArrayBuffer(nullSize + 1 * 2)
+        const allocator = new Allocator(buffer)
         allocator.allocate(1)
         const offset = allocator.allocate(1)
 
         allocator.free(offset)
 
-        expect(bufferToArray(allocator.buffer)).toStrictEqual([
-          0
-          // header
-        , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
-        , ...bufferToArray(uint32ToBuffer(1)) // 4
-          // body
-        , 0 // 1
-          // header
-        , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
-        , ...bufferToArray(uint32ToBuffer(0)) // 4
-        , 0 // 1
-        ])
+        expect(allocator.metadata).toStrictEqual({
+          blocks: [
+            { allocated: true, byteLength: 1 }
+          , { allocated: false, byteLength: 1 }
+          ]
+        })
       })
 
       test('the freed block is the middle block', () => {
-        const byteOffset = 1
-        const buffer = new ArrayBuffer(
-          byteOffset
-        + (Allocator.headerByteLength + 1) * 3
-        )
-        const allocator = new Allocator(buffer, byteOffset)
+        const buffer = new ArrayBuffer(nullSize + 1 * 3)
+        const allocator = new Allocator(buffer)
         allocator.allocate(1)
         const offset = allocator.allocate(1)
         allocator.allocate(1)
 
         allocator.free(offset)
 
-        expect(bufferToArray(allocator.buffer)).toStrictEqual([
-          0
-          // header
-        , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
-        , ...bufferToArray(uint32ToBuffer(1)) // 4
-          // body
-        , 0 // 1
-          // header
-        , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
-        , ...bufferToArray(uint32ToBuffer(0)) // 4
-        , 0 // 1
-          // header
-        , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
-        , ...bufferToArray(uint32ToBuffer(1)) // 4
-          // body
-        , 0 // 1
-        ])
+        expect(allocator.metadata).toStrictEqual({
+          blocks: [
+            { allocated: true, byteLength: 1 }
+          , { allocated: false, byteLength: 1 }
+          , { allocated: true, byteLength: 1 }
+          ]
+        })
       })
 
       describe('merge unallocated blocks', () => {
         test('[unallocated, free now], allocated', () => {
-          const byteOffset = 1
-          const buffer = new ArrayBuffer(
-            byteOffset
-          + (Allocator.headerByteLength + 1) * 3
-          )
-          const allocator = new Allocator(buffer, byteOffset)
+          const buffer = new ArrayBuffer(nullSize + 1 * 3)
+          const allocator = new Allocator(buffer)
           const offset1 = allocator.allocate(1)
           const offset2 = allocator.allocate(1)
           allocator.allocate(1)
@@ -412,31 +217,17 @@ describe('Allocator', () => {
 
           allocator.free(offset2)
 
-          expect(bufferToArray(allocator.buffer)).toStrictEqual([
-            0
-            // freed block header
-          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
-          , ...bufferToArray(uint32ToBuffer(0)) // 4
-            // freed block body
-          , 0 // 1
-          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 2)) // 4
-          , ...bufferToArray(uint32ToBuffer(0)) // 4
-          , 0 // 1
-            // header
-          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
-          , ...bufferToArray(uint32ToBuffer(1)) // 4
-            // body
-          , 0 // 1
-          ])
+          expect(allocator.metadata).toStrictEqual({
+            blocks: [
+              { allocated: false, byteLength: 2 }
+            , { allocated: true, byteLength: 1 }
+            ]
+          })
         })
 
         test('allocated, [free now, unallocated]', () => {
-          const byteOffset = 1
-          const buffer = new ArrayBuffer(
-            byteOffset
-          + (Allocator.headerByteLength + 1) * 3
-          )
-          const allocator = new Allocator(buffer, byteOffset)
+          const buffer = new ArrayBuffer(nullSize + 1 * 3)
+          const allocator = new Allocator(buffer)
           allocator.allocate(1)
           const offset1 = allocator.allocate(1)
           const offset2 = allocator.allocate(1)
@@ -444,31 +235,17 @@ describe('Allocator', () => {
 
           allocator.free(offset1)
 
-          expect(bufferToArray(allocator.buffer)).toStrictEqual([
-            0
-            // header
-          , ...bufferToArray(uint32ToBuffer(Allocator.headerByteLength + 1)) // 4
-          , ...bufferToArray(uint32ToBuffer(1)) // 4
-            // body
-          , 0 // 1
-            // freed block header
-          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
-          , ...bufferToArray(uint32ToBuffer(0)) // 4
-            // freed block body
-          , 0 // 1
-          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
-          , ...bufferToArray(uint32ToBuffer(0)) // 4
-          , 0 // 1
-          ])
+          expect(allocator.metadata).toStrictEqual({
+            blocks: [
+              { allocated: true, byteLength: 1 }
+            , { allocated: false, byteLength: 2 }
+            ]
+          })
         })
 
         test('[unallocated, free now, unallocated]', () => {
-          const byteOffset = 1
-          const buffer = new ArrayBuffer(
-            byteOffset
-          + (Allocator.headerByteLength + 1) * 3
-          )
-          const allocator = new Allocator(buffer, byteOffset)
+          const buffer = new ArrayBuffer(nullSize + 1 * 3)
+          const allocator = new Allocator(buffer)
           const offset1 = allocator.allocate(1)
           const offset2 = allocator.allocate(1)
           const offset3 = allocator.allocate(1)
@@ -477,20 +254,11 @@ describe('Allocator', () => {
 
           allocator.free(offset2)
 
-          expect(bufferToArray(allocator.buffer)).toStrictEqual([
-            0
-            // freed block header
-          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
-          , ...bufferToArray(uint32ToBuffer(0)) // 4
-            // freed block body
-          , 0 // 1
-          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
-          , ...bufferToArray(uint32ToBuffer(0)) // 4
-          , 0 // 1
-          , ...bufferToArray(uint32ToBuffer((Allocator.headerByteLength + 1) * 3)) // 4
-          , ...bufferToArray(uint32ToBuffer(0)) // 4
-          , 0 // 1
-          ])
+          expect(allocator.metadata).toStrictEqual({
+            blocks: [
+              { allocated: false, byteLength: 3 }
+            ]
+          })
         })
       })
     })

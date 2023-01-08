@@ -200,7 +200,7 @@ implements IClone<HashMap<KeyView, ValueView>>
 
     this._counter.decrement()
     if (this._counter.isZero()) {
-      this.allocator.free(this._view.byteOffset)
+      this._view.free(this.allocator)
     }
   }
 
