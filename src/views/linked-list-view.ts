@@ -3,6 +3,7 @@ import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { isntNull } from '@blackglory/prelude'
 import { StructView, MapStructureToValue } from '@views/struct-view'
 import { BaseView } from '@views/base-view'
+import { withLazyStatic, lazyStatic } from 'extra-lazy'
 
 export type ViewConstructor<View extends BaseView> =
   ISized
@@ -16,6 +17,26 @@ export type Structure<View extends BaseView & IHash & IReadableWritable<unknown>
   next: OwnershipPointerViewConstructor<LinkedListView<View>>
   value: ViewConstructor<View>
 }
+
+const createOwnershipPointerView = withLazyStatic(<
+  View extends BaseView & IReadableWritable<unknown> & IHash
+>(viewConstructor: ViewConstructor<View>) => {
+  return lazyStatic(() => {
+    class InternalLinkedListView extends LinkedListView<View> {
+      constructor(buffer: ArrayBufferLike, byteOffset: number) {
+        super(buffer, byteOffset, viewConstructor)
+      }
+    }
+
+    class InternalOwnershipPointerView extends OwnershipPointerView<LinkedListView<View>> {
+      constructor(buffer: ArrayBufferLike, byteOffset: number) {
+        super(buffer, byteOffset, InternalLinkedListView)
+      }
+    }
+
+    return InternalOwnershipPointerView
+  }, [viewConstructor])
+})
 
 export class LinkedListView<View extends BaseView & IReadableWritable<unknown> & IHash>
 extends BaseView
@@ -45,20 +66,8 @@ implements IHash
   ) {
     super()
 
-    class InternalLinkedListView extends LinkedListView<View> {
-      constructor(buffer: ArrayBufferLike, byteOffset: number) {
-        super(buffer, byteOffset, viewConstructor)
-      }
-    }
-
-    class InternalOwnershipPointerView extends OwnershipPointerView<LinkedListView<View>> {
-      constructor(buffer: ArrayBufferLike, byteOffset: number) {
-        super(buffer, byteOffset, InternalLinkedListView)
-      }
-    }
-
     this.view = new StructView(buffer, byteOffset, {
-      next: InternalOwnershipPointerView
+      next: createOwnershipPointerView(viewConstructor)
     , value: viewConstructor
     })
   }

@@ -26,6 +26,7 @@ go(async () => {
     let allocator: Allocator<ArrayBuffer>
     let map: HashMap<Uint16View, Uint16View>
 
+    debugger
     return {
       beforeEach() {
         allocator = new Allocator(new ArrayBuffer(Uint16View.byteLength * count * count))

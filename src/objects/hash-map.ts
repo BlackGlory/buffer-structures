@@ -9,10 +9,52 @@ import { ReferenceCounter } from '@utils/reference-counter'
 import { Hasher } from '@src/hasher'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
+import { withLazyStatic, lazyStatic } from 'extra-lazy'
 
 type ViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
+
+const createInternalOwnershipPointerView = withLazyStatic(<
+  ValueView extends BaseView & IReadableWritable<unknown> & IHash
+>(valueViewConstructor: ViewConstructor<ValueView>) => {
+  return lazyStatic(() => {
+    class InternalStructView extends StructView<{
+      keyHash: typeof Uint32View
+      value: ViewConstructor<ValueView>
+    }> {
+      static byteLength = StructView.getByteLength({
+        key: Uint32View
+      , value: valueViewConstructor
+      })
+
+      constructor(buffer: ArrayBufferLike, byteOffset: number) {
+        super(buffer, byteOffset, {
+          keyHash: Uint32View
+        , value: valueViewConstructor
+        })
+      }
+    }
+
+    class InternalLinkedListView extends LinkedListView<InternalStructView> {
+      static byteLength = LinkedListView.getByteLength(InternalStructView)
+
+      constructor(buffer: ArrayBufferLike, byteOffset: number) {
+        super(buffer, byteOffset, InternalStructView)
+      }
+    }
+
+    class InternalOwnershipPointerView extends OwnershipPointerView<
+      InternalLinkedListView
+    > {
+      constructor(buffer: ArrayBufferLike, byteOffset: number) {
+        super(buffer, byteOffset, InternalLinkedListView)
+      }
+    }
+
+    return { InternalLinkedListView, InternalOwnershipPointerView }
+  }, [valueViewConstructor])
+})
 
 export class HashMap<
   KeyView extends BaseView & IHash
@@ -73,39 +115,11 @@ implements IClone<HashMap<KeyView, ValueView>>
       this.valueViewConstructor = valueViewConstructor
       this.capacity = capacity
 
-      class InternalStructView extends StructView<{
-        keyHash: typeof Uint32View
-        value: ViewConstructor<ValueView>
-      }> {
-        static byteLength = StructView.getByteLength({
-          key: Uint32View
-        , value: valueViewConstructor
-        })
-
-        constructor(buffer: ArrayBufferLike, byteOffset: number) {
-          super(buffer, byteOffset, {
-            keyHash: Uint32View
-          , value: valueViewConstructor
-          })
-        }
-      }
-
-      class InternalLinkedListView extends LinkedListView<InternalStructView> {
-        static byteLength = LinkedListView.getByteLength(InternalStructView)
-
-        constructor(buffer: ArrayBufferLike, byteOffset: number) {
-          super(buffer, byteOffset, InternalStructView)
-        }
-      }
-      this.InternalLinkedListView = InternalLinkedListView
-
-      class InternalOwnershipPointerView extends OwnershipPointerView<
+      const {
         InternalLinkedListView
-      > {
-        constructor(buffer: ArrayBufferLike, byteOffset: number) {
-          super(buffer, byteOffset, InternalLinkedListView)
-        }
-      }
+      , InternalOwnershipPointerView
+      } = createInternalOwnershipPointerView(valueViewConstructor)
+      this.InternalLinkedListView = InternalLinkedListView
 
       const view = new ArrayView<
         OwnershipPointerView<
@@ -134,39 +148,11 @@ implements IClone<HashMap<KeyView, ValueView>>
       this.capacity = capacity
       this._counter = new ReferenceCounter()
 
-      class InternalStructView extends StructView<{
-        keyHash: typeof Uint32View
-        value: ViewConstructor<ValueView>
-      }> {
-        static byteLength = StructView.getByteLength({
-          keyHash: Uint32View
-        , value: valueViewConstructor
-        })
-
-        constructor(buffer: ArrayBufferLike, byteOffset: number) {
-          super(buffer, byteOffset, {
-            keyHash: Uint32View
-          , value: valueViewConstructor
-          })
-        }
-      }
-
-      class InternalLinkedListView extends LinkedListView<InternalStructView> {
-        static byteLength = LinkedListView.getByteLength(InternalStructView)
-
-        constructor(buffer: ArrayBufferLike, byteOffset: number) {
-          super(buffer, byteOffset, InternalStructView)
-        }
-      }
-      this.InternalLinkedListView = InternalLinkedListView
-
-      class InternalOwnershipPointerView extends OwnershipPointerView<
+      const {
         InternalLinkedListView
-      > {
-        constructor(buffer: ArrayBufferLike, byteOffset: number) {
-          super(buffer, byteOffset, InternalLinkedListView)
-        }
-      }
+      , InternalOwnershipPointerView
+      } = createInternalOwnershipPointerView(valueViewConstructor)
+      this.InternalLinkedListView = InternalLinkedListView
 
       const byteOffset = allocator.allocate(
         ArrayView.getByteLength(InternalOwnershipPointerView, capacity)

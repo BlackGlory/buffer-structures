@@ -5,10 +5,25 @@ import { ViewConstructor } from '@views/pointer-view'
 import { Uint32View } from '@views/uint32-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { BaseView } from '@views/base-view'
+import { withLazyStatic, lazyStatic } from 'extra-lazy'
 
 type OwnershipPointerViewConstructor<View extends BaseView & IHash & IFree> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => OwnershipPointerView<View>)
+
+const createInternalOwnershipPointerView = withLazyStatic(<
+  View extends BaseView & IHash & IFree
+>(viewConstructor: ViewConstructor<View>) => {
+  return lazyStatic(() => {
+    class InternalOwnershipPointerView extends OwnershipPointerView<View> {
+      constructor(buffer: ArrayBufferLike, byteOffset: number) {
+        super(buffer, byteOffset, viewConstructor)
+      }
+    }
+
+    return InternalOwnershipPointerView
+  }, [viewConstructor])
+})
 
 /**
  * ReferenceCountedOwnershipPointerView与OwnershipPointerView的区别:
@@ -31,19 +46,13 @@ implements IHash
   constructor(
     buffer: ArrayBufferLike
   , public readonly byteOffset: number
-  , viewConstruct: ViewConstructor<View>
+  , viewConstructor: ViewConstructor<View>
   ) {
     super()
 
-    class InternalOwnershipPointerView extends OwnershipPointerView<View> {
-      constructor(buffer: ArrayBufferLike, byteOffset: number) {
-        super(buffer, byteOffset, viewConstruct)
-      }
-    }
-
     this.view = new StructView(buffer, byteOffset, {
       count: Uint32View
-    , value: InternalOwnershipPointerView
+    , value: createInternalOwnershipPointerView(viewConstructor)
     })
   }
 
