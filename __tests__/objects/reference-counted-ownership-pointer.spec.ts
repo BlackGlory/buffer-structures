@@ -7,6 +7,7 @@ import { getError } from 'return-style'
 import { uint8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 import { BaseObject } from '@objects/base-object'
+import { NULL } from '@utils/null'
 
 describe('ReferenceCountedOwnershipPointer', () => {
   test('create', () => {
@@ -147,7 +148,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
       obj.hash(hasher)
 
       expect(hasher.write).toBeCalledTimes(1)
-      expect(hasher.write).nthCalledWith(1, [0])
+      expect(hasher.write).nthCalledWith(1, NULL)
     })
 
     test('non-null', () => {

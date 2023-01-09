@@ -1,5 +1,5 @@
 import { StringView } from '@views/string-view'
-import { bufferToArray, getSlice, setSlice, uint32ToBuffer } from '@test/utils'
+import { bufferToBytes, getSlice, setSlice, uint32ToBuffer } from '@test/utils'
 import { toArray } from '@blackglory/prelude'
 import { IAllocator, IHasher } from '@src/types'
 import { BaseView } from '@views/base-view'
@@ -89,14 +89,14 @@ describe('StringView', () => {
     stringView.set(value)
 
     expect(
-      bufferToArray(getSlice(
+      bufferToBytes(getSlice(
         buffer
       , byteOffset
       , Uint32Array.BYTES_PER_ELEMENT + Buffer.from(value, 'utf-8').byteLength
       ))
     ).toStrictEqual([
-      ...bufferToArray(uint32ToBuffer(Buffer.from(value, 'utf-8').byteLength))
-    , ...bufferToArray(Buffer.from(value, 'utf-8'))
+      ...bufferToBytes(uint32ToBuffer(Buffer.from(value, 'utf-8').byteLength))
+    , ...bufferToBytes(Buffer.from(value, 'utf-8'))
     ])
   })
 

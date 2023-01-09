@@ -5,6 +5,7 @@ import { Uint32View } from '@views/uint32-view'
 import { uint8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/types'
 import { BaseView } from '@views/base-view'
+import { NULL } from '@utils/null'
 
 describe('ReferenceCountedOwnershipPointerView', () => {
   test('create', () => {
@@ -404,7 +405,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       pointerView.hash(hasher)
 
       expect(hasher.write).toBeCalledTimes(1)
-      expect(hasher.write).toBeCalledWith([0])
+      expect(hasher.write).toBeCalledWith(NULL)
     })
 
     test('non-null', () => {

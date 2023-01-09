@@ -1,6 +1,7 @@
 import { IAllocator, IHash, IHasher, IReference, IReadableWritable, IFree } from '@src/types'
 import { isntNull } from '@blackglory/prelude'
 import { BaseView } from '@views/base-view'
+import { NULL } from '@utils/null'
 
 export type ViewConstructor<View extends BaseView> = new (
   buffer: ArrayBufferLike
@@ -36,7 +37,7 @@ implements IHash
     if (view) {
       view.hash(hasher)
     } else {
-      hasher.write([0])
+      hasher.write(NULL)
     }
   }
 

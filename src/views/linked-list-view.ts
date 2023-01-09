@@ -4,6 +4,7 @@ import { isntNull } from '@blackglory/prelude'
 import { StructView, MapStructureToValue } from '@views/struct-view'
 import { BaseView } from '@views/base-view'
 import { withLazyStatic, lazyStatic } from 'extra-lazy'
+import { NULL } from '@utils/null'
 
 export type ViewConstructor<View extends BaseView> =
   ISized
@@ -84,7 +85,7 @@ implements IHash
     if (isntNull(nextView)) {
       nextView.hash(hasher)
     } else {
-      hasher.write([0])
+      hasher.write(NULL)
     }
   }
 

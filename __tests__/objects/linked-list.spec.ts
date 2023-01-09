@@ -7,6 +7,7 @@ import { uint8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 import { PointerView } from '@src/views/pointer-view'
 import { BaseObject } from '@objects/base-object'
+import { NULL } from '@utils/null'
 
 describe('LinkedList', () => {
   test('create', () => {
@@ -431,6 +432,6 @@ describe('LinkedList', () => {
     expect(hasher.write).toBeCalledTimes(3)
     expect(hasher.write).nthCalledWith(1, uint8ToBuffer(10))
     expect(hasher.write).nthCalledWith(2, uint8ToBuffer(20))
-    expect(hasher.write).nthCalledWith(3, [0])
+    expect(hasher.write).nthCalledWith(3, NULL)
   })
 })

@@ -5,6 +5,7 @@ import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
+import { NULL } from '@utils/null'
 
 export class OwnershipPointer<View extends BaseView & IHash & IFree>
 extends BaseObject
@@ -75,7 +76,7 @@ implements IClone<OwnershipPointer<View>>
     if (view) {
       view.hash(hasher)
     } else {
-      hasher.write([0])
+      hasher.write(NULL)
     }
   }
 

@@ -1,5 +1,5 @@
 export interface IHasher {
-  write(bytes: ArrayLike<number> | ArrayBufferLike): void
+  write(bytes: ArrayBufferLike): void
 }
 
 export interface IAllocator {

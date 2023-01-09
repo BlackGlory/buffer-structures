@@ -14,8 +14,12 @@ export function getSlice(
   return view.slice(byteOffset, byteOffset + byteLength)
 }
 
-export function bufferToArray(buffer: ArrayBufferLike): number[] {
+export function bufferToBytes(buffer: ArrayBufferLike): number[] {
   return toArray(new Uint8Array(buffer))
+}
+
+export function bytesToBuffer(bytes: number[]): ArrayBuffer {
+  return new Uint8Array(bytes)
 }
 
 export function uint8ToBuffer(value: number): ArrayBuffer {

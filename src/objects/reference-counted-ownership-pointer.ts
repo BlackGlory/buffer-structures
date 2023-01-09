@@ -4,6 +4,7 @@ import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-o
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
+import { NULL } from '@utils/null'
 
 const internalOverrideSymbol = Symbol()
 
@@ -78,7 +79,7 @@ implements IClone<ReferenceCountedOwnershipPointer<View>>
     if (view) {
       view.hash(hasher)
     } else {
-      hasher.write([0])
+      hasher.write(NULL)
     }
   }
 

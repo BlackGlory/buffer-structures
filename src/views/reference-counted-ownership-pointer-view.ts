@@ -6,6 +6,7 @@ import { Uint32View } from '@views/uint32-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { BaseView } from '@views/base-view'
 import { withLazyStatic, lazyStatic } from 'extra-lazy'
+import { NULL } from '@utils/null'
 
 type OwnershipPointerViewConstructor<View extends BaseView & IHash & IFree> =
   ISized
@@ -77,7 +78,7 @@ implements IHash
     if (view) {
       view.hash(hasher)
     } else {
-      hasher.write([0])
+      hasher.write(NULL)
     }
   }
 

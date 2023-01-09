@@ -1,6 +1,6 @@
 import { Allocator } from '@src/allocator'
 import { getError } from 'return-style'
-import { bufferToArray } from '@test/utils'
+import { bufferToBytes } from '@test/utils'
 
 // 固定跳过缓冲区的第一个字节, 因为它被视作NULL.
 const nullSize = 1
@@ -12,7 +12,7 @@ describe('Allocator', () => {
 
       const allocator = new Allocator(buffer)
 
-      expect(bufferToArray(allocator.buffer)).toStrictEqual([0, 0])
+      expect(bufferToBytes(allocator.buffer)).toStrictEqual([0, 0])
       expect(allocator.metadata).toStrictEqual({
         freeLists: [
           { byteOffset: nullSize, byteLength: 1 }
@@ -27,7 +27,7 @@ describe('Allocator', () => {
         freeLists: [{ byteOffset: 2, byteLength: 2 }]
       })
 
-      expect(bufferToArray(allocator.buffer)).toStrictEqual([0, 0, 0, 0])
+      expect(bufferToBytes(allocator.buffer)).toStrictEqual([0, 0, 0, 0])
       expect(allocator.metadata).toStrictEqual({
         freeLists: [
           { byteOffset: 2, byteLength: 2 }
