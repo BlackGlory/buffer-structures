@@ -218,6 +218,20 @@ implements IClone<HashMap<KeyView, ValueView>>
     )
   }
 
+  * values(): IterableIterator<ValueView> {
+    const buckets = this._view.getViewByKey('buckets')
+    for (let i = 0; i < this.capacity; i++) {
+      const pointer = buckets.getViewByIndex(i)
+
+      let linkedList = pointer.deref()
+      while (linkedList) {
+        const struct = linkedList.getViewOfValue()
+        yield struct.getViewByKey('value')
+        linkedList = linkedList.derefNext()
+      }
+    }
+  }
+
   has(key: IHash): boolean {
     this.fsm.assertAllocated()
 

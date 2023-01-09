@@ -1,3 +1,4 @@
+import { toArray } from '@blackglory/prelude'
 import { HashSet } from '@objects/hash-set'
 import { IAllocator } from '@src/types'
 import { Uint8View } from '@views/uint8-view'
@@ -142,6 +143,30 @@ describe('HashSet', () => {
 
         expect(result).toBe(0)
       })
+    })
+  })
+
+  describe('values', () => {
+    test('empty', () => {
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+
+      const iter = obj.values()
+      const result = toArray(iter)
+
+      expect(result).toStrictEqual([])
+    })
+
+    test('non-empty', () => {
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+      obj.add(uint8(10))
+      obj.add(uint8(20))
+
+      const iter = obj.values()
+      const result = toArray(iter).map(x => x.get())
+
+      expect(result).toStrictEqual([10, 20])
     })
   })
 

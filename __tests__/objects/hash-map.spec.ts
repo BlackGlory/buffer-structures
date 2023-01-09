@@ -1,3 +1,4 @@
+import { toArray } from '@blackglory/prelude'
 import { HashMap } from '@objects/hash-map'
 import { IAllocator } from '@src/types'
 import { Uint8View } from '@views/uint8-view'
@@ -142,6 +143,30 @@ describe('HashMap', () => {
 
         expect(result).toBe(0)
       })
+    })
+  })
+
+  describe('values', () => {
+    test('empty', () => {
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
+
+      const iter = obj.values()
+      const result = toArray(iter).map(x => x.get())
+
+      expect(result).toStrictEqual([])
+    })
+
+    test('non-empty', () => {
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
+      obj.set(uint8(1), uint8(10))
+      obj.set(uint8(2), uint8(20))
+
+      const iter = obj.values()
+      const result = toArray(iter).map(x => x.get())
+
+      expect(result).toStrictEqual([10, 20])
     })
   })
 
