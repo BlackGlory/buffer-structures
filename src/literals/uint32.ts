@@ -1,9 +1,16 @@
 import { IReadableWritable, IHash, IHasher } from '@src/types'
 import { BaseLiteral } from '@literals/base-literal'
+import { lazy } from 'extra-lazy'
 
 export function uint32(val: number): Uint32Literal {
   return new Uint32Literal(val)
 }
+
+const getView = lazy(() => {
+  const buffer = new ArrayBuffer(Uint32Array.BYTES_PER_ELEMENT)
+  const view = new DataView(buffer)
+  return view
+})
 
 export class Uint32Literal
 extends BaseLiteral
@@ -14,11 +21,10 @@ implements IReadableWritable<number>
   }
 
   hash(hasher: IHasher): void {
-    const buffer = new ArrayBuffer(Uint32Array.BYTES_PER_ELEMENT)
-    const view = new DataView(buffer)
+    const view = getView()
     view.setUint32(0, this.value)
 
-    hasher.write(buffer)
+    hasher.write(view.buffer)
   }
 
   get(): number {
