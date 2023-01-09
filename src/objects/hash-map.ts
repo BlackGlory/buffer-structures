@@ -15,9 +15,12 @@ type ViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
-const createInternalOwnershipPointerView = withLazyStatic(<
+const createInternalViews = withLazyStatic(<
   ValueView extends BaseView & IReadableWritable<unknown> & IHash
->(valueViewConstructor: ViewConstructor<ValueView>) => {
+>(
+  valueViewConstructor: ViewConstructor<ValueView>
+, capacity: number
+) => {
   return lazyStatic(() => {
     class InternalStructView extends StructView<{
       keyHash: typeof Uint32View
@@ -44,7 +47,7 @@ const createInternalOwnershipPointerView = withLazyStatic(<
       }
     }
 
-    class InternalOwnershipPointerView extends OwnershipPointerView<
+    class InternalLinkedListOwnershipPointerView extends OwnershipPointerView<
       InternalLinkedListView
     > {
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
@@ -52,8 +55,22 @@ const createInternalOwnershipPointerView = withLazyStatic(<
       }
     }
 
-    return { InternalLinkedListView, InternalOwnershipPointerView }
-  }, [valueViewConstructor])
+    class InternalArrayView extends ArrayView<
+      InternalLinkedListOwnershipPointerView
+    , number
+    > {
+      static byteLength = ArrayView.getByteLength(
+        InternalLinkedListOwnershipPointerView
+      , capacity
+      )
+
+      constructor(buffer: ArrayBufferLike, byteOffset: number) {
+        super(buffer, byteOffset, InternalLinkedListOwnershipPointerView, capacity)
+      }
+    }
+
+    return { InternalLinkedListView, InternalArrayView }
+  }, [valueViewConstructor, capacity])
 })
 
 export class HashMap<
@@ -63,23 +80,32 @@ export class HashMap<
 extends BaseObject
 implements IClone<HashMap<KeyView, ValueView>>
          , IDestroy {
-  readonly _view: ArrayView<
-    OwnershipPointerView<
-      LinkedListView<
-        StructView<{
-          keyHash: typeof Uint32View
-          value: ViewConstructor<ValueView>
-        }>
+  readonly _view: StructView<{
+    size: typeof Uint32View
+    buckets: ViewConstructor<ArrayView<
+      OwnershipPointerView<
+        LinkedListView<
+          StructView<{
+            keyHash: typeof Uint32View
+            value: ViewConstructor<ValueView>
+          }>
+        >
       >
-    >
-  , number
-  >
+    , number
+    >>
+  }>
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
   private valueViewConstructor: ViewConstructor<ValueView>
   private capacity: number
   private InternalLinkedListView
+
+  get size(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.getByKey('size')
+  }
 
   constructor(
     allocator: IAllocator
@@ -117,25 +143,17 @@ implements IClone<HashMap<KeyView, ValueView>>
 
       const {
         InternalLinkedListView
-      , InternalOwnershipPointerView
-      } = createInternalOwnershipPointerView(valueViewConstructor)
+      , InternalArrayView
+      } = createInternalViews(valueViewConstructor, capacity)
       this.InternalLinkedListView = InternalLinkedListView
 
-      const view = new ArrayView<
-        OwnershipPointerView<
-          LinkedListView<
-            StructView<{
-              keyHash: typeof Uint32View
-              value: ViewConstructor<ValueView>
-            }>
-          >
-        >
-      , number
-      >(
+      const view = new StructView(
         allocator.buffer
       , byteOffset
-      , InternalOwnershipPointerView
-      , capacity
+      , {
+          size: Uint32View
+        , buckets: InternalArrayView
+        }
       )
       this._view = view
 
@@ -150,32 +168,30 @@ implements IClone<HashMap<KeyView, ValueView>>
 
       const {
         InternalLinkedListView
-      , InternalOwnershipPointerView
-      } = createInternalOwnershipPointerView(valueViewConstructor)
+      , InternalArrayView
+      } = createInternalViews(valueViewConstructor, capacity)
       this.InternalLinkedListView = InternalLinkedListView
 
       const byteOffset = allocator.allocate(
-        ArrayView.getByteLength(InternalOwnershipPointerView, capacity)
+        StructView.getByteLength({
+          size: Uint32View
+        , buckets: InternalArrayView
+        })
       )
-      const view = new ArrayView<
-        OwnershipPointerView<
-          LinkedListView<
-            StructView<{
-              keyHash: typeof Uint32View
-              value: ViewConstructor<ValueView>
-            }>
-          >
-        >
-      , number
-      >(
+      const view = new StructView(
         allocator.buffer
       , byteOffset
-      , InternalOwnershipPointerView
-      , capacity
+      , {
+          size: Uint32View
+        , buckets: InternalArrayView
+        }
       )
-      // 初始化每一个指针, 防止指向错误的位置.
+      // 初始化size
+      view.setByKey('size', 0)
+      const buckets = view.getViewByKey('buckets')
+      // 初始化buckets中的每一个指针, 防止指向错误的位置.
       for (let i = 0; i < capacity; i++) {
-        view.setByIndex(i, null)
+        buckets.setByIndex(i, null)
       }
       this._view = view
     }
@@ -205,9 +221,10 @@ implements IClone<HashMap<KeyView, ValueView>>
   has(key: IHash): boolean {
     this.fsm.assertAllocated()
 
+    const buckets = this._view.getViewByKey('buckets')
     const hash = this.getHash(key)
     const index = this.getIndex(hash)
-    const pointer = this._view.getViewByIndex(index)
+    const pointer = buckets.getViewByIndex(index)
 
     let linkedList = pointer.deref()
     while (linkedList) {
@@ -226,9 +243,10 @@ implements IClone<HashMap<KeyView, ValueView>>
   get(key: IHash): ValueView | undefined {
     this.fsm.assertAllocated()
 
+    const buckets = this._view.getViewByKey('buckets')
     const hash = this.getHash(key)
     const index = this.getIndex(hash)
-    const pointer = this._view.getViewByIndex(index)
+    const pointer = buckets.getViewByIndex(index)
 
     let linkedList = pointer.deref()
     while (linkedList) {
@@ -246,9 +264,10 @@ implements IClone<HashMap<KeyView, ValueView>>
   set(key: IHash, value: PickReadableWritable<ValueView>): void {
     this.fsm.assertAllocated()
 
+    const buckets = this._view.getViewByKey('buckets')
     const hash = this.getHash(key)
     const index = this.getIndex(hash)
-    const pointer = this._view.getViewByIndex(index)
+    const pointer = buckets.getViewByIndex(index)
 
     let linkedList = pointer.deref()
     if (linkedList) {
@@ -265,6 +284,7 @@ implements IClone<HashMap<KeyView, ValueView>>
           } else {
             const newLinkedList = this.createNewLinkedList(hash, value)
             linkedList.setNext(newLinkedList.byteOffset)
+            this.incrementSize()
             return
           }
         }
@@ -272,15 +292,17 @@ implements IClone<HashMap<KeyView, ValueView>>
     } else {
       const newLinkedList = this.createNewLinkedList(hash, value)
       pointer.set(newLinkedList.byteOffset)
+      this.incrementSize()
     }
   }
 
   delete(key: IHash): void {
     this.fsm.assertAllocated()
 
+    const buckets = this._view.getViewByKey('buckets')
     const hash = this.getHash(key)
     const index = this.getIndex(hash)
-    const pointer = this._view.getViewByIndex(index)
+    const pointer = buckets.getViewByIndex(index)
 
     let previous:
     | OwnershipPointerView<
@@ -311,12 +333,23 @@ implements IClone<HashMap<KeyView, ValueView>>
         }
         linkedList.setNext(null)
         linkedList.free(this.allocator)
+        this.decrementSize()
         return
       } else {
         previous = linkedList
         linkedList = linkedList.derefNext()
       }
     }
+  }
+
+  private incrementSize(): void {
+    const size = this._view.getViewByKey('size')
+    size.set(size.get() + 1)
+  }
+
+  private decrementSize(): void {
+    const size = this._view.getViewByKey('size')
+    size.set(size.get() - 1)
   }
 
   private getHash(key: IHash): number {

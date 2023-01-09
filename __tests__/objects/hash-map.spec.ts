@@ -1,6 +1,7 @@
 import { HashMap } from '@objects/hash-map'
 import { IAllocator } from '@src/types'
 import { Uint8View } from '@views/uint8-view'
+import { Uint32View } from '@views/uint32-view'
 import { PointerView } from '@views/pointer-view'
 import { Allocator } from '@src/allocator'
 import { getError } from 'return-style'
@@ -16,7 +17,7 @@ describe('HashMap', () => {
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(allocate).toBeCalledTimes(1)
-    expect(allocate).toBeCalledWith(PointerView.byteLength * 10)
+    expect(allocate).toBeCalledWith(Uint32View.byteLength + PointerView.byteLength * 10)
   })
 
   describe('destory', () => {
@@ -85,6 +86,63 @@ describe('HashMap', () => {
     expect(result._view.byteOffset).toBe(obj._view.byteOffset)
     expect(result._counter).toBe(obj._counter)
     expect(result._counter._count).toBe(2)
+  })
+
+  describe('size', () => {
+    test('initial value', () => {
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
+
+      const result = obj.size
+
+      expect(result).toBe(0)
+    })
+
+    describe('set', () => {
+      test('new item', () => {
+        const allocator = new Allocator(new ArrayBuffer(100))
+        const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
+
+        obj.set(uint8(1), uint8(1))
+        const result = obj.size
+
+        expect(result).toBe(1)
+      })
+
+      test('old item', () => {
+        const allocator = new Allocator(new ArrayBuffer(100))
+        const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
+        obj.set(uint8(1), uint8(1))
+
+        obj.set(uint8(1), uint8(2))
+        const result = obj.size
+
+        expect(result).toBe(1)
+      })
+    })
+
+    describe('delete', () => {
+      test('exist item', () => {
+        const allocator = new Allocator(new ArrayBuffer(100))
+        const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
+        obj.set(uint8(1), uint8(1))
+
+        obj.delete(uint8(1))
+        const result = obj.size
+
+        expect(result).toBe(0)
+      })
+
+      test('non-exist item', () => {
+        const allocator = new Allocator(new ArrayBuffer(100))
+        const obj = new HashMap<Uint8View, Uint8View>(allocator, Uint8View, 10)
+
+        obj.delete(uint8(1))
+        const result = obj.size
+
+        expect(result).toBe(0)
+      })
+    })
   })
 
   describe('has', () => {
