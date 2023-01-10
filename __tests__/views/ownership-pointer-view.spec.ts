@@ -2,7 +2,7 @@ import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { PointerView } from '@views/pointer-view'
 import { Uint8View } from '@views/uint8-view'
 import { uint8ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
 
 describe('OwnershipPointerView', () => {

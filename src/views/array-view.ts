@@ -1,4 +1,6 @@
-import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree, UnpackedReadableWritable } from '@src/types'
+import { IHash, IReference, ISized, IReadableWritable, IFree } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
+import { UnpackedReadableWritable } from '@src/types'
 import { FixedLengthArray } from 'justypes'
 import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
 import { each } from 'iterable-operator'

@@ -1,4 +1,5 @@
-import { IAllocator, ICopy, IClone, IDestroy, IReadableWritable, IHash, IHasher, ISized } from '@src/types'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { TupleView, ViewConstructor, MapStructureToValue } from '@views/tuple-view'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ObjectStateMachine } from '@utils/object-state-machine'

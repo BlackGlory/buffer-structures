@@ -1,4 +1,4 @@
-import { IOwnershipPointer } from '@src/types'
+import { IOwnershipPointer } from '@src/traits'
 import { isFunction } from '@blackglory/prelude'
 
 export function isOwnershiptPointer(view: object): view is IOwnershipPointer {

@@ -1,6 +1,6 @@
 import { Double } from '@objects/double'
 import { DoubleView } from '@views/double-view'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { getError } from 'return-style'
 import { float64ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'

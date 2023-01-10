@@ -1,6 +1,6 @@
 import { String } from '@objects/string'
 import { StringView } from '@views/string-view'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { getError } from 'return-style'
 import { Allocator } from '@src/allocator'
 import { BaseObject } from '@objects/base-object'

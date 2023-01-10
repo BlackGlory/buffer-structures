@@ -1,6 +1,6 @@
 import { DoubleView } from '@views/double-view'
 import { float64ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
 
 describe('DoubleView', () => {

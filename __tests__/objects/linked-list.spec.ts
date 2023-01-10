@@ -1,11 +1,11 @@
 import { LinkedList } from '@objects/linked-list'
 import { LinkedListView } from '@views/linked-list-view'
 import { Uint8View } from '@views/uint8-view'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { getError } from 'return-style'
 import { uint8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
-import { PointerView } from '@src/views/pointer-view'
+import { OwnershipPointerView } from '@src/views/ownership-pointer-view'
 import { BaseObject } from '@objects/base-object'
 import { NULL } from '@utils/null'
 
@@ -374,7 +374,7 @@ describe('LinkedList', () => {
 
     const result = obj.getViewOfNext()
 
-    expect(result).toBeInstanceOf(PointerView)
+    expect(result).toBeInstanceOf(OwnershipPointerView)
   })
 
   describe('derefNext', () => {

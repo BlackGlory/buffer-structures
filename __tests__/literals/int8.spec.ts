@@ -1,5 +1,5 @@
 import { Int8Literal, int8 } from '@literals/int8'
-import { IHasher } from '@src/types'
+import { IHasher } from '@src/interfaces'
 import { int8ToBuffer } from '@test/utils'
 import { BaseLiteral } from '@literals/base-literal'
 

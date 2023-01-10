@@ -1,4 +1,5 @@
-import { IAllocator, IHash, IHasher, IReference, IReadableWritable, IFree } from '@src/types'
+import { IHash, IReference, IReadableWritable, IFree } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { getSlice } from '@utils/get-slice'
 import { BaseView } from '@views/base-view'
 
@@ -8,14 +9,11 @@ implements IHash
          , IReference
          , IReadableWritable<number>
          , IFree {
-  static readonly byteLength = Uint32Array.BYTES_PER_ELEMENT
+  static readonly byteLength: number = Uint32Array.BYTES_PER_ELEMENT
 
   private view: DataView
 
-  constructor(
-    buffer: ArrayBufferLike
-  , public readonly byteOffset: number
-  ) {
+  constructor(buffer: ArrayBufferLike, public readonly byteOffset: number) {
     super()
 
     this.view = new DataView(buffer)

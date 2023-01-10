@@ -1,6 +1,6 @@
 import { toArray } from '@blackglory/prelude'
 import { HashSet } from '@objects/hash-set'
-import { IAllocator } from '@src/types'
+import { IAllocator } from '@src/interfaces'
 import { Uint8View } from '@views/uint8-view'
 import { Uint32View } from '@views/uint32-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'

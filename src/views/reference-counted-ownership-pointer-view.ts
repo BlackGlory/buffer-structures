@@ -1,5 +1,6 @@
 import { assert } from '@blackglory/prelude'
-import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFree, IOwnershipPointer } from '@src/types'
+import { IHash, ISized, IReference, IReadableWritable, IFree, IOwnershipPointer } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { StructView } from '@views/struct-view'
 import { ViewConstructor } from '@views/pointer-view'
 import { Uint32View } from '@views/uint32-view'
@@ -37,7 +38,8 @@ implements IHash
          , IReadableWritable<{ count: number; value: number | null }>
          , IFree
          , IOwnershipPointer {
-  static readonly byteLength = Uint32View.byteLength + OwnershipPointerView.byteLength
+  static readonly byteLength: number = Uint32View.byteLength
+                                     + OwnershipPointerView.byteLength
 
   private view: StructView<{
     count: typeof Uint32View

@@ -1,4 +1,5 @@
-import { IReadableWritable, IHash, IHasher } from '@src/types'
+import { IReadableWritable, IHash } from '@src/traits'
+import { IHasher } from '@src/interfaces'
 import { BaseLiteral } from '@literals/base-literal'
 import { lazy } from 'extra-lazy'
 

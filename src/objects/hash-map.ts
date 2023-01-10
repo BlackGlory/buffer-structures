@@ -1,4 +1,6 @@
-import { IAllocator, ISized, IHash, IReadableWritable, IClone, IDestroy, PickReadableWritable } from '@src/types'
+import { ISized, IHash, IReadableWritable, IClone, IDestroy } from '@src/traits'
+import { IAllocator } from '@src/interfaces'
+import { PickReadableWritable } from '@src/types'
 import { ArrayView } from '@views/array-view'
 import { LinkedListView } from '@views/linked-list-view'
 import { Uint32View } from '@views/uint32-view'

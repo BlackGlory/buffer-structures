@@ -1,6 +1,6 @@
 import { Int32 } from '@objects/int32'
 import { Int32View } from '@views/int32-view'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { getError } from 'return-style'
 import { int32ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'

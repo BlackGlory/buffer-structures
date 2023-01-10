@@ -1,4 +1,6 @@
-import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree, UnpackedReadableWritable } from '@src/types'
+import { IHash, IReference, ISized, IReadableWritable, IFree } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
+import { UnpackedReadableWritable } from '@src/types'
 import { pipe } from 'extra-utils'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import * as Iter from 'iterable-operator'
@@ -15,7 +17,9 @@ export type MapStructureToValue<
   , ViewConstructor<IReadableWritable<unknown> & IHash>
   >
 > = {
-  [Key in keyof Structure]: UnpackedReadableWritable<ReturnTypeOfConstructor<Structure[Key]>>
+  [Key in keyof Structure]: UnpackedReadableWritable<
+    ReturnTypeOfConstructor<Structure[Key]>
+  >
 }
 
 export class StructView<

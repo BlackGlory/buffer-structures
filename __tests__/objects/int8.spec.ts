@@ -1,6 +1,6 @@
 import { Int8 } from '@objects/int8'
 import { Int8View } from '@views/int8-view'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { getError } from 'return-style'
 import { int8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'

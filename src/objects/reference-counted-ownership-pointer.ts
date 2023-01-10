@@ -1,4 +1,5 @@
-import { IAllocator, IHash, IFree, IHasher, IClone, IDestroy } from '@src/types'
+import { IHash, IFree, IClone, IDestroy } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { ViewConstructor } from '@views/pointer-view'
 import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-ownership-pointer-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'

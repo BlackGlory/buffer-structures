@@ -1,6 +1,6 @@
 import { Int8View } from '@views/int8-view'
 import { int8ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
 
 describe('Int8View', () => {

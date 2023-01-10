@@ -1,7 +1,7 @@
 import { StringView } from '@views/string-view'
 import { bufferToBytes, getSlice, setSlice, uint32ToBuffer } from '@test/utils'
 import { toArray } from '@blackglory/prelude'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
 
 describe('StringView', () => {

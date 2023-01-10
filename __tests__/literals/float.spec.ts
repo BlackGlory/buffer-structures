@@ -1,5 +1,5 @@
 import { FloatLiteral, float } from '@literals/float'
-import { IHasher } from '@src/types'
+import { IHasher } from '@src/interfaces'
 import { float64ToBuffer } from '@test/utils'
 import { BaseLiteral } from '@literals/base-literal'
 

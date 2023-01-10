@@ -1,7 +1,7 @@
 import { Array } from '@objects/array'
 import { ArrayView } from '@views/array-view'
 import { Uint8View } from '@views/uint8-view'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { getError } from 'return-style'
 import { uint8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'

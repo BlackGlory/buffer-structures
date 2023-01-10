@@ -1,4 +1,4 @@
-import { IHasher } from './types'
+import { IHasher } from '@src/interfaces'
 import { Xxh32 } from '@node-rs/xxhash'
 import { NULL } from '@utils/null'
 

@@ -1,4 +1,6 @@
-import { IAllocator, IHasher, ICopy, IClone, IDestroy, IHash, IReadableWritable, UnpackedReadableWritable } from '@src/types'
+import { ICopy, IClone, IDestroy, IHash, IReadableWritable } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
+import { UnpackedReadableWritable } from '@src/types'
 import { ViewConstructor, ArrayView } from '@views/array-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'

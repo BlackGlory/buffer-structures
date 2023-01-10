@@ -1,4 +1,5 @@
-import { IAllocator, ICopy, IClone, IDestroy, IReadableWritable, IHash, IHasher } from '@src/types'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { LinkedListView, ViewConstructor, Structure } from '@views/linked-list-view'
 import { MapStructureToValue } from '@views/struct-view'

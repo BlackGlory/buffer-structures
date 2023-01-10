@@ -1,5 +1,5 @@
 import { assert } from '@blackglory/prelude'
-import { IAllocator } from '@src/types'
+import { IAllocator } from '@src/interfaces'
 import { NonEmptyArray } from '@blackglory/prelude'
 
 interface IMetadata {
@@ -32,22 +32,25 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
   }
 
   /**
+   * 申请一段连续的缓冲区空间, 返回它的偏移值.
+   * 在缓冲区空间不足以分配的情况下, 会抛出错误.
+   * 
    * @returns 字节单位的偏移值
    */
-  allocate(size: number): number {
-    assert(Number.isInteger(size), 'The size should be an integer')
-    assert(size > 0, 'The size should be greater than zero')
+  allocate(byteLength: number): number {
+    assert(Number.isInteger(byteLength), 'The byteLength should be an integer')
+    assert(byteLength > 0, 'The byteLength should be greater than zero')
 
     for (const [index, freeList] of this.freeLists()) {
-      if (freeList.byteLength === size) {
+      if (freeList.byteLength === byteLength) {
         // 如果空闲链表的长度等于用户请求的长度, 移除此空闲链表.
         this.metadata.freeLists.splice(index, 1)
         return freeList.byteOffset
-      } else if (freeList.byteLength > size) {
+      } else if (freeList.byteLength > byteLength) {
         // 如果空闲链表的长度超过用户请求的长度, 将多余的部分拆分成新的空闲链表.
         const oldFreeListByteOffset = freeList.byteOffset
-        freeList.byteOffset += size
-        freeList.byteLength -= size
+        freeList.byteOffset += byteLength
+        freeList.byteLength -= byteLength
         return oldFreeListByteOffset
       }
     }
@@ -55,6 +58,9 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
     throw new Error('Out of bounds')
   }
 
+  /**
+   * 释放一段已申请的连续内存空间.
+   */
   free(byteOffset: number, byteLength: number): void {
     assert(Number.isInteger(byteOffset), 'The byteOffset should be an integer')
     assert(Number.isInteger(byteLength), 'The byteLength should be an integer')

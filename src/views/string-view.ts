@@ -1,10 +1,11 @@
-import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFree } from '@src/types'
+import { IHash, ISized, IReference, IReadableWritable, IFree } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { Uint32View } from '@views/uint32-view'
 import { getSlice } from '@utils/get-slice'
-import { View } from '@src/views'
+import { BaseView } from '@views/base-view'
 
 export class StringView
-extends View
+extends BaseView
 implements IHash
          , IReference
          , IReadableWritable<string>
@@ -19,7 +20,7 @@ implements IHash
   private lengthView: Uint32View
   private valueView: DataView
 
-  get byteLength() {
+  get byteLength(): number {
     const byteLenght = this.valueView.getUint32(this.byteOffset)
     return Uint32View.byteLength + byteLenght
   }

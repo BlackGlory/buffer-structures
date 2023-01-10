@@ -1,6 +1,6 @@
 import { Uint32View } from '@views/uint32-view'
 import { uint32ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
 
 describe('Uint32View', () => {

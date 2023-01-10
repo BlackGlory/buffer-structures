@@ -1,4 +1,5 @@
-import { IAllocator, IHash, IHasher, IReference, IReadableWritable, IFree } from '@src/types'
+import { IHash, IReference, IReadableWritable, IFree } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { isntNull } from '@blackglory/prelude'
 import { BaseView } from '@views/base-view'
 import { NULL } from '@utils/null'
@@ -14,7 +15,7 @@ implements IHash
          , IReference
          , IReadableWritable<number | null>
          , IFree {
-  static readonly byteLength = Uint32Array.BYTES_PER_ELEMENT
+  static readonly byteLength: number = Uint32Array.BYTES_PER_ELEMENT
 
   protected view: DataView
 

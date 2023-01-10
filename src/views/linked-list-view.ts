@@ -1,4 +1,5 @@
-import { IAllocator, IHash, IHasher, ISized, IReference, IReadableWritable, IFree } from '@src/types'
+import { IHash, ISized, IReference, IReadableWritable, IFree } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { isntNull } from '@blackglory/prelude'
 import { StructView, MapStructureToValue } from '@views/struct-view'
@@ -52,7 +53,7 @@ implements IHash
     & IReadableWritable<unknown>
     & IHash
     >
-  ) {
+  ): number {
     return viewConstructor.byteLength + OwnershipPointerView.byteLength
   }
 

@@ -1,4 +1,5 @@
-import { IAllocator, IHash, IHasher, IReference, IReadableWritable } from '@src/types'
+import { IHash, IReference, IReadableWritable } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { getSlice } from '@utils/get-slice'
 import { BaseView } from '@views/base-view'
 
@@ -7,7 +8,7 @@ extends BaseView
 implements IHash
          , IReference
          , IReadableWritable<number> {
-  static readonly byteLength = Int32Array.BYTES_PER_ELEMENT
+  static readonly byteLength: number = Int32Array.BYTES_PER_ELEMENT
 
   private view: DataView
 

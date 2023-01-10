@@ -1,5 +1,5 @@
 import { Uint32Literal, uint32 } from '@literals/uint32'
-import { IHasher } from '@src/types'
+import { IHasher } from '@src/interfaces'
 import { uint32ToBuffer } from '@test/utils'
 import { BaseLiteral } from '@literals/base-literal'
 

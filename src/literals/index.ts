@@ -1,4 +1,4 @@
-export * from '@literals/base-literal'
+export * from './base-literal'
 export * from './float'
 export * from './double'
 export * from './int8'

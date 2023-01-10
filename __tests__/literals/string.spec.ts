@@ -1,5 +1,5 @@
 import { StringLiteral, string } from '@literals/string'
-import { IHasher } from '@src/types'
+import { IHasher } from '@src/interfaces'
 import { BaseLiteral } from '@literals/base-literal'
 
 test('string', () => {

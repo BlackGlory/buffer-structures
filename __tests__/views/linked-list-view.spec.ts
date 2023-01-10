@@ -1,8 +1,8 @@
 import { LinkedListView } from '@views/linked-list-view'
-import { PointerView } from '@views/pointer-view'
+import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { Uint8View } from '@views/uint8-view'
 import { uint8ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
 import { NULL } from '@utils/null'
 
@@ -18,7 +18,7 @@ describe('LinkedListView', () => {
   test('getByteLength', () => {
     const result = LinkedListView.getByteLength(Uint8View)
 
-    expect(result).toBe(Uint8View.byteLength + PointerView.byteLength)
+    expect(result).toBe(Uint8View.byteLength + OwnershipPointerView.byteLength)
   })
 
   test('byteOffset', () => {
@@ -201,7 +201,7 @@ describe('LinkedListView', () => {
 
     const result = linkedListView.getViewOfNext()
 
-    expect(result).toBeInstanceOf(PointerView)
+    expect(result).toBeInstanceOf(OwnershipPointerView)
     expect(result.byteOffset).toBe(byteOffset)
   })
 

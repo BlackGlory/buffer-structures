@@ -1,6 +1,6 @@
 import { Int16 } from '@objects/int16'
 import { Int16View } from '@views/int16-view'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { getError } from 'return-style'
 import { int16ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'

@@ -1,4 +1,5 @@
-import { IAllocator, IHash, IHasher, IReference, IReadableWritable, IFree } from '@src/types'
+import { IHash, IReference, IReadableWritable, IFree } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { getSlice } from '@utils/get-slice'
 import { BaseView } from '@views/base-view'
 
@@ -8,7 +9,7 @@ implements IHash
          , IReference
          , IReadableWritable<number>
          , IFree {
-  static readonly byteLength = Float32Array.BYTES_PER_ELEMENT
+  static readonly byteLength: number = Float32Array.BYTES_PER_ELEMENT
 
   private view: DataView
 

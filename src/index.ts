@@ -1,4 +1,6 @@
 export * from '@src/allocator'
+export * from '@src/traits'
+export * from '@src/interfaces'
 export * from '@literals/index'
 export * from '@objects/index'
 export * from '@views/index'

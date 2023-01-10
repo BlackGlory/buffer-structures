@@ -1,5 +1,5 @@
 import { Uint16Literal, uint16 } from '@literals/uint16'
-import { IHasher } from '@src/types'
+import { IHasher } from '@src/interfaces'
 import { uint16ToBuffer } from '@test/utils'
 import { BaseLiteral } from '@literals/base-literal'
 

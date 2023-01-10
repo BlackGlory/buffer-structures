@@ -1,4 +1,5 @@
-import { IAllocator, ICopy, IClone, IDestroy, IReadable, IHash, IHasher } from '@src/types'
+import { ICopy, IClone, IDestroy, IReadable, IHash } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { StringView } from '@views/string-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'

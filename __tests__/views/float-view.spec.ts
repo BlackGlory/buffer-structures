@@ -1,6 +1,6 @@
 import { FloatView } from '@views/float-view'
 import { float32ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
 
 describe('FloatView', () => {

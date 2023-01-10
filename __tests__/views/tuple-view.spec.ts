@@ -3,7 +3,7 @@ import { Uint8View } from '@views/uint8-view'
 import { Uint16View } from '@views/uint16-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { uint8ToBuffer, uint16ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/types'
+import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
 
 describe('TupleView', () => {

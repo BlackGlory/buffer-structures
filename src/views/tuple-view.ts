@@ -1,4 +1,6 @@
-import { IAllocator, IHash, IHasher, IReference, ISized, IReadableWritable, IFree, UnpackedReadableWritable } from '@src/types'
+import { IHash, IReference, ISized, IReadableWritable, IFree } from '@src/traits'
+import { IAllocator, IHasher } from '@src/interfaces'
+import { UnpackedReadableWritable } from '@src/types'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
