@@ -31,6 +31,10 @@ const createInternalViews = withLazyStatic(<
       , value: valueViewConstructor
       })
 
+      static override getByteLength(): number {
+        return this.byteLength
+      }
+
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
         super(buffer, byteOffset, {
           keyHash: Uint32View
@@ -42,7 +46,7 @@ const createInternalViews = withLazyStatic(<
     class InternalLinkedListView extends LinkedListView<InternalStructView> {
       static byteLength = LinkedListView.getByteLength(InternalStructView)
 
-      static override getByteLength() {
+      static override getByteLength(): number {
         return this.byteLength
       }
 
