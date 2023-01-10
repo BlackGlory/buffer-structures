@@ -127,6 +127,7 @@ implements IClone<HashMap<KeyView, ValueView>>
   private allocator: IAllocator
   private valueViewConstructor: ViewConstructor<ValueView>
   private loadFactor: number
+  private growthFactor: number
   private InternalLinkedListView
 
   get size(): number {
@@ -138,14 +139,20 @@ implements IClone<HashMap<KeyView, ValueView>>
   constructor(
     allocator: IAllocator
   , valueViewConstructor: ViewConstructor<ValueView>
-  , capacity?: number
-  , loadFactor?: number
+  , options?: {
+      capacity?: number
+      loadFactor?: number
+      growthFactor?: number
+    }
   )
   constructor(
     _allocator: IAllocator
   , _valueViewConstructor: ViewConstructor<ValueView>
-  , _capacity: number
-  , _loadFactor: number
+  , _options: {
+      capacity: number
+      loadFactor: number
+      growthFactor: number
+    }
   , _byteOffset: number
   , _counter: ReferenceCounter
   )
@@ -153,31 +160,38 @@ implements IClone<HashMap<KeyView, ValueView>>
   | [
       allocator: IAllocator
     , valueViewConstructor: ViewConstructor<ValueView>
-    , capacity?: number
-    , loadFactor?: number
+    , options?: {
+        capacity?: number
+        loadFactor?: number
+        growthFactor?: number
+      }
     ]
   | [
       allocator: IAllocator
     , valueViewConstructor: ViewConstructor<ValueView>
-    , capacity: number
-    , loadFactor: number
+    , options: {
+        capacity: number
+        loadFactor: number
+        growthFactor: number
+      }
     , byteOffset: number
     , counter: ReferenceCounter
     ]
   ) {
     super()
 
-    if (args.length === 6) {
-      const [allocator, valueViewConstructor, capacity, loadFactor, byteOffset, counter] = args
+    if (args.length === 5) {
+      const [allocator, valueViewConstructor, options, byteOffset, counter] = args
       this.allocator = allocator
       this.valueViewConstructor = valueViewConstructor
-      this._capacity = capacity
-      this.loadFactor = loadFactor
+      this._capacity = options.capacity
+      this.loadFactor = options.loadFactor
+      this.growthFactor = options.growthFactor
 
       const {
         InternalLinkedListView
       , InternalBucketsOwnershipPointerView
-      } = createInternalViews(valueViewConstructor, capacity)
+      } = createInternalViews(valueViewConstructor, options.capacity)
       this.InternalLinkedListView = InternalLinkedListView
 
       const rootView = new StructView(
@@ -193,11 +207,20 @@ implements IClone<HashMap<KeyView, ValueView>>
       counter.increment()
       this._counter = counter
     } else {
-      const [allocator, valueViewConstructor, capacity = 1, loadFactor = 0.75] = args
+      const [
+        allocator
+      , valueViewConstructor
+      , {
+          capacity = 1
+        , loadFactor = 0.75
+        , growthFactor = 2
+        } = {}
+      ] = args
       this.allocator = allocator
       this.valueViewConstructor = valueViewConstructor
       this._capacity = capacity
       this.loadFactor = loadFactor
+      this.growthFactor = growthFactor
       this._counter = new ReferenceCounter()
 
       const {
@@ -252,8 +275,11 @@ implements IClone<HashMap<KeyView, ValueView>>
     return new HashMap(
       this.allocator
     , this.valueViewConstructor
-    , this._capacity
-    , this.loadFactor
+    , {
+        capacity: this._capacity
+      , growthFactor: this.growthFactor
+      , loadFactor: this.loadFactor
+      }
     , this._view.byteOffset
     , this._counter
     )
@@ -402,14 +428,18 @@ implements IClone<HashMap<KeyView, ValueView>>
   }
 
   private resizeWhenOverloaded() {
-    const newCapacity = this.computeNewCapacity()
-    if (newCapacity > this._capacity) {
+    if (this.isOverloaded(this._capacity)) {
+      let newCapacity = this._capacity * this.growthFactor
+      while (this.isOverloaded(newCapacity)) {
+        newCapacity *= this.growthFactor
+      }
+
       this.resize(newCapacity)
     }
   }
 
-  private computeNewCapacity(): number {
-    return Math.ceil(this.size / this.loadFactor)
+  private isOverloaded(capacity: number): boolean {
+    return this.size / capacity > this.loadFactor
   }
 
   private resize(newCapacity: number): void {
@@ -447,7 +477,7 @@ implements IClone<HashMap<KeyView, ValueView>>
           const newPointer = newBuckets.getViewByIndex(newIndex)
           let newLinkedList = newPointer.deref()
           if (newLinkedList) {
-            while (newLinkedList) {
+            while (true) {
               const struct = newLinkedList.getViewOfValue()
               const newKeyHash = struct.getByKey('keyHash')
               if (keyHash === newKeyHash) {

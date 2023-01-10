@@ -15,7 +15,7 @@ describe('HashMap', () => {
     const allocate = jest.spyOn(allocator, 'allocate')
     const capacity = 10
 
-    const result = new HashMap(allocator, Uint8View, capacity)
+    const result = new HashMap(allocator, Uint8View, { capacity })
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(allocate).toBeCalledTimes(2)
@@ -31,7 +31,7 @@ describe('HashMap', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const capacity = 1
       const loadFactor = 1
-      const obj = new HashMap(allocator, Uint8View, capacity, loadFactor)
+      const obj = new HashMap(allocator, Uint8View, { capacity, loadFactor })
       const bucketsByteOffset = obj._view.getByKey('buckets')
 
       obj.set(uint8(1), uint8(10))
@@ -46,14 +46,15 @@ describe('HashMap', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const capacity = 1
       const loadFactor = 0.75
-      const obj = new HashMap(allocator, Uint8View, capacity, loadFactor)
+      const growthFactor = 3
+      const obj = new HashMap(allocator, Uint8View, { capacity, loadFactor, growthFactor })
       const bucketsByteOffset = obj._view.getByKey('buckets')
 
       obj.set(uint8(1), uint8(10))
 
       expect(obj._view.getByKey('buckets')).not.toBe(bucketsByteOffset)
-      expect(obj._view.getViewByKey('buckets').deref()!.length).toBe(2)
-      expect(obj._capacity).toBe(2)
+      expect(obj._view.getViewByKey('buckets').deref()!.length).toBe(3)
+      expect(obj._capacity).toBe(3)
       expect(obj.get(uint8(1))!.get()).toBe(10)
     })
   })
@@ -207,7 +208,7 @@ describe('HashMap', () => {
       const iter = obj.values()
       const result = toArray(iter).map(x => x.get())
 
-      expect(result).toStrictEqual([10, 20])
+      expect(result).toStrictEqual([20, 10])
     })
   })
 
