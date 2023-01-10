@@ -31,7 +31,7 @@ implements IHash
     private buffer: ArrayBufferLike
   , public readonly byteOffset: number
   , private viewConstructor: ViewConstructor<View>
-  , private length: Length
+  , public readonly length: Length
   ) {
     super()
   }

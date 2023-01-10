@@ -1,6 +1,7 @@
 import { go } from '@blackglory/go'
 import { Allocator, HashMap, Uint16View, uint16 } from '..'
 import { Benchmark } from 'extra-benchmark'
+import { MB } from './utils'
 
 const benchmark = new Benchmark('HashMap')
 
@@ -29,8 +30,8 @@ go(async () => {
     debugger
     return {
       beforeEach() {
-        allocator = new Allocator(new ArrayBuffer(Uint16View.byteLength * count * count))
-        map = new HashMap(allocator, Uint16View, count)
+        allocator = new Allocator(new ArrayBuffer(50 * MB))
+        map = new HashMap(allocator, Uint16View)
       }
     , iterate() {
         for (let i = 0; i < count; i++) {
