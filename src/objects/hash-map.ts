@@ -98,8 +98,7 @@ const createInternalViews = withLazyStatic(<
 })
 
 /**
- * 在向HashMap添加新的项目后, HashMap会根据负载因子(load factor)尝试对内部数组进行扩容,
- * 确保当前负载总是低于或等于负载因子.
+ * 在向HashMap添加新的项目后, HashMap可能会尝试对内部数组进行扩容, 从而确保当前负载总是低于或等于负载因子.
  * 扩容无法发生在添加项目之前, 因为在添加前无法知道添加项目后的负载情况会增长还是不变.
  */
 export class HashMap<
@@ -222,10 +221,10 @@ implements IClone<HashMap<KeyView, ValueView>>
       ] = args
       this.allocator = allocator
       this.valueViewConstructor = valueViewConstructor
+      this._counter = new ReferenceCounter()
       this._capacity = capacity
       this.loadFactor = loadFactor
       this.growthFactor = growthFactor
-      this._counter = new ReferenceCounter()
 
       const {
         InternalLinkedListView

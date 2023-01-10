@@ -3,7 +3,7 @@ import { HashSet } from '@objects/hash-set'
 import { IAllocator } from '@src/types'
 import { Uint8View } from '@views/uint8-view'
 import { Uint32View } from '@views/uint32-view'
-import { PointerView } from '@views/pointer-view'
+import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { Allocator } from '@src/allocator'
 import { getError } from 'return-style'
 import { BaseObject } from '@objects/base-object'
@@ -13,24 +13,64 @@ describe('HashSet', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
+    const capacity = 10
 
-    const result = new HashSet(allocator, Uint8View, 10)
+    const result = new HashSet(allocator, Uint8View, { capacity })
 
     expect(result).toBeInstanceOf(BaseObject)
-    expect(allocate).toBeCalledTimes(1)
-    expect(allocate).toBeCalledWith(Uint32View.byteLength + PointerView.byteLength * 10)
+    expect(allocate).toBeCalledTimes(2)
+    expect(allocate).nthCalledWith(1, OwnershipPointerView.byteLength * capacity)
+    expect(allocate).nthCalledWith(
+      2
+    , Uint32View.byteLength + OwnershipPointerView.byteLength
+    )
+  })
+
+  describe('resize', () => {
+    test('(size / capacity) <= load factor', () => {
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const capacity = 1
+      const loadFactor = 1
+      const obj = new HashSet(allocator, Uint8View, { capacity, loadFactor })
+      const bucketsByteOffset = obj._view.getByKey('buckets')
+
+      obj.add(uint8(10))
+
+      expect(obj._view.getByKey('buckets')).toBe(bucketsByteOffset)
+      expect(obj._view.getViewByKey('buckets').deref()!.length).toBe(1)
+      expect(obj._capacity).toBe(1)
+      expect(obj.has(uint8(10))).toBe(true)
+    })
+
+    test('(size / capacity) > load factor', () => {
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const capacity = 1
+      const loadFactor = 0.75
+      const growthFactor = 3
+      const obj = new HashSet(allocator, Uint8View, { capacity, loadFactor, growthFactor })
+      const bucketsByteOffset = obj._view.getByKey('buckets')
+
+      obj.add(uint8(10))
+
+      expect(obj._view.getByKey('buckets')).not.toBe(bucketsByteOffset)
+      expect(obj._view.getViewByKey('buckets').deref()!.length).toBe(3)
+      expect(obj._capacity).toBe(3)
+      expect(obj.has(uint8(10))).toBe(true)
+    })
   })
 
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const result = new HashSet(allocator, Uint8View, 10)
+      const obj = new HashSet(allocator, Uint8View)
+      const buckets = obj._view.getViewByKey('buckets').deref()!
 
-      result.destroy()
+      obj.destroy()
 
-      expect(free).toBeCalledTimes(1)
-      expect(free).toBeCalledWith(result._view.byteOffset, result._view.byteLength)
+      expect(free).toBeCalledTimes(2)
+      expect(free).nthCalledWith(1, buckets.byteOffset, buckets.byteLength)
+      expect(free).nthCalledWith(2, obj._view.byteOffset, obj._view.byteLength)
     })
 
     it('cannot destory twice', () => {
@@ -39,10 +79,10 @@ describe('HashSet', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const result = new HashSet(allocator, Uint8View, 10)
-      result.destroy()
+      const obj = new HashSet(allocator, Uint8View)
+      obj.destroy()
 
-      const err = getError(() => result.destroy())
+      const err = getError(() => obj.destroy())
 
       expect(err).toBeInstanceOf(Error)
     })
@@ -54,7 +94,7 @@ describe('HashSet', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new HashSet(allocator, Uint8View, 10)
+        const obj1 = new HashSet(allocator, Uint8View)
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -65,21 +105,23 @@ describe('HashSet', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new HashSet(allocator, Uint8View, 10)
+        const obj1 = new HashSet(allocator, Uint8View)
+        const buckets = obj1._view.getViewByKey('buckets').deref()!
         const obj2 = obj1.clone()
 
         obj1.destroy()
         obj2.destroy()
 
-        expect(free).toBeCalledTimes(1)
-        expect(free).toBeCalledWith(obj1._view.byteOffset, obj1._view.byteLength)
+        expect(free).toBeCalledTimes(2)
+        expect(free).nthCalledWith(1, buckets.byteOffset, buckets.byteLength)
+        expect(free).nthCalledWith(2, obj1._view.byteOffset, obj1._view.byteLength)
       })
     })
   })
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new HashSet(allocator, Uint8View, 10)
+    const obj = new HashSet(allocator, Uint8View)
 
     const result = obj.clone()
 
@@ -92,7 +134,7 @@ describe('HashSet', () => {
   describe('size', () => {
     test('initial value', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+      const obj = new HashSet<Uint8View>(allocator, Uint8View)
 
       const result = obj.size
 
@@ -102,7 +144,7 @@ describe('HashSet', () => {
     describe('add', () => {
       test('new item', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+        const obj = new HashSet<Uint8View>(allocator, Uint8View)
 
         obj.add(uint8(1))
         const result = obj.size
@@ -112,7 +154,7 @@ describe('HashSet', () => {
 
       test('old item', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+        const obj = new HashSet<Uint8View>(allocator, Uint8View)
         obj.add(uint8(1))
 
         obj.add(uint8(1))
@@ -125,7 +167,7 @@ describe('HashSet', () => {
     describe('delete', () => {
       test('exist item', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+        const obj = new HashSet<Uint8View>(allocator, Uint8View)
         obj.add(uint8(1))
 
         obj.delete(uint8(1))
@@ -136,7 +178,7 @@ describe('HashSet', () => {
 
       test('non-exist item', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+        const obj = new HashSet<Uint8View>(allocator, Uint8View)
 
         obj.delete(uint8(1))
         const result = obj.size
@@ -149,7 +191,7 @@ describe('HashSet', () => {
   describe('values', () => {
     test('empty', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+      const obj = new HashSet<Uint8View>(allocator, Uint8View)
 
       const iter = obj.values()
       const result = toArray(iter)
@@ -159,21 +201,21 @@ describe('HashSet', () => {
 
     test('non-empty', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+      const obj = new HashSet<Uint8View>(allocator, Uint8View)
       obj.add(uint8(10))
       obj.add(uint8(20))
 
       const iter = obj.values()
       const result = toArray(iter).map(x => x.get())
 
-      expect(result).toStrictEqual([10, 20])
+      expect(result).toStrictEqual([20, 10])
     })
   })
 
   describe('has', () => {
     test('item does not exist', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+      const obj = new HashSet<Uint8View>(allocator, Uint8View)
       const key = uint8(1)
 
       const result = obj.has(key)
@@ -183,7 +225,7 @@ describe('HashSet', () => {
 
     test('item exists', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+      const obj = new HashSet<Uint8View>(allocator, Uint8View)
       const value = uint8(1)
       obj.add(value)
 
@@ -196,7 +238,7 @@ describe('HashSet', () => {
   describe('add', () => {
     test('item does not exist', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+      const obj = new HashSet<Uint8View>(allocator, Uint8View)
       const value = uint8(1)
 
       obj.add(value)
@@ -206,7 +248,7 @@ describe('HashSet', () => {
 
     test('item exists', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+      const obj = new HashSet<Uint8View>(allocator, Uint8View)
       const value = uint8(1)
       obj.add(value)
 
@@ -219,7 +261,7 @@ describe('HashSet', () => {
   describe('delete', () => {
     test('item does not exist', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+      const obj = new HashSet<Uint8View>(allocator, Uint8View)
       const value = uint8(1)
 
       obj.delete(value)
@@ -229,7 +271,7 @@ describe('HashSet', () => {
 
     test('item exists', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new HashSet<Uint8View>(allocator, Uint8View, 10)
+      const obj = new HashSet<Uint8View>(allocator, Uint8View)
       const value = uint8(1)
       obj.add(value)
 
