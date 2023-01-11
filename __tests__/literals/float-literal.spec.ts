@@ -1,25 +1,25 @@
-import { Int32Literal, int32 } from '@literals/int32'
+import { FloatLiteral, float } from '@literals/float-literal'
 import { IHasher } from '@src/interfaces'
-import { int32ToBuffer } from '@test/utils'
+import { float64ToBuffer } from '@test/utils'
 import { BaseLiteral } from '@literals/base-literal'
 
-test('int32', () => {
-  const result = int32(1)
+test('float', () => {
+  const result = float(1)
 
-  expect(result).toBeInstanceOf(Int32Literal)
+  expect(result).toBeInstanceOf(FloatLiteral)
   expect(result.get()).toBe(1)
 })
 
-describe('Int32Literal', () => {
+describe('FloatLiteral', () => {
   test('create', () => {
-    const result = new Int32Literal(1)
+    const result = new FloatLiteral(1)
 
     expect(result).toBeInstanceOf(BaseLiteral)
     expect(result.get()).toBe(1)
   })
 
   test('get', () => {
-    const literal = new Int32Literal(1)
+    const literal = new FloatLiteral(1)
 
     const result = literal.get()
 
@@ -27,7 +27,7 @@ describe('Int32Literal', () => {
   })
 
   test('set', () => {
-    const literal = new Int32Literal(1)
+    const literal = new FloatLiteral(1)
 
     literal.set(2)
 
@@ -35,7 +35,7 @@ describe('Int32Literal', () => {
   })
 
   test('hash', () => {
-    const literal = new Int32Literal(1)
+    const literal = new FloatLiteral(1)
     const hasher = {
       write: jest.fn()
     } satisfies IHasher
@@ -43,6 +43,6 @@ describe('Int32Literal', () => {
     literal.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).toBeCalledWith(int32ToBuffer(1))
+    expect(hasher.write).toBeCalledWith(float64ToBuffer(1))
   })
 })

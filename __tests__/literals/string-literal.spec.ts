@@ -1,4 +1,4 @@
-import { StringLiteral, string } from '@literals/string'
+import { StringLiteral, string } from '@literals/string-literal'
 import { IHasher } from '@src/interfaces'
 import { BaseLiteral } from '@literals/base-literal'
 

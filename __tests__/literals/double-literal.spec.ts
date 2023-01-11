@@ -1,25 +1,25 @@
-import { Uint16Literal, uint16 } from '@literals/uint16'
+import { DoubleLiteral, double } from '@literals/double-literal'
 import { IHasher } from '@src/interfaces'
-import { uint16ToBuffer } from '@test/utils'
+import { float64ToBuffer } from '@test/utils'
 import { BaseLiteral } from '@literals/base-literal'
 
-test('uint16', () => {
-  const result = uint16(1)
+test('double', () => {
+  const result = double(1)
 
-  expect(result).toBeInstanceOf(Uint16Literal)
+  expect(result).toBeInstanceOf(DoubleLiteral)
   expect(result.get()).toBe(1)
 })
 
-describe('Uint16Literal', () => {
+describe('DoubleLiteral', () => {
   test('create', () => {
-    const result = new Uint16Literal(1)
+    const result = new DoubleLiteral(1)
 
     expect(result).toBeInstanceOf(BaseLiteral)
     expect(result.get()).toBe(1)
   })
 
   test('get', () => {
-    const literal = new Uint16Literal(1)
+    const literal = new DoubleLiteral(1)
 
     const result = literal.get()
 
@@ -27,7 +27,7 @@ describe('Uint16Literal', () => {
   })
 
   test('set', () => {
-    const literal = new Uint16Literal(1)
+    const literal = new DoubleLiteral(1)
 
     literal.set(2)
 
@@ -35,7 +35,7 @@ describe('Uint16Literal', () => {
   })
 
   test('hash', () => {
-    const literal = new Uint16Literal(1)
+    const literal = new DoubleLiteral(1)
     const hasher = {
       write: jest.fn()
     } satisfies IHasher
@@ -43,6 +43,6 @@ describe('Uint16Literal', () => {
     literal.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).toBeCalledWith(uint16ToBuffer(1))
+    expect(hasher.write).toBeCalledWith(float64ToBuffer(1))
   })
 })

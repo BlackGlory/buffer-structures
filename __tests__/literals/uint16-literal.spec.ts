@@ -1,25 +1,25 @@
-import { Uint32Literal, uint32 } from '@literals/uint32'
+import { Uint16Literal, uint16 } from '@literals/uint16-literal'
 import { IHasher } from '@src/interfaces'
-import { uint32ToBuffer } from '@test/utils'
+import { uint16ToBuffer } from '@test/utils'
 import { BaseLiteral } from '@literals/base-literal'
 
-test('uint32', () => {
-  const result = uint32(1)
+test('uint16', () => {
+  const result = uint16(1)
 
-  expect(result).toBeInstanceOf(Uint32Literal)
+  expect(result).toBeInstanceOf(Uint16Literal)
   expect(result.get()).toBe(1)
 })
 
-describe('Uint32Literal', () => {
+describe('Uint16Literal', () => {
   test('create', () => {
-    const result = new Uint32Literal(1)
+    const result = new Uint16Literal(1)
 
     expect(result).toBeInstanceOf(BaseLiteral)
     expect(result.get()).toBe(1)
   })
 
   test('get', () => {
-    const literal = new Uint32Literal(1)
+    const literal = new Uint16Literal(1)
 
     const result = literal.get()
 
@@ -27,7 +27,7 @@ describe('Uint32Literal', () => {
   })
 
   test('set', () => {
-    const literal = new Uint32Literal(1)
+    const literal = new Uint16Literal(1)
 
     literal.set(2)
 
@@ -35,7 +35,7 @@ describe('Uint32Literal', () => {
   })
 
   test('hash', () => {
-    const literal = new Uint32Literal(1)
+    const literal = new Uint16Literal(1)
     const hasher = {
       write: jest.fn()
     } satisfies IHasher
@@ -43,6 +43,6 @@ describe('Uint32Literal', () => {
     literal.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).toBeCalledWith(uint32ToBuffer(1))
+    expect(hasher.write).toBeCalledWith(uint16ToBuffer(1))
   })
 })

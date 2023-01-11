@@ -1,25 +1,25 @@
-import { DoubleLiteral, double } from '@literals/double'
+import { Uint32Literal, uint32 } from '@literals/uint32-literal'
 import { IHasher } from '@src/interfaces'
-import { float64ToBuffer } from '@test/utils'
+import { uint32ToBuffer } from '@test/utils'
 import { BaseLiteral } from '@literals/base-literal'
 
-test('double', () => {
-  const result = double(1)
+test('uint32', () => {
+  const result = uint32(1)
 
-  expect(result).toBeInstanceOf(DoubleLiteral)
+  expect(result).toBeInstanceOf(Uint32Literal)
   expect(result.get()).toBe(1)
 })
 
-describe('DoubleLiteral', () => {
+describe('Uint32Literal', () => {
   test('create', () => {
-    const result = new DoubleLiteral(1)
+    const result = new Uint32Literal(1)
 
     expect(result).toBeInstanceOf(BaseLiteral)
     expect(result.get()).toBe(1)
   })
 
   test('get', () => {
-    const literal = new DoubleLiteral(1)
+    const literal = new Uint32Literal(1)
 
     const result = literal.get()
 
@@ -27,7 +27,7 @@ describe('DoubleLiteral', () => {
   })
 
   test('set', () => {
-    const literal = new DoubleLiteral(1)
+    const literal = new Uint32Literal(1)
 
     literal.set(2)
 
@@ -35,7 +35,7 @@ describe('DoubleLiteral', () => {
   })
 
   test('hash', () => {
-    const literal = new DoubleLiteral(1)
+    const literal = new Uint32Literal(1)
     const hasher = {
       write: jest.fn()
     } satisfies IHasher
@@ -43,6 +43,6 @@ describe('DoubleLiteral', () => {
     literal.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).toBeCalledWith(float64ToBuffer(1))
+    expect(hasher.write).toBeCalledWith(uint32ToBuffer(1))
   })
 })

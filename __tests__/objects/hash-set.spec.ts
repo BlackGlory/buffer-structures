@@ -7,7 +7,7 @@ import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { Allocator } from '@src/allocator'
 import { getError } from 'return-style'
 import { BaseObject } from '@objects/base-object'
-import { uint8 } from '@literals/uint8'
+import { uint8 } from '@literals/uint8-literal'
 
 describe('HashSet', () => {
   test('create', () => {
