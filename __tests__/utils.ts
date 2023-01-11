@@ -19,7 +19,7 @@ export function bufferToBytes(buffer: ArrayBufferLike): number[] {
 }
 
 export function bytesToBuffer(bytes: number[]): ArrayBuffer {
-  return new Uint8Array(bytes)
+  return new Uint8Array(bytes).buffer
 }
 
 export function uint8ToBuffer(value: number): ArrayBuffer {

@@ -1,27 +1,18 @@
 import { IHasher } from '@src/interfaces'
-import { Xxh32 } from '@node-rs/xxhash'
 import { NULL } from '@utils/null'
+import { h32 } from 'xxhashjs'
 
-// 出于性能原因, 共享实例.
-const hasher = new Xxh32(0)
-
-/**
- * **由于性能优化, 不能同时存在多个Hasher实例, 否则会导致结果出错.**
- */
+// 当前采用纯JavaScript实现, 等待`@node-rs/xxhash`解决内存泄漏问题:
+// https://github.com/napi-rs/node-rs/issues/655
 export class Hasher implements IHasher {
-  constructor() {
-    hasher.reset()
-  }
+  private hasher = h32(0)
 
   write(bytes: ArrayBufferLike): void {
-    const buffer = Buffer.from(bytes)
-    hasher.update(buffer)
-
-    // 将0作为分隔符, 防止因前后数据串连起来恰好一致导致的冲突.
-    hasher.update(Buffer.from(NULL))
+    this.hasher.update(bytes)
+    this.hasher.update(NULL)
   }
 
   finish(): number {
-    return hasher.digest()
+    return this.hasher.digest().toNumber()
   }
 }
