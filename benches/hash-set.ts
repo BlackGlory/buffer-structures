@@ -8,15 +8,15 @@ const benchmark = new Benchmark('HashSet')
 go(async () => {
   benchmark.addCase('Set#set', () => {
     const count = 10000
-    const map = new Set<number>()
+    const set = new Set<number>()
 
     return {
       beforeEach() {
-        map.clear()
+        set.clear()
       }
     , iterate() {
         for (let i = 0; i < count; i++) {
-          map.add(i)
+          set.add(i)
         }
       }
     }
@@ -25,18 +25,47 @@ go(async () => {
   benchmark.addCase('HashSet#set', () => {
     const count = 10000
     let allocator: Allocator<ArrayBuffer>
-    let map: HashSet<Uint16View>
+    let set: HashSet<Uint16View>
 
-    debugger
     return {
       beforeEach() {
         allocator = new Allocator(new ArrayBuffer(50 * MB))
-        map = new HashSet(allocator, Uint16View)
+        set = new HashSet(allocator, Uint16View)
       }
     , iterate() {
         for (let i = 0; i < count; i++) {
-          map.add(uint16(i))
+          set.add(uint16(i))
         }
+      }
+    }
+  })
+
+  benchmark.addCase('Set#has', () => {
+    const count = 10000
+    const set = new Set<number>()
+    for (let i = 0; i < count; i += 2) {
+      set.add(i)
+    }
+
+    return () =>{
+      for (let i = 0; i < count; i++) {
+        set.has(i)
+      }
+    }
+  })
+
+  benchmark.addCase('HashSet#has', () => {
+    const count = 10000
+    const allocator = new Allocator(new ArrayBuffer(50 * MB))
+    const set = new HashSet(allocator, Uint16View)
+    for (let i = 0; i < count; i += 2) {
+      set.add(uint16(i))
+    }
+
+    debugger
+    return () => {
+      for (let i = 0; i < count; i++) {
+        set.has(uint16(i))
       }
     }
   })

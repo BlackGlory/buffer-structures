@@ -27,7 +27,6 @@ go(async () => {
     let allocator: Allocator<ArrayBuffer>
     let map: HashMap<Uint16View, Uint16View>
 
-    debugger
     return {
       beforeEach() {
         allocator = new Allocator(new ArrayBuffer(50 * MB))
@@ -37,6 +36,35 @@ go(async () => {
         for (let i = 0; i < count; i++) {
           map.set(uint16(i), uint16(i))
         }
+      }
+    }
+  })
+
+  benchmark.addCase('Map#has', () => {
+    const count = 10000
+    const map = new Map<number, number>()
+    for (let i = 0; i < count; i += 2) {
+      map.set(i, i)
+    }
+
+    return () => {
+      for (let i = 0; i < count; i++) {
+        map.has(i)
+      }
+    }
+  })
+
+  benchmark.addCase('HashMap#has', () => {
+    const count = 10000
+    const allocator = new Allocator(new ArrayBuffer(50 * MB))
+    const map = new HashMap(allocator, Uint16View)
+    for (let i = 0; i < count; i += 2) {
+      map.set(uint16(i), uint16(i))
+    }
+
+    return () => {
+      for (let i = 0; i < count; i++) {
+        map.has(uint16(i))
       }
     }
   })
