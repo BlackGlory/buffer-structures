@@ -138,6 +138,7 @@ interface ICopy<T> {
 
 ### 字面量 Literal
 字面量是一种内存数据结构, 它以JavaScript数据类型表示, 不需要缓冲区就可以使用.
+所有字面量都是不可变的, 以免不慎将其当作视图或对象使用.
 
 #### Float32Literal
 ```ts
@@ -145,7 +146,7 @@ function float(val: number): Float32Literal
 
 class Float32Literal
 extends BaseLiteral
-implements IReadableWritable<number>
+implements IReadable<number>
          , IHash {
   constructor(value: number)
 }
@@ -156,7 +157,7 @@ implements IReadableWritable<number>
 function double(val: number): Float64Literal
 
 class Float64Literal extends BaseLiteral
-implements IReadableWritable<number>
+implements IReadable<number>
          , IHash {
   constructor(value: number)
 }
@@ -168,7 +169,7 @@ function int8(val: number): Int8Literal
 
 class Int8Literal
 extends BaseLiteral
-implements IReadableWritable<number>
+implements IReadable<number>
          , IHash {
   constructor(value: number)
 }
@@ -180,7 +181,7 @@ function int16(val: number): Int16Literal
 
 class Int16Literal
 extends BaseLiteral
-implements IReadableWritable<number>
+implements IReadable<number>
          , IHash {
   constructor(value: number)
 }
@@ -192,7 +193,7 @@ function int32(val: number): Int32Literal
 
 class Int32Literal
 extends BaseLiteral
-implements IReadableWritable<number>
+implements IReadable<number>
          , IHash {
   constructor(value: number)
 }
@@ -204,7 +205,7 @@ function uint8(val: number): Uint8Literal
 
 class Uint8Literal
 extends BaseLiteral
-implements IReadableWritable<number>
+implements IReadable<number>
          , IHash {
   constructor(value: number)
 }
@@ -216,7 +217,7 @@ function uint16(val: number): Uint16Literal
 
 class Uint16Literal
 extends BaseLiteral
-implements IReadableWritable<number>
+implements IReadable<number>
          , IHash {
   constructor(value: number)
 }
@@ -228,7 +229,7 @@ function uint32(val: number): Uint32Literal
 
 class Uint32Literal
 extends BaseLiteral
-implements IReadableWritable<number>
+implements IReadable<number>
          , IHash {
   constructor(value: number)
 }
@@ -240,7 +241,7 @@ function string(val: string): StringLiteral
 
 class StringLiteral
 extends BaseLiteral
-implements IReadableWritable<string>
+implements IReadable<string>
          , IHash {
   constructor(value: string)
 }

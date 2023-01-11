@@ -26,14 +26,6 @@ describe('Int32Literal', () => {
     expect(result).toBe(1)
   })
 
-  test('set', () => {
-    const literal = new Int32Literal(1)
-
-    literal.set(2)
-
-    expect(literal.get()).toBe(2)
-  })
-
   test('hash', () => {
     const literal = new Int32Literal(1)
     const hasher = {

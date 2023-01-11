@@ -26,14 +26,6 @@ describe('Uint8Literal', () => {
     expect(result).toBe(1)
   })
 
-  test('set', () => {
-    const literal = new Uint8Literal(1)
-
-    literal.set(2)
-
-    expect(literal.get()).toBe(2)
-  })
-
   test('hash', () => {
     const literal = new Uint8Literal(1)
     const hasher = {

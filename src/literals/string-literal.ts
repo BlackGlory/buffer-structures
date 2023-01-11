@@ -1,4 +1,4 @@
-import { IReadableWritable, IHash } from '@src/traits'
+import { IReadable, IHash } from '@src/traits'
 import { IHasher } from '@src/interfaces'
 import { BaseLiteral } from '@literals/base-literal'
 
@@ -8,7 +8,7 @@ export function string(val: string): StringLiteral {
 
 export class StringLiteral
 extends BaseLiteral
-implements IReadableWritable<string>
+implements IReadable<string>
          , IHash {
   constructor(private value: string) {
     super()
@@ -22,9 +22,5 @@ implements IReadableWritable<string>
 
   get(): string {
     return this.value
-  }
-
-  set(value: string): void {
-    this.value = value
   }
 }

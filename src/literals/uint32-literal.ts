@@ -1,4 +1,4 @@
-import { IReadableWritable, IHash } from '@src/traits'
+import { IReadable, IHash } from '@src/traits'
 import { IHasher } from '@src/interfaces'
 import { BaseLiteral } from '@literals/base-literal'
 import { lazy } from 'extra-lazy'
@@ -15,7 +15,7 @@ const getView = lazy(() => {
 
 export class Uint32Literal
 extends BaseLiteral
-implements IReadableWritable<number>
+implements IReadable<number>
          , IHash {
   constructor(private value: number) {
     super()
@@ -30,9 +30,5 @@ implements IReadableWritable<number>
 
   get(): number {
     return this.value
-  }
-
-  set(value: number): void {
-    this.value = value
   }
 }

@@ -25,14 +25,6 @@ describe('StringLiteral', () => {
     expect(result).toBe('foo')
   })
 
-  test('set', () => {
-    const literal = new StringLiteral('foo')
-
-    literal.set('bar')
-
-    expect(literal.get()).toBe('bar')
-  })
-
   test('hash', () => {
     const literal = new StringLiteral('foo')
     const hasher = {
