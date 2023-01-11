@@ -142,7 +142,7 @@ interface ICopy<T> {
 
 #### Float32Literal
 ```ts
-function float(val: number): Float32Literal
+function float32(val: number): Float32Literal
 
 class Float32Literal
 extends BaseLiteral
@@ -154,7 +154,7 @@ implements IReadable<number>
 
 #### Float64Literal
 ```ts
-function double(val: number): Float64Literal
+function float64(val: number): Float64Literal
 
 class Float64Literal extends BaseLiteral
 implements IReadable<number>
