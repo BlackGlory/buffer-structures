@@ -4,12 +4,13 @@ import { Uint16View } from '@views/uint16-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { BaseObject } from '@objects/base-object'
+import { Uint16Literal } from '@literals/uint16-literal'
 
 export class Uint16
 extends BaseObject
 implements ICopy<Uint16>
          , IClone<Uint16>
-         , IReadableWritable<number>
+         , IReadableWritable<Uint16Literal>
          , IHash
          , IDestroy {
   readonly _view: Uint16View
@@ -17,10 +18,10 @@ implements ICopy<Uint16>
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
-  constructor(allocator: IAllocator, value: number)
+  constructor(allocator: IAllocator, value: Uint16Literal)
   constructor(_allocator: IAllocator, _byteOffset: number, _counter: ReferenceCounter)
   constructor(...args:
-  | [allocator: IAllocator, value: number]
+  | [allocator: IAllocator, value: Uint16Literal]
   | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
     super()
@@ -71,13 +72,13 @@ implements ICopy<Uint16>
     return new Uint16(this.allocator, this.get())
   }
 
-  get(): number {
+  get(): Uint16Literal {
     this.fsm.assertAllocated()
 
     return this._view.get()
   }
 
-  set(value: number): void {
+  set(value: Uint16Literal): void {
     this.fsm.assertAllocated()
 
     this._view.set(value)

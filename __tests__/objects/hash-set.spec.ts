@@ -36,7 +36,7 @@ describe('HashSet', () => {
 
       obj.add(uint8(10))
 
-      expect(obj._view.getByKey('buckets')).toBe(bucketsByteOffset)
+      expect(obj._view.getByKey('buckets')).toStrictEqual(bucketsByteOffset)
       expect(obj._view.getViewByKey('buckets').deref()!.length).toBe(1)
       expect(obj._capacity).toBe(1)
       expect(obj.has(uint8(10))).toBe(true)
@@ -208,7 +208,7 @@ describe('HashSet', () => {
       const iter = obj.values()
       const result = toArray(iter).map(x => x.get())
 
-      expect(result).toStrictEqual([20, 10])
+      expect(result).toStrictEqual([uint8(20), uint8(10)])
     })
   })
 

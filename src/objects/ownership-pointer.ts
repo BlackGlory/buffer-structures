@@ -7,6 +7,7 @@ import { ReferenceCounter } from '@utils/reference-counter'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
 import { NULL } from '@utils/null'
+import { uint32 } from '@literals/uint32-literal'
 
 export class OwnershipPointer<View extends BaseView & IHash & IFree>
 extends BaseObject
@@ -57,7 +58,7 @@ implements IClone<OwnershipPointer<View>>
       , byteOffset
       , viewConstructor
       )
-      view.set(valueByteOffset)
+      view.set(uint32(valueByteOffset))
       this._view = view
     } else {
       const [allocator, viewConstructor, byteOffset, counter] = args

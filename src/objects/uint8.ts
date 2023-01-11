@@ -4,12 +4,13 @@ import { Uint8View } from '@views/uint8-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { BaseObject } from '@objects/base-object'
+import { Uint8Literal } from '@literals/uint8-literal'
 
 export class Uint8
 extends BaseObject
 implements ICopy<Uint8>
          , IClone<Uint8>
-         , IReadableWritable<number>
+         , IReadableWritable<Uint8Literal>
          , IHash
          , IDestroy {
   readonly _view: Uint8View
@@ -17,10 +18,10 @@ implements ICopy<Uint8>
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
-  constructor(allocator: IAllocator, value: number)
+  constructor(allocator: IAllocator, value: Uint8Literal)
   constructor(_allocator: IAllocator, _byteOffset: number, _counter: ReferenceCounter)
   constructor(...args:
-  | [allocator: IAllocator, value: number]
+  | [allocator: IAllocator, value: Uint8Literal]
   | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
     super()
@@ -71,13 +72,13 @@ implements ICopy<Uint8>
     return new Uint8(this.allocator, this.get())
   }
 
-  get(): number {
+  get(): Uint8Literal {
     this.fsm.assertAllocated()
 
     return this._view.get()
   }
 
-  set(value: number): void {
+  set(value: Uint8Literal): void {
     this.fsm.assertAllocated()
 
     this._view.set(value)

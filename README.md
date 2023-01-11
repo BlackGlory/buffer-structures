@@ -138,8 +138,6 @@ interface ICopy<T> {
 
 ### 字面量 Literal
 字面量是一种内存数据结构, 它以JavaScript数据类型表示, 不需要缓冲区就可以使用.
-字面量之所以存在, 是因为存在需要表示特定数据类型, 但又不希望往缓冲区里写入数据的情况.
-由于字面量以JavaScript数据类型表示, 使用字面量可以显著加强性能.
 
 #### Float32Literal
 ```ts
@@ -260,7 +258,7 @@ class Float32
 extends BaseObject
 implements ICopy<Float32>
          , IClone<Float32>
-         , IReadableWritable<number>
+         , IReadableWritable<Float32Literal>
          , IHash
          , IDestroy {
   constructor(allocator: IAllocator, value: number)
@@ -273,7 +271,7 @@ class Float64
 extends BaseObject
 implements ICopy<Float64>
          , IClone<Float64>
-         , IReadableWritable<number>
+         , IReadableWritable<Float64Literal>
          , IHash
          , IDestroy {
   constructor(allocator: IAllocator, value: number)
@@ -286,7 +284,7 @@ class Int8
 extends BaseObject
 implements ICopy<Int8>
          , IClone<Int8>
-         , IReadableWritable<number>
+         , IReadableWritable<Int8Literal>
          , IHash
          , IDestroy {
   constructor(allocator: IAllocator, value: number)
@@ -299,7 +297,7 @@ class Int16
 extends BaseObject
 implements ICopy<Int16>
          , IClone<Int16>
-         , IReadableWritable<number>
+         , IReadableWritable<Int16Literal>
          , IHash
          , IDestroy {
   constructor(allocator: IAllocator, value: number)
@@ -312,7 +310,7 @@ class Int32
 extends BaseObject
 implements ICopy<Int32>
          , IClone<Int32>
-         , IReadableWritable<number>
+         , IReadableWritable<Int32Literal>
          , IHash
          , IDestroy {
   constructor(allocator: IAllocator, value: number)
@@ -325,7 +323,7 @@ class Uint8
 extends BaseObject
 implements ICopy<Uint8>
          , IClone<Uint8>
-         , IReadableWritable<number>
+         , IReadableWritable<Uint8Literal>
          , IHash
          , IDestroy {
   constructor(allocator: IAllocator, value: number)
@@ -338,7 +336,7 @@ class Uint16
 extends BaseObject
 implements ICopy<Uint16>
          , IClone<Uint16>
-         , IReadableWritable<number>
+         , IReadableWritable<Uint16Literal>
          , IHash
          , IDestroy {
   constructor(allocator: IAllocator, value: number)
@@ -351,7 +349,7 @@ class Uint32
 extends BaseObject
 implements ICopy<Uint32>
          , IClone<Uint32>
-         , IReadableWritable<number>
+         , IReadableWritable<Uint32Literal>
          , IHash
          , IDestroy {
   constructor(allocator: IAllocator, value: number)
@@ -364,7 +362,7 @@ class String
 extends BaseObject
 implements ICopy<String>
          , IClone<String>
-         , IReadable<string>
+         , IReadable<StrintLiteral>
          , IHash
          , IDestroy {
   constructor(allocator: IAllocator, value: string)
@@ -503,12 +501,6 @@ implements ICopy<Struct<Structure>>
          , IReadableWritable<MapStructureToValue<Structure>>
          , IHash
          , IDestroy {
-  readonly _view: StructView<Structure>
-  readonly _counter: ReferenceCounter
-  private fsm = new ObjectStateMachine()
-  private allocator: IAllocator
-  private structure: Structure
-
   constructor(
     allocator: IAllocator
   , structure: Structure
@@ -558,7 +550,7 @@ implements IClone<HashMap<KeyView, ValueView>>
   values(): IterableIterator<ValueView>
   has(key: IHash): boolean
   get(key: IHash): ValueView | undefined
-  set(key: IHash, value: PickReadableWritable<ValueView>): void
+  set(key: IHash, value: UnpackedReadableWritable<ValueView>): void
   delete(key: IHash): void
 }
 ```
@@ -591,7 +583,7 @@ implements IClone<HashSet<View>>
 
   values(): IterableIterator<View>
   has(value: IHash): boolean
-  add(value: PickReadableWritable<View> & IHash): void
+  add(value: UnpackedReadableWritable<View> & IHash): void
   delete(value: IHash): void
 }
 ```
@@ -611,7 +603,7 @@ class Float32View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number>
+         , IReadableWritable<Float32Literal>
          , IFree {
   static readonly byteLength: number
 
@@ -630,7 +622,7 @@ class Float64View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number>
+         , IReadableWritable<Float64Literal>
          , IFree {
   static readonly byteLength: number
 
@@ -649,7 +641,7 @@ class Int8View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number>
+         , IReadableWritable<Int8Literal>
          , IFree {
   static readonly byteLength: number
 
@@ -668,7 +660,7 @@ class Int16View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number>
+         , IReadableWritable<Int16Literal>
          , IFree {
   static readonly byteLength: number
 
@@ -687,7 +679,7 @@ class Int32View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number> {
+         , IReadableWritable<Int32Literal> {
   static readonly byteLength: number
 
   constructor(buffer: ArrayBufferLike, byteOffset: number)
@@ -705,7 +697,7 @@ class Uint8View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number>
+         , IReadableWritable<Uint8Literal>
          , IFree {
   static readonly byteLength: number
 
@@ -724,7 +716,7 @@ class Uint16View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number>
+         , IReadableWritable<Uint16Literal>
          , IFree {
   static readonly byteLength: number
 
@@ -743,7 +735,7 @@ class Uint32View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number>
+         , IReadableWritable<Uint32Literal>
          , IFree {
   static readonly byteLength: number
 
@@ -765,7 +757,7 @@ class StringView
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<string>
+         , IReadableWritable<StringLiteral>
          , ISized
          , IFree {
   static getByteLength(value: string): number
@@ -797,7 +789,7 @@ class PointerView<View extends BaseView & IHash>
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number | null>
+         , IReadableWritable<Uint32Literal | null>
          , IFree {
   static readonly byteLength: number
 
@@ -831,7 +823,7 @@ class OwnershipPointerView<View extends BaseView & IHash & IFree>
 extends PointerView<View>
 implements IHash
          , IReference
-         , IReadableWritable<number | null>
+         , IReadableWritable<Uint32Literal | null>
          , IFree
          , IOwnershipPointer {
   static readonly byteLength: number
@@ -866,7 +858,7 @@ class ReferenceCountedOwnershipPointerView<View extends BaseView & IHash & IFree
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<{ count: number; value: number | null }>
+         , IReadableWritable<{ count: Uint32Literal; value: Uint32Literal | null }>
          , IFree
          , IOwnershipPointer {
   static readonly byteLength: number
@@ -877,13 +869,13 @@ implements IHash
   , viewConstructor: ViewConstructor<View>
   )
 
-  setValue(value: number | null): void 
-  getValue(): number | null
+  setValue(value: Uint32Literal | null): void 
+  getValue(): Uint32Literal | null
 
-  setCount(value: number): void
-  getCount(): number
-  incrementCount(value: number = 1): void
-  decrementCount(value: number = 1): void
+  setCount(value: Uint32Literal): void
+  getCount(): Uint32Literal
+  incrementCount(value: Uint32Literal = uint32(1)): void
+  decrementCount(value: Uint32Literal = uint32(1)): void
 
   deref(): View | null
 }

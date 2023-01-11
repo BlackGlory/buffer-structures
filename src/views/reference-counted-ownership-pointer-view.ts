@@ -8,6 +8,7 @@ import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { BaseView } from '@views/base-view'
 import { withLazyStatic, lazyStatic } from 'extra-lazy'
 import { NULL } from '@utils/null'
+import { Uint32Literal, uint32 } from '@literals/uint32-literal'
 
 type OwnershipPointerViewConstructor<View extends BaseView & IHash & IFree> =
   ISized
@@ -35,7 +36,7 @@ export class ReferenceCountedOwnershipPointerView<View extends BaseView & IHash 
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<{ count: number; value: number | null }>
+         , IReadableWritable<{ count: Uint32Literal; value: Uint32Literal | null }>
          , IFree
          , IOwnershipPointer {
   static readonly byteLength: number = Uint32View.byteLength
@@ -61,7 +62,7 @@ implements IHash
 
   free(allocator: IAllocator): void {
     this.decrementCount()
-    if (this.getCount() === 0) {
+    if (this.getCount().get() === 0) {
       this.deref()?.free(allocator)
 
       allocator.free(this.byteOffset, ReferenceCountedOwnershipPointerView.byteLength)
@@ -70,7 +71,7 @@ implements IHash
 
   freePointed(allocator: IAllocator): void {
     this.decrementCount()
-    if (this.getCount() === 0) {
+    if (this.getCount().get() === 0) {
       this.deref()?.free(allocator)
     }
   }
@@ -84,41 +85,44 @@ implements IHash
     }
   }
 
-  set(value: { count: number; value: number | null }): void {
+  set(value: { count: Uint32Literal; value: Uint32Literal | null }): void {
     this.view.set(value)
   }
 
-  get(): { count: number; value: number | null } {
+  get(): { count: Uint32Literal; value: Uint32Literal | null } {
     return this.view.get()
   }
 
-  setCount(value: number): void {
-    assert(Number.isInteger(value), 'The new count must be an integer')
-    assert(value >= 0, 'The new count must be greater than or equal to 0')
-    assert(value <= Number.MAX_SAFE_INTEGER, 'The new count must be less than or equal to Number.MAX_SAFE_INTEGER')
+  setCount(value: Uint32Literal): void {
+    assert(Number.isInteger(value.get()), 'The new count must be an integer')
+    assert(value.get() >= 0, 'The new count must be greater than or equal to 0')
+    assert(
+      value.get() <= Number.MAX_SAFE_INTEGER
+    , 'The new count must be less than or equal to Number.MAX_SAFE_INTEGER'
+    )
 
     this.view.setByKey('count', value)
   }
 
-  getCount(): number {
+  getCount(): Uint32Literal {
     return this.view.getByKey('count')
   }
 
-  incrementCount(value: number = 1): void {
-    const newCount = this.getCount() + value
-    this.setCount(newCount)
+  incrementCount(value: Uint32Literal = uint32(1)): void {
+    const newCount = this.getCount().get() + value.get()
+    this.setCount(uint32(newCount))
   }
 
-  decrementCount(value: number = 1): void {
-    const newCount = this.getCount() - value
-    this.setCount(newCount)
+  decrementCount(value: Uint32Literal = uint32(1)): void {
+    const newCount = this.getCount().get() - value.get()
+    this.setCount(uint32(newCount))
   }
 
-  setValue(value: number | null): void {
+  setValue(value: Uint32Literal | null): void {
     this.view.setByKey('value', value)
   }
 
-  getValue(): number | null {
+  getValue(): Uint32Literal | null {
     return this.view.getByKey('value')
   }
 

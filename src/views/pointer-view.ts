@@ -3,6 +3,7 @@ import { IAllocator, IHasher } from '@src/interfaces'
 import { isntNull } from '@blackglory/prelude'
 import { BaseView } from '@views/base-view'
 import { NULL } from '@utils/null'
+import { uint32, Uint32Literal } from '@literals/uint32-literal'
 
 export type ViewConstructor<View extends BaseView> = new (
   buffer: ArrayBufferLike
@@ -13,7 +14,7 @@ export class PointerView<View extends BaseView & IHash>
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number | null>
+         , IReadableWritable<Uint32Literal | null>
          , IFree {
   static readonly byteLength: number = Uint32Array.BYTES_PER_ELEMENT
 
@@ -42,21 +43,21 @@ implements IHash
     }
   }
 
-  set(value: number | null): void {
-    this.view.setUint32(this.byteOffset, value ?? 0)
+  set(value: Uint32Literal | null): void {
+    this.view.setUint32(this.byteOffset, value?.get() ?? 0)
   }
 
-  get(): number | null {
+  get(): Uint32Literal | null {
     const pointer = this.view.getUint32(this.byteOffset)
     return pointer === 0
          ? null
-         : pointer
+         : uint32(pointer)
   }
 
   deref(): View | null {
     const value = this.get()
     return isntNull(value)
-         ? new this.viewConstruct(this.view.buffer, value)
+         ? new this.viewConstruct(this.view.buffer, value.get())
          : null
   }
 }

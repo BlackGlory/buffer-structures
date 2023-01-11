@@ -5,6 +5,9 @@ import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { uint8ToBuffer, uint16ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
+import { uint8 } from '@literals/uint8-literal'
+import { uint16 } from '@literals/uint16-literal'
+import { uint32 } from '@literals/uint32-literal'
 
 describe('TupleView', () => {
   test('create', () => {
@@ -87,7 +90,7 @@ describe('TupleView', () => {
         Uint8View
       , Uint8OwnershipPointerView
       ])
-      view.setByIndex(1, 20)
+      view.setByIndex(1, uint32(20))
 
       view.free(allocator)
 
@@ -110,7 +113,7 @@ describe('TupleView', () => {
 
     const result = tupleView.get()
 
-    expect(result).toStrictEqual([100, 1000])
+    expect(result).toStrictEqual([uint8(100), uint16(1000)])
   })
 
   test('set', () => {
@@ -121,7 +124,7 @@ describe('TupleView', () => {
     , Uint16View
     ])
 
-    tupleView.set([100, 1000])
+    tupleView.set([uint8(100), uint16(1000)])
 
     const dataView = new DataView(buffer)
     expect(dataView.getUint8(byteOffset)).toBe(100)
@@ -141,7 +144,7 @@ describe('TupleView', () => {
 
     const result = tupleView.getByIndex(1)
 
-    expect(result).toBe(1000)
+    expect(result).toStrictEqual(uint16(1000))
   })
 
   test('setByIndex', () => {
@@ -152,7 +155,7 @@ describe('TupleView', () => {
     , Uint16View
     ])
 
-    tupleView.setByIndex(1, 1000)
+    tupleView.setByIndex(1, uint16(1000))
 
     const dataView = new DataView(buffer)
     expect(dataView.getUint8(byteOffset)).toBe(0)
@@ -186,7 +189,7 @@ describe('TupleView', () => {
       Uint8View
     , Uint16View
     ])
-    view.set([10, 20])
+    view.set([uint8(10), uint16(20)])
     const hasher = {
       write: jest.fn()
     } satisfies IHasher

@@ -4,6 +4,8 @@ import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { uint8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
+import { uint8 } from '@literals/uint8-literal'
+import { uint32 } from '@literals/uint32-literal'
 
 describe('ArrayView', () => {
   test('create', () => {
@@ -68,8 +70,8 @@ describe('ArrayView', () => {
         }
       }
       const view = new ArrayView(allocator.buffer, 10, Uint8OwnershipPointerView, 2)
-      view.setByIndex(0, 20)
-      view.setByIndex(1, 30)
+      view.setByIndex(0, uint32(20))
+      view.setByIndex(1, uint32(30))
 
       view.free(allocator)
 
@@ -91,7 +93,7 @@ describe('ArrayView', () => {
 
     const result = arrayView.get()
 
-    expect(result).toStrictEqual([1, 2, 3])
+    expect(result).toStrictEqual([uint8(1), uint8(2), uint8(3)])
   })
 
   test('set', () => {
@@ -99,7 +101,7 @@ describe('ArrayView', () => {
     const byteOffset = 1
     const arrayView = new ArrayView(buffer, byteOffset, Uint8View, 3)
 
-    arrayView.set([1, 2, 3])
+    arrayView.set([uint8(1), uint8(2), uint8(3)])
 
     const dataView = new DataView(buffer)
     expect(dataView.getUint8(byteOffset)).toBe(1)
@@ -118,7 +120,7 @@ describe('ArrayView', () => {
 
     const result = arrayView.getByIndex(1)
 
-    expect(result).toBe(2)
+    expect(result).toStrictEqual(uint8(2))
   })
 
   test('setByIndex', () => {
@@ -126,7 +128,7 @@ describe('ArrayView', () => {
     const byteOffset = 1
     const arrayView = new ArrayView(buffer, byteOffset, Uint8View, 3)
 
-    arrayView.setByIndex(1, 2)
+    arrayView.setByIndex(1, uint8(2))
 
     const dataView = new DataView(buffer)
     expect(dataView.getUint8(byteOffset + Uint8Array.BYTES_PER_ELEMENT)).toBe(2)
@@ -153,8 +155,8 @@ describe('ArrayView', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
     const view = new ArrayView(buffer, byteOffset, Uint8View, 2)
-    view.setByIndex(0, 1)
-    view.setByIndex(1, 2)
+    view.setByIndex(0, uint8(1))
+    view.setByIndex(1, uint8(2))
     const hasher = {
       write: jest.fn()
     } satisfies IHasher

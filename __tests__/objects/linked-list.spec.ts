@@ -8,6 +8,8 @@ import { Allocator } from '@src/allocator'
 import { OwnershipPointerView } from '@src/views/ownership-pointer-view'
 import { BaseObject } from '@objects/base-object'
 import { NULL } from '@utils/null'
+import { uint8 } from '@literals/uint8-literal'
+import { uint32 } from '@literals/uint32-literal'
 
 describe('LinkedList', () => {
   test('create', () => {
@@ -19,14 +21,14 @@ describe('LinkedList', () => {
     , Uint8View
     , {
         next: null
-      , value: 1
+      , value: uint8(1)
       }
     )
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(result.get()).toStrictEqual({
       next: null
-    , value: 1
+    , value: uint8(1)
     })
     expect(allocate).toBeCalledTimes(1)
     expect(allocate).toBeCalledWith(LinkedListView.getByteLength(Uint8View))
@@ -41,7 +43,7 @@ describe('LinkedList', () => {
       , Uint8View
       , {
           next: null
-        , value: 1
+        , value: uint8(1)
         }
       )
 
@@ -58,7 +60,7 @@ describe('LinkedList', () => {
       , Uint8View
       , {
           next: null
-        , value: 1
+        , value: uint8(1)
         }
       )
       result.destroy()
@@ -80,7 +82,7 @@ describe('LinkedList', () => {
         , Uint8View
         , {
             next: null
-          , value: 1
+          , value: uint8(1)
           }
         )
         const obj2 = obj1.clone()
@@ -98,7 +100,7 @@ describe('LinkedList', () => {
         , Uint8View
         , {
             next: null
-          , value: 1
+          , value: uint8(1)
           }
         )
         const obj2 = obj1.clone()
@@ -119,7 +121,7 @@ describe('LinkedList', () => {
     , Uint8View
     , {
         next: null
-      , value: 1
+      , value: uint8(1)
       }
     )
 
@@ -138,7 +140,7 @@ describe('LinkedList', () => {
     , Uint8View
     , {
         next: null
-      , value: 1
+      , value: uint8(1)
       }
     )
 
@@ -158,7 +160,7 @@ describe('LinkedList', () => {
       , Uint8View
       , {
           next: null
-        , value: 1
+        , value: uint8(1)
         }
       )
 
@@ -166,7 +168,7 @@ describe('LinkedList', () => {
 
       expect(result).toStrictEqual({
         next: null
-      , value: 1
+      , value: uint8(1)
       })
     })
 
@@ -176,16 +178,16 @@ describe('LinkedList', () => {
         allocator
       , Uint8View
       , {
-          next: 1
-        , value: 2
+          next: uint32(1)
+        , value: uint8(2)
         }
       )
 
       const result = obj.get()
 
       expect(result).toStrictEqual({
-        next: 1
-      , value: 2
+        next: uint32(1)
+      , value: uint8(2)
       })
     })
   })
@@ -197,19 +199,19 @@ describe('LinkedList', () => {
         allocator
       , Uint8View
       , {
-          next: 1
-        , value: 2
+          next: uint32(1)
+        , value: uint8(2)
         }
       )
 
       obj.set({
         next: null
-      , value: 1
+      , value: uint8(1)
       })
 
       expect(obj.get()).toStrictEqual({
         next: null
-      , value: 1
+      , value: uint8(1)
       })
     })
 
@@ -220,18 +222,18 @@ describe('LinkedList', () => {
       , Uint8View
       , {
           next: null
-        , value: 1
+        , value: uint8(1)
         }
       )
 
       obj.set({
-        next: 1
-      , value: 2
+        next: uint32(1)
+      , value: uint8(2)
       })
 
       expect(obj.get()).toStrictEqual({
-        next: 1
-      , value: 2
+        next: uint32(1)
+      , value: uint8(2)
       })
     })
   })
@@ -244,7 +246,7 @@ describe('LinkedList', () => {
       , Uint8View
       , {
           next: null
-        , value: 1
+        , value: uint8(1)
         }
       )
 
@@ -259,14 +261,14 @@ describe('LinkedList', () => {
         allocator
       , Uint8View
       , {
-          next: 1
-        , value: 2
+          next: uint32(1)
+        , value: uint8(2)
         }
       )
 
       const result = obj.getNext()
 
-      expect(result).toBe(1)
+      expect(result).toStrictEqual(uint32(1))
     })
   })
 
@@ -277,8 +279,8 @@ describe('LinkedList', () => {
         allocator
       , Uint8View
       , {
-          next: 1
-        , value: 2
+          next: uint32(1)
+        , value: uint8(2)
         }
       )
 
@@ -286,7 +288,7 @@ describe('LinkedList', () => {
 
       expect(obj.get()).toStrictEqual({
         next: null
-      , value: 2
+      , value: uint8(2)
       })
     })
 
@@ -297,15 +299,15 @@ describe('LinkedList', () => {
       , Uint8View
       , {
           next: null
-        , value: 1
+        , value: uint8(1)
         }
       )
 
-      obj.setNext(2)
+      obj.setNext(uint32(2))
 
       expect(obj.get()).toStrictEqual({
-        next: 2
-      , value: 1
+        next: uint32(2)
+      , value: uint8(1)
       })
     })
   })
@@ -317,13 +319,13 @@ describe('LinkedList', () => {
     , Uint8View
     , {
         next: null
-      , value: 1
+      , value: uint8(1)
       }
     )
 
     const result = obj.getValue()
 
-    expect(result).toBe(1)
+    expect(result).toStrictEqual(uint8(1))
   })
 
   test('setValue', () => {
@@ -333,15 +335,15 @@ describe('LinkedList', () => {
     , Uint8View
     , {
         next: null
-      , value: 1
+      , value: uint8(1)
       }
     )
 
-    obj.setValue(2)
+    obj.setValue(uint8(2))
 
     expect(obj.get()).toStrictEqual({
       next: null
-    , value: 2
+    , value: uint8(2)
     })
   })
 
@@ -352,7 +354,7 @@ describe('LinkedList', () => {
     , Uint8View
     , {
         next: null
-      , value: 1
+      , value: uint8(1)
       }
     )
 
@@ -367,8 +369,8 @@ describe('LinkedList', () => {
       allocator
     , Uint8View
     , {
-        next: 50
-      , value: 1
+        next: uint32(50)
+      , value: uint8(1)
       }
     )
 
@@ -385,7 +387,7 @@ describe('LinkedList', () => {
       , Uint8View
       , {
           next: null
-        , value: 1
+        , value: uint8(1)
         }
       )
 
@@ -400,8 +402,8 @@ describe('LinkedList', () => {
         allocator
       , Uint8View
       , {
-          next: 50
-        , value: 1
+          next: uint32(50)
+        , value: uint8(1)
         }
       )
 
@@ -414,13 +416,13 @@ describe('LinkedList', () => {
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const view = new LinkedListView(allocator.buffer, 50, Uint8View)
-    view.setValue(20)
+    view.setValue(uint8(20))
     const obj = new LinkedList(
       allocator
     , Uint8View
     , {
-        next: 50
-      , value: 10
+        next: uint32(50)
+      , value: uint8(10)
       }
     )
     const hasher = {

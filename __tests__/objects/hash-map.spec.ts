@@ -36,10 +36,10 @@ describe('HashMap', () => {
 
       obj.set(uint8(1), uint8(10))
 
-      expect(obj._view.getByKey('buckets')).toBe(bucketsByteOffset)
+      expect(obj._view.getByKey('buckets')).toStrictEqual(bucketsByteOffset)
       expect(obj._view.getViewByKey('buckets').deref()!.length).toBe(1)
       expect(obj._capacity).toBe(1)
-      expect(obj.get(uint8(1))!.get()).toBe(10)
+      expect(obj.get(uint8(1))!.get()).toStrictEqual(uint8(10))
     })
 
     test('(size / capacity) > load factor', () => {
@@ -55,7 +55,7 @@ describe('HashMap', () => {
       expect(obj._view.getByKey('buckets')).not.toBe(bucketsByteOffset)
       expect(obj._view.getViewByKey('buckets').deref()!.length).toBe(3)
       expect(obj._capacity).toBe(3)
-      expect(obj.get(uint8(1))!.get()).toBe(10)
+      expect(obj.get(uint8(1))!.get()).toStrictEqual(uint8(10))
     })
   })
 
@@ -208,7 +208,7 @@ describe('HashMap', () => {
       const iter = obj.values()
       const result = toArray(iter).map(x => x.get())
 
-      expect(result).toStrictEqual([20, 10])
+      expect(result).toStrictEqual([uint8(20), uint8(10)])
     })
   })
 
@@ -257,7 +257,7 @@ describe('HashMap', () => {
       const result = obj.get(key)
 
       expect(result).toBeInstanceOf(Uint8View)
-      expect(result!.get()).toBe(2)
+      expect(result!.get()).toStrictEqual(uint8(2))
     })
   })
 
@@ -270,7 +270,7 @@ describe('HashMap', () => {
 
       obj.set(key, value)
 
-      expect(obj.get(key)!.get()).toBe(2)
+      expect(obj.get(key)!.get()).toStrictEqual(uint8(2))
     })
 
     test('item exists', () => {
@@ -283,7 +283,7 @@ describe('HashMap', () => {
 
       obj.set(key, newValue)
 
-      expect(obj.get(key)!.get()).toBe(3)
+      expect(obj.get(key)!.get()).toStrictEqual(uint8(3))
     })
   })
 

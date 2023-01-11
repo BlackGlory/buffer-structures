@@ -3,6 +3,7 @@ import { bufferToBytes, getSlice, setSlice, uint32ToBuffer } from '@test/utils'
 import { toArray } from '@blackglory/prelude'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
+import { string } from '@literals/string-literal'
 
 describe('StringView', () => {
   test('create', () => {
@@ -77,13 +78,13 @@ describe('StringView', () => {
 
     const result = stringView.get()
 
-    expect(result).toBe(value)
+    expect(result).toStrictEqual(string(value))
   })
 
   test('set', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const value = 'foo'
+    const value = string('foo')
     const stringView = new StringView(buffer, byteOffset)
 
     stringView.set(value)
@@ -92,11 +93,11 @@ describe('StringView', () => {
       bufferToBytes(getSlice(
         buffer
       , byteOffset
-      , Uint32Array.BYTES_PER_ELEMENT + Buffer.from(value, 'utf-8').byteLength
+      , Uint32Array.BYTES_PER_ELEMENT + Buffer.from(value.get(), 'utf-8').byteLength
       ))
     ).toStrictEqual([
-      ...bufferToBytes(uint32ToBuffer(Buffer.from(value, 'utf-8').byteLength))
-    , ...bufferToBytes(Buffer.from(value, 'utf-8'))
+      ...bufferToBytes(uint32ToBuffer(Buffer.from(value.get(), 'utf-8').byteLength))
+    , ...bufferToBytes(Buffer.from(value.get(), 'utf-8'))
     ])
   })
 
@@ -104,7 +105,7 @@ describe('StringView', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
     const view = new StringView(buffer, byteOffset)
-    view.set('foo')
+    view.set(string('foo'))
     const hasher = {
       write: jest.fn()
     } satisfies IHasher

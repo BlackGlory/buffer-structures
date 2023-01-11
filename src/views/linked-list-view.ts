@@ -125,7 +125,7 @@ implements IHash
   derefNext(): LinkedListView<View> | null {
     const offset = this.getNext()
     if (isntNull(offset)) {
-      return new LinkedListView(this.buffer, offset, this.viewConstructor)
+      return new LinkedListView(this.buffer, offset.get(), this.viewConstructor)
     } else {
       return null
     }

@@ -2,6 +2,7 @@ import { Uint8View } from '@views/uint8-view'
 import { uint8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
+import { uint8 } from '@literals/uint8-literal'
 
 describe('Uint8View', () => {
   test('create', () => {
@@ -53,25 +54,25 @@ describe('Uint8View', () => {
 
     const result = doubleView.get()
 
-    expect(result).toBe(value)
+    expect(result).toStrictEqual(uint8(value))
   })
 
   test('set', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const value = 255
+    const value = uint8(255)
     const doubleView = new Uint8View(buffer, byteOffset)
 
     doubleView.set(value)
 
     const dataView = new DataView(buffer)
-    expect(dataView.getUint8(byteOffset)).toBe(value)
+    expect(dataView.getUint8(byteOffset)).toBe(255)
   })
 
   test('hash', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const value = 255
+    const value = uint8(255)
     const view = new Uint8View(buffer, byteOffset)
     view.set(value)
     const hasher = {

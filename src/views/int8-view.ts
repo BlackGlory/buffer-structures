@@ -2,12 +2,13 @@ import { IHash, IReference, IReadableWritable, IFree } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { getSlice } from '@utils/get-slice'
 import { BaseView } from '@views/base-view'
+import { int8, Int8Literal } from '@literals/int8-literal'
 
 export class Int8View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number>
+         , IReadableWritable<Int8Literal>
          , IFree {
   static readonly byteLength: number = Int8Array.BYTES_PER_ELEMENT
 
@@ -23,12 +24,12 @@ implements IHash
     allocator.free(this.byteOffset, Int8View.byteLength)
   }
 
-  get(): number {
-    return this.view.getInt8(this.byteOffset)
+  get(): Int8Literal {
+    return int8(this.view.getInt8(this.byteOffset))
   }
 
-  set(value: number): void {
-    this.view.setInt8(this.byteOffset, value)
+  set(value: Int8Literal): void {
+    this.view.setInt8(this.byteOffset, value.get())
   }
 
   hash(hasher: IHasher): void {

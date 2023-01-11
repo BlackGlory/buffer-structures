@@ -2,12 +2,13 @@ import { IHash, IReference, IReadableWritable, IFree } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { getSlice } from '@utils/get-slice'
 import { BaseView } from '@views/base-view'
+import { uint32, Uint32Literal } from '@literals/uint32-literal'
 
 export class Uint32View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number>
+         , IReadableWritable<Uint32Literal>
          , IFree {
   static readonly byteLength: number = Uint32Array.BYTES_PER_ELEMENT
 
@@ -23,12 +24,12 @@ implements IHash
     allocator.free(this.byteOffset, Uint32View.byteLength)
   }
 
-  get(): number {
-    return this.view.getUint32(this.byteOffset)
+  get(): Uint32Literal {
+    return uint32(this.view.getUint32(this.byteOffset))
   }
 
-  set(value: number): void {
-    this.view.setUint32(this.byteOffset, value)
+  set(value: Uint32Literal): void {
+    this.view.setUint32(this.byteOffset, value.get())
   }
 
   hash(hasher: IHasher): void {

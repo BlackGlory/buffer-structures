@@ -7,6 +7,8 @@ import { uint8ToBuffer, uint16ToBuffer } from '@test/utils'
 import { getError } from 'return-style'
 import { Allocator } from '@src/allocator'
 import { BaseObject } from '@objects/base-object'
+import { uint8 } from '@literals/uint8-literal'
+import { uint16 } from '@literals/uint16-literal'
 
 describe('Struct', () => {
   test('create', () => {
@@ -19,13 +21,13 @@ describe('Struct', () => {
         foo: Uint8View
       , bar: Uint16View
       }
-    , { foo: 1, bar: 2 }
+    , { foo: uint8(1), bar: uint16(2) }
     )
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(result.get()).toStrictEqual({
-      foo: 1
-    , bar: 2
+      foo: uint8(1)
+    , bar: uint16(2)
     })
     expect(allocate).toBeCalledTimes(1)
     expect(allocate).toBeCalledWith(StructView.getByteLength({
@@ -47,7 +49,7 @@ describe('Struct', () => {
           foo: Uint8View
         , bar: Uint16View
         }
-      , { foo: 1, bar: 2 }
+      , { foo: uint8(1), bar: uint16(2) }
       )
 
       result.destroy()
@@ -68,7 +70,7 @@ describe('Struct', () => {
           foo: Uint8View
         , bar: Uint16View
         }
-      , { foo: 1, bar: 2 }
+      , { foo: uint8(1), bar: uint16(2) }
       )
       result.destroy()
 
@@ -90,7 +92,7 @@ describe('Struct', () => {
             foo: Uint8View
           , bar: Uint16View
           }
-        , { foo: 1, bar: 2 }
+        , { foo: uint8(1), bar: uint16(2) }
         )
         const obj2 = obj1.clone()
 
@@ -108,7 +110,7 @@ describe('Struct', () => {
             foo: Uint8View
           , bar: Uint16View
           }
-        , { foo: 1, bar: 2 }
+        , { foo: uint8(1), bar: uint16(2) }
         )
         const obj2 = obj1.clone()
 
@@ -129,7 +131,7 @@ describe('Struct', () => {
         foo: Uint8View
       , bar: Uint16View
       }
-    , { foo: 1, bar: 2 }
+    , { foo: uint8(1), bar: uint16(2) }
     )
 
     const result = obj.clone()
@@ -148,7 +150,7 @@ describe('Struct', () => {
         foo: Uint8View
       , bar: Uint16View
       }
-    , { foo: 1, bar: 2 }
+    , { foo: uint8(1), bar: uint16(2) }
     )
 
     const result = obj.copy()
@@ -167,14 +169,14 @@ describe('Struct', () => {
         foo: Uint8View
       , bar: Uint16View
       }
-    , { foo: 1, bar: 2 }
+    , { foo: uint8(1), bar: uint16(2) }
     )
 
     const result = obj.get()
 
     expect(result).toStrictEqual({
-      foo: 1
-    , bar: 2
+      foo: uint8(1)
+    , bar: uint16(2)
     })
   })
 
@@ -186,17 +188,17 @@ describe('Struct', () => {
         foo: Uint8View
       , bar: Uint16View
       }
-    , { foo: 1, bar: 2 }
+    , { foo: uint8(1), bar: uint16(2) }
     )
 
     obj.set({
-      foo: 3
-    , bar: 4
+      foo: uint8(3)
+    , bar: uint16(4)
     })
 
     expect(obj.get()).toStrictEqual({
-      foo: 3
-    , bar: 4
+      foo: uint8(3)
+    , bar: uint16(4)
     })
   })
 
@@ -208,12 +210,12 @@ describe('Struct', () => {
         foo: Uint8View
       , bar: Uint16View
       }
-    , { foo: 1, bar: 2 }
+    , { foo: uint8(1), bar: uint16(2) }
     )
 
     const result = obj.getByKey('bar')
 
-    expect(result).toBe(2)
+    expect(result).toStrictEqual(uint16(2))
   })
 
   test('setByKey', () => {
@@ -224,14 +226,14 @@ describe('Struct', () => {
         foo: Uint8View
       , bar: Uint16View
       }
-    , { foo: 1, bar: 2 }
+    , { foo: uint8(1), bar: uint16(2) }
     )
 
-    obj.setByKey('bar', 3)
+    obj.setByKey('bar', uint16(3))
 
     expect(obj.get()).toStrictEqual({
-      foo: 1
-    , bar: 3
+      foo: uint8(1)
+    , bar: uint16(3)
     })
   })
 
@@ -243,7 +245,7 @@ describe('Struct', () => {
         foo: Uint8View
       , bar: Uint16View
       }
-    , { foo: 1, bar: 2 }
+    , { foo: uint8(1), bar: uint16(2) }
     )
 
     const view1 = obj.getViewByKey('foo')
@@ -261,7 +263,7 @@ describe('Struct', () => {
         foo: Uint8View
       , bar: Uint16View
       }
-    , { foo: 10, bar: 20 }
+    , { foo: uint8(10), bar: uint16(20) }
     )
     const hasher = {
       write: jest.fn()

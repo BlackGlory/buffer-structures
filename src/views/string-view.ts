@@ -3,12 +3,14 @@ import { IAllocator, IHasher } from '@src/interfaces'
 import { Uint32View } from '@views/uint32-view'
 import { getSlice } from '@utils/get-slice'
 import { BaseView } from '@views/base-view'
+import { uint32 } from '@literals/uint32-literal'
+import { string, StringLiteral } from '@literals/string-literal'
 
 export class StringView
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<string>
+         , IReadableWritable<StringLiteral>
          , ISized
          , IFree {
   static getByteLength(value: string): number {
@@ -36,8 +38,8 @@ implements IHash
     allocator.free(this.byteOffset, this.byteLength)
   }
 
-  get(): string {
-    const byteLength = this.lengthView.get()
+  get(): StringLiteral {
+    const byteLength = this.lengthView.get().get()
 
     const text = this.valueView.buffer.slice(
       this.byteOffset + Uint32View.byteLength
@@ -45,17 +47,17 @@ implements IHash
     )
 
     const decoder = new TextDecoder()
-    return decoder.decode(text)
+    return string(decoder.decode(text))
   }
 
   /**
    * 注意, 由于字符串是变长的, **该操作有可能错误地覆盖掉其他数据**.
    */
-  set(value: string): void {
+  set(value: StringLiteral): void {
     const encoder = new TextEncoder()
-    const bytes = encoder.encode(value)
+    const bytes = encoder.encode(value.get())
 
-    this.lengthView.set(bytes.byteLength)
+    this.lengthView.set(uint32(bytes.byteLength))
 
     for (let i = 0; i < bytes.length; i++) {
       this.valueView.setUint8(
@@ -69,7 +71,7 @@ implements IHash
     const slice = getSlice(
       this.valueView.buffer
     , this.byteOffset + Uint32View.byteLength
-    , this.lengthView.get()
+    , this.lengthView.get().get()
     )
 
     hasher.write(slice)

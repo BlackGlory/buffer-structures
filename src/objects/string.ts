@@ -4,12 +4,13 @@ import { StringView } from '@views/string-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { BaseObject } from '@objects/base-object'
+import { StringLiteral } from '@literals/string-literal'
 
 export class String
 extends BaseObject
 implements ICopy<String>
          , IClone<String>
-         , IReadable<string>
+         , IReadable<StringLiteral>
          , IHash
          , IDestroy {
   readonly _view: StringView
@@ -17,10 +18,10 @@ implements ICopy<String>
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
-  constructor(allocator: IAllocator, value: string)
+  constructor(allocator: IAllocator, value: StringLiteral)
   constructor(_allocator: IAllocator, _byteOffset: number, _counter: ReferenceCounter)
   constructor(...args:
-  | [allocator: IAllocator, value: string]
+  | [allocator: IAllocator, value: StringLiteral]
   | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
     super()
@@ -30,7 +31,7 @@ implements ICopy<String>
       this.allocator = allocator
       this._counter = new ReferenceCounter()
 
-      const offset = allocator.allocate(StringView.getByteLength(value))
+      const offset = allocator.allocate(StringView.getByteLength(value.get()))
       const view = new StringView(allocator.buffer, offset)
       view.set(value)
       this._view = view
@@ -71,7 +72,7 @@ implements ICopy<String>
     return new String(this.allocator, this.get())
   }
 
-  get(): string {
+  get(): StringLiteral {
     this.fsm.assertAllocated()
 
     return this._view.get()

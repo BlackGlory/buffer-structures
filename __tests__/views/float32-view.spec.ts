@@ -2,6 +2,7 @@ import { Float32View } from '@views/float32-view'
 import { float32ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
+import { float32 } from '@literals/float32-literal'
 
 describe('Float32View', () => {
   test('create', () => {
@@ -53,25 +54,25 @@ describe('Float32View', () => {
 
     const result = doubleView.get()
 
-    expect(result).toBe(value)
+    expect(result).toStrictEqual(float32(value))
   })
 
   test('set', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const value = -3
+    const value = float32(-3)
     const doubleView = new Float32View(buffer, byteOffset)
 
     doubleView.set(value)
 
     const dataView = new DataView(buffer)
-    expect(dataView.getFloat32(byteOffset)).toBe(value)
+    expect(dataView.getFloat32(byteOffset)).toBe(-3)
   })
 
   test('hash', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const value = -3
+    const value = float32(-3)
     const view = new Float32View(buffer, byteOffset)
     view.set(value)
     const hasher = {

@@ -4,12 +4,13 @@ import { Float64View } from '@views/float64-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { BaseObject } from '@objects/base-object'
+import { Float64Literal } from '@literals/float64-literal'
 
 export class Float64
 extends BaseObject
 implements ICopy<Float64>
          , IClone<Float64>
-         , IReadableWritable<number>
+         , IReadableWritable<Float64Literal>
          , IHash
          , IDestroy {
   readonly _view: Float64View
@@ -17,10 +18,10 @@ implements ICopy<Float64>
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
-  constructor(allocator: IAllocator, value: number)
+  constructor(allocator: IAllocator, value: Float64Literal)
   constructor(_allocator: IAllocator, _byteOffset: number, _counter: ReferenceCounter)
   constructor(...args:
-  | [allocator: IAllocator, value: number]
+  | [allocator: IAllocator, value: Float64Literal]
   | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
     super()
@@ -71,13 +72,13 @@ implements ICopy<Float64>
     return new Float64(this.allocator, this.get())
   }
 
-  get(): number {
+  get(): Float64Literal {
     this.fsm.assertAllocated()
 
     return this._view.get()
   }
 
-  set(value: number): void {
+  set(value: Float64Literal): void {
     this.fsm.assertAllocated()
 
     this._view.set(value)

@@ -4,6 +4,8 @@ import { Uint8View } from '@views/uint8-view'
 import { uint8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
+import { uint8 } from '@literals/uint8-literal'
+import { uint32 } from '@literals/uint32-literal'
 
 describe('OwnershipPointerView', () => {
   test('create', () => {
@@ -53,9 +55,9 @@ describe('OwnershipPointerView', () => {
       , free: jest.fn()
       } satisfies IAllocator
       const dataView = new Uint8View(allocator.buffer, 1)
-      dataView.set(10)
+      dataView.set(uint8(10))
       const pointerView = new OwnershipPointerView(allocator.buffer, 50, Uint8View)
-      pointerView.set(1)
+      pointerView.set(uint32(1))
 
       pointerView.free(allocator)
 
@@ -87,9 +89,9 @@ describe('OwnershipPointerView', () => {
       , free: jest.fn()
       } satisfies IAllocator
       const dataView = new Uint8View(allocator.buffer, 1)
-      dataView.set(10)
+      dataView.set(uint8(10))
       const pointerView = new OwnershipPointerView(allocator.buffer, 50, Uint8View)
-      pointerView.set(10)
+      pointerView.set(uint32(10))
 
       pointerView.freePointed(allocator)
 
@@ -122,7 +124,7 @@ describe('OwnershipPointerView', () => {
 
       const result = pointerView.get()
 
-      expect(result).toBe(value)
+      expect(result).toStrictEqual(uint32(value))
     })
   })
 
@@ -142,13 +144,13 @@ describe('OwnershipPointerView', () => {
     test('non-null', () => {
       const buffer = new ArrayBuffer(100)
       const byteOffset = 1
-      const value = 1000000
+      const value = uint32(1000000)
       const pointerView = new OwnershipPointerView(buffer, byteOffset, Uint8View)
 
       pointerView.set(value)
 
       const dataView = new DataView(buffer)
-      expect(dataView.getUint32(byteOffset)).toBe(value)
+      expect(dataView.getUint32(byteOffset)).toBe(1000000)
     })
   })
 
@@ -180,7 +182,7 @@ describe('OwnershipPointerView', () => {
 
       expect(result).toBeInstanceOf(Uint8View)
       expect(result!.byteOffset).toBe(value)
-      expect(result!.get()).toBe(100)
+      expect(result!.get()).toStrictEqual(uint8(100))
     })
   })
 
@@ -188,9 +190,9 @@ describe('OwnershipPointerView', () => {
     test('null', () => {
       const buffer = new ArrayBuffer(100)
       const dataView = new Uint8View(buffer, 1)
-      dataView.set(10)
+      dataView.set(uint8(10))
       const pointerView = new OwnershipPointerView(buffer, 50, Uint8View)
-      pointerView.set(1)
+      pointerView.set(uint32(1))
       const hasher = {
         write: jest.fn()
       } satisfies IHasher
@@ -204,7 +206,7 @@ describe('OwnershipPointerView', () => {
     test('non-null', () => {
       const buffer = new ArrayBuffer(100)
       const pointerView = new OwnershipPointerView(buffer, 50, Uint8View)
-      pointerView.set(1)
+      pointerView.set(uint32(1))
       const hasher = {
         write: jest.fn()
       } satisfies IHasher

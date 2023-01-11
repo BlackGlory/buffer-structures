@@ -5,6 +5,8 @@ import { uint8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
 import { NULL } from '@utils/null'
+import { uint8 } from '@literals/uint8-literal'
+import { uint32 } from '@literals/uint32-literal'
 
 describe('LinkedListView', () => {
   test('create', () => {
@@ -59,7 +61,7 @@ describe('LinkedListView', () => {
 
       const result = view.get()
 
-      expect(result).toStrictEqual({ value, next })
+      expect(result).toStrictEqual({ value: uint8(value), next: uint32(next) })
     })
 
     test('next: number', () => {
@@ -74,7 +76,7 @@ describe('LinkedListView', () => {
 
       const result = view.get()
 
-      expect(result).toStrictEqual({ value, next })
+      expect(result).toStrictEqual({ value: uint8(value), next: uint32(next) })
     })
   })
 
@@ -83,7 +85,7 @@ describe('LinkedListView', () => {
       const buffer = new ArrayBuffer(100)
       const byteOffset = 1
       const next = null
-      const value = 1
+      const value = uint8(1)
       const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
       view.set({ next, value })
@@ -96,15 +98,15 @@ describe('LinkedListView', () => {
     test('next: number', () => {
       const buffer = new ArrayBuffer(100)
       const byteOffset = 1
-      const next = 1
-      const value = 2
+      const next = uint32(1)
+      const value = uint8(2)
       const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
       view.set({ next, value })
 
       const dataView = new DataView(buffer)
-      expect(dataView.getUint32(byteOffset)).toBe(next)
-      expect(dataView.getUint8(byteOffset + Uint32Array.BYTES_PER_ELEMENT)).toBe(value)
+      expect(dataView.getUint32(byteOffset)).toBe(1)
+      expect(dataView.getUint8(byteOffset + Uint32Array.BYTES_PER_ELEMENT)).toBe(2)
     })
   })
 
@@ -118,19 +120,19 @@ describe('LinkedListView', () => {
 
     const result = view.getNext()
 
-    expect(result).toBe(next)
+    expect(result).toStrictEqual(uint32(next))
   })
 
   test('setNext', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const next = 1
+    const next = uint32(1)
     const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
     view.setNext(next)
 
     const dataView = new DataView(buffer)
-    expect(dataView.getUint32(byteOffset)).toBe(next)
+    expect(dataView.getUint32(byteOffset)).toBe(1)
   })
 
   test('getValue', () => {
@@ -143,28 +145,28 @@ describe('LinkedListView', () => {
 
     const result = view.getValue()
 
-    expect(result).toBe(value)
+    expect(result).toStrictEqual(uint8(value))
   })
 
   test('setValue', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const value = 1
+    const value = uint8(1)
     const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
     view.setValue(value)
 
     const dataView = new DataView(buffer)
-    expect(dataView.getUint8(byteOffset + Uint32Array.BYTES_PER_ELEMENT)).toBe(value)
+    expect(dataView.getUint8(byteOffset + Uint32Array.BYTES_PER_ELEMENT)).toBe(1)
   })
 
   test('hash', () => {
     const buffer = new ArrayBuffer(100)
     const view1 = new LinkedListView(buffer, 1, Uint8View)
     const view2 = new LinkedListView(buffer, 50, Uint8View)
-    view1.setNext(view2.byteOffset)
-    view1.setValue(10)
-    view2.setValue(20)
+    view1.setNext(uint32(view2.byteOffset))
+    view1.setValue(uint8(10))
+    view2.setValue(uint8(20))
     const hasher = {
       write: jest.fn()
     } satisfies IHasher
@@ -221,7 +223,7 @@ describe('LinkedListView', () => {
       const buffer = new ArrayBuffer(100)
       const byteOffset = 1
       const view = new LinkedListView(buffer, byteOffset, Uint8View)
-      view.setNext(50)
+      view.setNext(uint32(50))
 
       const result = view.derefNext()
 

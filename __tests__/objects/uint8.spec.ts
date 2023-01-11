@@ -5,16 +5,17 @@ import { getError } from 'return-style'
 import { uint8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 import { BaseObject } from '@objects/base-object'
+import { uint8 } from '@literals/uint8-literal'
 
 describe('Uint8', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new Uint8(allocator, 1)
+    const result = new Uint8(allocator, uint8(1))
 
     expect(result).toBeInstanceOf(BaseObject)
-    expect(result.get()).toBe(1)
+    expect(result.get()).toStrictEqual(uint8(1))
     expect(allocate).toBeCalledTimes(1)
     expect(allocate).toBeCalledWith(Uint8View.byteLength)
   })
@@ -23,7 +24,7 @@ describe('Uint8', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const result = new Uint8(allocator, 1)
+      const result = new Uint8(allocator, uint8(1))
 
       result.destroy()
 
@@ -37,7 +38,7 @@ describe('Uint8', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const result = new Uint8(allocator, 1)
+      const result = new Uint8(allocator, uint8(1))
       result.destroy()
 
       const err = getError(() => result.destroy())
@@ -52,7 +53,7 @@ describe('Uint8', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new Uint8(allocator, 1)
+        const obj1 = new Uint8(allocator, uint8(1))
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -63,7 +64,7 @@ describe('Uint8', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new Uint8(allocator, 1)
+        const obj1 = new Uint8(allocator, uint8(1))
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -77,7 +78,7 @@ describe('Uint8', () => {
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Uint8(allocator, 1)
+    const obj = new Uint8(allocator, uint8(1))
 
     const result = obj.clone()
 
@@ -89,7 +90,7 @@ describe('Uint8', () => {
 
   test('copy', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Uint8(allocator, 1)
+    const obj = new Uint8(allocator, uint8(1))
 
     const result = obj.copy()
 
@@ -101,25 +102,25 @@ describe('Uint8', () => {
 
   test('get', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Uint8(allocator, 1)
+    const obj = new Uint8(allocator, uint8(1))
 
     const result = obj.get()
 
-    expect(result).toBe(1)
+    expect(result).toStrictEqual(uint8(1))
   })
 
   test('set', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Uint8(allocator, 1)
+    const obj = new Uint8(allocator, uint8(1))
 
-    obj.set(2)
+    obj.set(uint8(2))
 
-    expect(obj.get()).toBe(2)
+    expect(obj.get()).toStrictEqual(uint8(2))
   })
 
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Uint8(allocator, 1)
+    const obj = new Uint8(allocator, uint8(1))
     const hasher = {
       write: jest.fn()
     } satisfies IHasher

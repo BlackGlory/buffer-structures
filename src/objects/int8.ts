@@ -4,12 +4,13 @@ import { Int8View } from '@views/int8-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { BaseObject } from '@objects/base-object'
+import { Int8Literal } from '@literals/int8-literal'
 
 export class Int8
 extends BaseObject
 implements ICopy<Int8>
          , IClone<Int8>
-         , IReadableWritable<number>
+         , IReadableWritable<Int8Literal>
          , IHash
          , IDestroy {
   readonly _view: Int8View
@@ -17,10 +18,10 @@ implements ICopy<Int8>
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
-  constructor(allocator: IAllocator, value: number)
+  constructor(allocator: IAllocator, value: Int8Literal)
   constructor(_allocator: IAllocator, _byteOffset: number, _counter: ReferenceCounter)
   constructor(...args:
-  | [allocator: IAllocator, value: number]
+  | [allocator: IAllocator, value: Int8Literal]
   | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
     super()
@@ -71,13 +72,13 @@ implements ICopy<Int8>
     return new Int8(this.allocator, this.get())
   }
 
-  get(): number {
+  get(): Int8Literal {
     this.fsm.assertAllocated()
 
     return this._view.get()
   }
 
-  set(value: number): void {
+  set(value: Int8Literal): void {
     this.fsm.assertAllocated()
 
     this._view.set(value)

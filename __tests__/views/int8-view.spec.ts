@@ -2,6 +2,7 @@ import { Int8View } from '@views/int8-view'
 import { int8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
+import { int8 } from '@literals/int8-literal'
 
 describe('Int8View', () => {
   test('create', () => {
@@ -53,7 +54,7 @@ describe('Int8View', () => {
 
     const result = doubleView.get()
 
-    expect(result).toBe(value)
+    expect(result).toStrictEqual(int8(value))
   })
 
   test('set', () => {
@@ -62,7 +63,7 @@ describe('Int8View', () => {
     const value = -127
     const doubleView = new Int8View(buffer, byteOffset)
 
-    doubleView.set(value)
+    doubleView.set(int8(value))
 
     const dataView = new DataView(buffer)
     expect(dataView.getInt8(byteOffset)).toBe(value)
@@ -73,7 +74,7 @@ describe('Int8View', () => {
     const byteOffset = 1
     const value = -127
     const view = new Int8View(buffer, byteOffset)
-    view.set(value)
+    view.set(int8(value))
     const hasher = {
       write: jest.fn()
     } satisfies IHasher

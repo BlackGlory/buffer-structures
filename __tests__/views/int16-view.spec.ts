@@ -2,6 +2,7 @@ import { Int16View } from '@views/int16-view'
 import { int16ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
+import { int16 } from '@literals/int16-literal'
 
 describe('Int16View', () => {
   test('create', () => {
@@ -53,25 +54,25 @@ describe('Int16View', () => {
 
     const result = doubleView.get()
 
-    expect(result).toBe(value)
+    expect(result).toStrictEqual(int16(value))
   })
 
   test('set', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const value = -10000
+    const value = int16(-10000)
     const doubleView = new Int16View(buffer, byteOffset)
 
     doubleView.set(value)
 
     const dataView = new DataView(buffer)
-    expect(dataView.getInt16(byteOffset)).toBe(value)
+    expect(dataView.getInt16(byteOffset)).toBe(-10000)
   })
 
   test('hash', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const value = -10000
+    const value = int16(-10000)
     const view = new Int16View(buffer, byteOffset)
     view.set(value)
     const hasher = {

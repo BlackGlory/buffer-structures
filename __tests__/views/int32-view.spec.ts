@@ -2,6 +2,7 @@ import { Int32View } from '@views/int32-view'
 import { int32ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
+import { int32 } from '@literals/int32-literal'
 
 describe('Int32View', () => {
   test('create', () => {
@@ -53,25 +54,25 @@ describe('Int32View', () => {
 
     const result = doubleView.get()
 
-    expect(result).toBe(value)
+    expect(result).toStrictEqual(int32(value))
   })
 
   test('set', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const value = -1000000
+    const value = int32(-1000000)
     const doubleView = new Int32View(buffer, byteOffset)
 
     doubleView.set(value)
 
     const dataView = new DataView(buffer)
-    expect(dataView.getInt32(byteOffset)).toBe(value)
+    expect(dataView.getInt32(byteOffset)).toBe(-1000000)
   })
 
   test('hash', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const value = -1000000
+    const value = int32(-1000000)
     const view = new Int32View(buffer, byteOffset)
     view.set(value)
     const hasher = {

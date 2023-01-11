@@ -6,16 +6,17 @@ import { getError } from 'return-style'
 import { uint8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 import { BaseObject } from '@objects/base-object'
+import { uint8 } from '@literals/uint8-literal'
 
 describe('Array', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new Array(allocator, Uint8View, 3, [1, 2, 3])
+    const result = new Array(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
 
     expect(result).toBeInstanceOf(BaseObject)
-    expect(result.get()).toStrictEqual([1, 2, 3])
+    expect(result.get()).toStrictEqual([uint8(1), uint8(2), uint8(3)])
     expect(allocate).toBeCalledTimes(1)
     expect(allocate).toBeCalledWith(ArrayView.getByteLength(Uint8View, 3))
   })
@@ -102,43 +103,43 @@ describe('Array', () => {
 
   test('get', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 3, [1, 2, 3])
+    const obj = new Array(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
 
     const result = obj.get()
 
-    expect(result).toStrictEqual([1, 2, 3])
+    expect(result).toStrictEqual([uint8(1), uint8(2), uint8(3)])
   })
 
   test('set', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 3, [1, 2, 3])
+    const obj = new Array(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
 
-    obj.set([10, 20, 30])
+    obj.set([uint8(10), uint8(20), uint8(30)])
 
-    expect(obj.get()).toStrictEqual([10, 20, 30])
+    expect(obj.get()).toStrictEqual([uint8(10), uint8(20), uint8(30)])
   })
 
   test('getByIndex', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 3, [1, 2, 3])
+    const obj = new Array(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
 
     const result = obj.getByIndex(1)
 
-    expect(result).toBe(2)
+    expect(result).toStrictEqual(uint8(2))
   })
 
   test('setByIndex', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 3, [1, 2, 3])
+    const obj = new Array(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
 
-    obj.setByIndex(1, 10)
+    obj.setByIndex(1, uint8(10))
 
-    expect(obj.get()).toStrictEqual([1, 10, 3])
+    expect(obj.get()).toStrictEqual([uint8(1), uint8(10), uint8(3)])
   })
 
   test('getViewByIndex', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 2, [1, 2])
+    const obj = new Array(allocator, Uint8View, 2, [uint8(1), uint8(2)])
 
     const view1 = obj.getViewByIndex(0)
     const view2 = obj.getViewByIndex(1)
@@ -149,7 +150,7 @@ describe('Array', () => {
 
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 2, [1, 2])
+    const obj = new Array(allocator, Uint8View, 2, [uint8(1), uint8(2)])
     const hasher = {
       write: jest.fn()
     } satisfies IHasher

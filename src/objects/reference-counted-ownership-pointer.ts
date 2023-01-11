@@ -6,6 +6,7 @@ import { ObjectStateMachine } from '@utils/object-state-machine'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
 import { NULL } from '@utils/null'
+import { uint32 } from '@literals/uint32-literal'
 
 const internalOverrideSymbol = Symbol()
 
@@ -58,7 +59,10 @@ implements IClone<ReferenceCountedOwnershipPointer<View>>
       , byteOffset
       , viewConstructor
       )
-      view.set({ count: 1, value: valueByteOffset })
+      view.set({
+        count: uint32(1)
+      , value: uint32(valueByteOffset)
+      })
       this._view = view
     } else {
       const [, allocator, viewConstructor, byteOffset] = args

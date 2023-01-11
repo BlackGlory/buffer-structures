@@ -2,6 +2,7 @@ import { Float64View } from '@views/float64-view'
 import { float64ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
+import { float64 } from '@literals/float64-literal'
 
 describe('Float64View', () => {
   test('create', () => {
@@ -53,25 +54,25 @@ describe('Float64View', () => {
 
     const result = doubleView.get()
 
-    expect(result).toBe(value)
+    expect(result).toStrictEqual(float64(3.14))
   })
 
   test('set', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const value = 3.14
+    const value = float64(3.14)
     const doubleView = new Float64View(buffer, byteOffset)
 
     doubleView.set(value)
 
     const dataView = new DataView(buffer)
-    expect(dataView.getFloat64(byteOffset)).toBe(value)
+    expect(dataView.getFloat64(byteOffset)).toBe(3.14)
   })
 
   test('hash', () => {
     const buffer = new ArrayBuffer(100)
     const byteOffset = 1
-    const value = 3.14
+    const value = float64(3.14)
     const view = new Float64View(buffer, byteOffset)
     view.set(value)
     const hasher = {

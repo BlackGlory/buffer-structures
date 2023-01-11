@@ -8,6 +8,7 @@ import { uint8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 import { BaseObject } from '@objects/base-object'
 import { NULL } from '@utils/null'
+import { uint8 } from '@literals/uint8-literal'
 
 describe('OwnershipPointer', () => {
   test('create', () => {
@@ -25,7 +26,7 @@ describe('OwnershipPointer', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const data = new Uint8(allocator, 50)
+      const data = new Uint8(allocator, uint8(50))
       const pointer = new OwnershipPointer(allocator, Uint8View, data._view.byteOffset)
 
       pointer.destroy()
@@ -67,7 +68,7 @@ describe('OwnershipPointer', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const data = new Uint8(allocator, 10)
+        const data = new Uint8(allocator, uint8(10))
         const obj1 = new OwnershipPointer(allocator, Uint8View, data._view.byteOffset)
         const obj2 = obj1.clone()
 
@@ -106,14 +107,14 @@ describe('OwnershipPointer', () => {
     test('non-null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const dataView = new Uint8View(allocator.buffer, 50)
-      dataView.set(100)
+      dataView.set(uint8(100))
       const obj = new OwnershipPointer(allocator, Uint8View, 50)
 
       const result = obj.deref()
 
       expect(result).toBeInstanceOf(Uint8View)
       expect(result!.byteOffset).toBe(50)
-      expect(result!.get()).toBe(100)
+      expect(result!.get()).toStrictEqual(uint8(100))
     })
   })
 
@@ -133,7 +134,7 @@ describe('OwnershipPointer', () => {
 
     test('non-null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const data = new Uint8(allocator, 20)
+      const data = new Uint8(allocator, uint8(20))
       const obj = new OwnershipPointer(allocator, Uint8View, data._view.byteOffset)
       const hasher = {
         write: jest.fn()

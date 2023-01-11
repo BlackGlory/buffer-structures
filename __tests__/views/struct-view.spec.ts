@@ -5,6 +5,9 @@ import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { uint8ToBuffer, uint16ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
+import { uint8 } from '@literals/uint8-literal'
+import { uint16 } from '@literals/uint16-literal'
+import { uint32 } from '@literals/uint32-literal'
 
 describe('StructView', () => {
   test('create', () => {
@@ -87,7 +90,7 @@ describe('StructView', () => {
         foo: Uint8View
       , bar: Uint8OwnershipPointerView
       })
-      view.setByKey('bar', 20)
+      view.setByKey('bar', uint32(20))
 
       view.free(allocator)
 
@@ -111,8 +114,8 @@ describe('StructView', () => {
     const result = structView.get()
 
     expect(result).toStrictEqual({
-      foo: 100
-    , bar: 1000
+      foo: uint8(100)
+    , bar: uint16(1000)
     })
   })
 
@@ -125,8 +128,8 @@ describe('StructView', () => {
     })
 
     structView.set({
-      foo: 100
-    , bar: 1000
+      foo: uint8(100)
+    , bar: uint16(1000)
     })
 
     const dataView = new DataView(buffer)
@@ -147,7 +150,7 @@ describe('StructView', () => {
 
     const result = structView.getByKey('bar')
 
-    expect(result).toBe(1000)
+    expect(result).toStrictEqual(uint16(1000))
   })
 
   test('setByKey', () => {
@@ -158,7 +161,7 @@ describe('StructView', () => {
     , bar: Uint16View
     })
 
-    structView.setByKey('bar', 1000)
+    structView.setByKey('bar', uint16(1000))
 
     const dataView = new DataView(buffer)
     expect(dataView.getUint8(byteOffset)).toBe(0)
@@ -193,8 +196,8 @@ describe('StructView', () => {
     , bar: Uint16View
     })
     view.set({
-      foo: 10
-    , bar: 20
+      foo: uint8(10)
+    , bar: uint16(20)
     })
     const hasher = {
       write: jest.fn()

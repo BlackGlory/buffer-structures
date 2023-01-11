@@ -7,6 +7,8 @@ import { uint8ToBuffer, uint16ToBuffer } from '@test/utils'
 import { getError } from 'return-style'
 import { Allocator } from '@src/allocator'
 import { BaseObject } from '@objects/base-object'
+import { uint8 } from '@literals/uint8-literal'
+import { uint16 } from '@literals/uint16-literal'
 
 describe('Tuple', () => {
   test('create', () => {
@@ -16,11 +18,11 @@ describe('Tuple', () => {
     const result = new Tuple(
       allocator
     , [Uint8View, Uint16View]
-    , [1, 2]
+    , [uint8(1), uint16(2)]
     )
 
     expect(result).toBeInstanceOf(BaseObject)
-    expect(result.get()).toStrictEqual([1, 2])
+    expect(result.get()).toStrictEqual([uint8(1), uint16(2)])
     expect(allocate).toBeCalledTimes(1)
     expect(allocate).toBeCalledWith(TupleView.getByteLength([
       Uint8View
@@ -35,7 +37,7 @@ describe('Tuple', () => {
       const obj = new Tuple(
         allocator
       , [Uint8View, Uint16View]
-      , [1, 2]
+      , [uint8(1), uint16(2)]
       )
 
       obj.destroy()
@@ -53,7 +55,7 @@ describe('Tuple', () => {
       const obj = new Tuple(
         allocator
       , [Uint8View, Uint16View]
-      , [1, 2]
+      , [uint8(1), uint16(2)]
       )
       obj.destroy()
 
@@ -72,7 +74,7 @@ describe('Tuple', () => {
         const obj1 = new Tuple(
           allocator
         , [Uint8View, Uint16View]
-        , [1, 2]
+        , [uint8(1), uint16(2)]
         )
         const obj2 = obj1.clone()
 
@@ -87,7 +89,7 @@ describe('Tuple', () => {
         const obj1 = new Tuple(
           allocator
         , [Uint8View, Uint16View]
-        , [1, 2]
+        , [uint8(1), uint16(2)]
         )
         const obj2 = obj1.clone()
 
@@ -105,7 +107,7 @@ describe('Tuple', () => {
     const obj = new Tuple(
       allocator
     , [Uint8View, Uint16View]
-    , [1, 2]
+    , [uint8(1), uint16(2)]
     )
 
     const result = obj.clone()
@@ -121,7 +123,7 @@ describe('Tuple', () => {
     const obj = new Tuple(
       allocator
     , [Uint8View, Uint16View]
-    , [1, 2]
+    , [uint8(1), uint16(2)]
     )
 
     const result = obj.copy()
@@ -137,12 +139,12 @@ describe('Tuple', () => {
     const obj = new Tuple(
       allocator
     , [Uint8View, Uint16View]
-    , [1, 2]
+    , [uint8(1), uint16(2)]
     )
 
     const result = obj.get()
 
-    expect(result).toStrictEqual([1, 2])
+    expect(result).toStrictEqual([uint8(1), uint16(2)])
   })
 
   test('set', () => {
@@ -150,12 +152,12 @@ describe('Tuple', () => {
     const obj = new Tuple(
       allocator
     , [Uint8View, Uint16View]
-    , [1, 2]
+    , [uint8(1), uint16(2)]
     )
 
-    obj.set([3, 4])
+    obj.set([uint8(3), uint16(4)])
 
-    expect(obj.get()).toStrictEqual([3, 4])
+    expect(obj.get()).toStrictEqual([uint8(3), uint16(4)])
   })
 
   test('getByIndex', () => {
@@ -163,12 +165,12 @@ describe('Tuple', () => {
     const obj = new Tuple(
       allocator
     , [Uint8View, Uint16View]
-    , [1, 2]
+    , [uint8(1), uint16(2)]
     )
 
     const result = obj.getByIndex(1)
 
-    expect(result).toBe(2)
+    expect(result).toStrictEqual(uint16(2))
   })
 
   test('setByIndex', () => {
@@ -176,12 +178,12 @@ describe('Tuple', () => {
     const obj = new Tuple(
       allocator
     , [Uint8View, Uint16View]
-    , [1, 2]
+    , [uint8(1), uint16(2)]
     )
 
-    obj.setByIndex(1, 3)
+    obj.setByIndex(1, uint16(3))
 
-    expect(obj.get()).toStrictEqual([1, 3])
+    expect(obj.get()).toStrictEqual([uint8(1), uint16(3)])
   })
 
   test('getViewByIndex', () => {
@@ -189,7 +191,7 @@ describe('Tuple', () => {
     const obj = new Tuple(
       allocator
     , [Uint8View, Uint16View]
-    , [1, 2]
+    , [uint8(1), uint16(2)]
     )
 
     const view1 = obj.getViewByIndex(0)
@@ -204,7 +206,7 @@ describe('Tuple', () => {
     const obj = new Tuple(
       allocator
     , [Uint8View, Uint16View]
-    , [10, 20]
+    , [uint8(10), uint16(20)]
     )
     const hasher = {
       write: jest.fn()

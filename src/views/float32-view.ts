@@ -2,12 +2,13 @@ import { IHash, IReference, IReadableWritable, IFree } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { getSlice } from '@utils/get-slice'
 import { BaseView } from '@views/base-view'
+import { float32, Float32Literal } from '@literals/float32-literal'
 
 export class Float32View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<number>
+         , IReadableWritable<Float32Literal>
          , IFree {
   static readonly byteLength: number = Float32Array.BYTES_PER_ELEMENT
 
@@ -23,12 +24,12 @@ implements IHash
     allocator.free(this.byteOffset, Float32View.byteLength)
   }
 
-  get(): number {
-    return this.view.getFloat32(this.byteOffset)
+  get(): Float32Literal {
+    return float32(this.view.getFloat32(this.byteOffset))
   }
 
-  set(value: number): void {
-    this.view.setFloat32(this.byteOffset, value)
+  set(value: Float32Literal): void {
+    this.view.setFloat32(this.byteOffset, value.get())
   }
 
   hash(hasher: IHasher): void {
