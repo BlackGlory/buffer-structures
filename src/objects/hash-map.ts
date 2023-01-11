@@ -24,12 +24,12 @@ const createInternalViews = withLazyStatic(<
   valueViewConstructor: ViewConstructor<ValueView>
 , capacity: number
 ) => {
-  return lazyStatic(() => {
-    const structure = {
-      keyHash: Uint32View
-    , value: valueViewConstructor
-    }
+  const structure = lazyStatic(() => ({
+    keyHash: Uint32View
+  , value: valueViewConstructor
+  }), [valueViewConstructor])
 
+  return lazyStatic(() => {
     class InternalStructView extends StructView<{
       keyHash: typeof Uint32View
       value: ViewConstructor<ValueView>
@@ -96,10 +96,10 @@ const createInternalViews = withLazyStatic(<
 
     return {
       InternalLinkedListView
-    , InternalBucketsView
     , InternalBucketsOwnershipPointerView
+    , InternalBucketsView
     }
-  }, [valueViewConstructor, capacity])
+  }, [structure, capacity])
 })
 
 /**
