@@ -25,6 +25,11 @@ const createInternalViews = withLazyStatic(<
 , capacity: number
 ) => {
   return lazyStatic(() => {
+    const structure = {
+      keyHash: Uint32View
+    , value: valueViewConstructor
+    }
+
     class InternalStructView extends StructView<{
       keyHash: typeof Uint32View
       value: ViewConstructor<ValueView>
@@ -39,10 +44,7 @@ const createInternalViews = withLazyStatic(<
       }
 
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
-        super(buffer, byteOffset, {
-          keyHash: Uint32View
-        , value: valueViewConstructor
-        })
+        super(buffer, byteOffset, structure)
       }
     }
 

@@ -6,6 +6,7 @@ import { ReturnTypeOfConstructor } from 'hotypes'
 import * as Iter from 'iterable-operator'
 import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
 import { BaseView } from '@views/base-view'
+import { lazy } from 'extra-lazy'
 
 export type ViewConstructor<View> =
   ISized
@@ -38,6 +39,8 @@ implements IReference
   }
 
   readonly byteLength = StructView.getByteLength(this.structure)
+
+  private getEntries = lazy(() => Object.entries(this.structure))
 
   constructor(
     private buffer: ArrayBufferLike
@@ -109,7 +112,7 @@ implements IReference
   private getOffsetByIndex<U extends string & keyof Structure>(key: U): number {
     return this.byteOffset
          + pipe(
-             Object.entries(this.structure)
+             this.getEntries()
            , iter => Iter.takeUntil(iter, ([entryKey]) => entryKey === key)
            , iter => Iter.map(iter, ([, constructor]) => constructor)
            , iter => Iter.reduce(iter, (acc, cur) => acc + cur.byteLength, 0)
@@ -121,7 +124,7 @@ implements IReference
   , view: IReadableWritable<unknown> & IHash
   }> {
     let offset: number = this.byteOffset
-    for (const [key, constructor] of Object.entries(this.structure)) {
+    for (const [key, constructor] of this.getEntries()) {
       const view = new constructor(this.buffer, offset)
       yield { key, view }
       offset += constructor.byteLength
