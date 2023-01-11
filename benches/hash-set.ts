@@ -62,7 +62,6 @@ go(async () => {
       set.add(uint16(i))
     }
 
-    debugger
     return () => {
       for (let i = 0; i < count; i++) {
         set.has(uint16(i))
