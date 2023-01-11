@@ -28,8 +28,8 @@ JavaScript跨上下文的数据传输严重依赖于序列化和复制, 这直�
 
 [RAII]: https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization
 
-### 与TypedArray的区别是什么?
-与TypedArray等数据结构不同, 本项目中的数据结构将缓冲区视作一种可分配和释放的线性内存来使用.
+### 与类型化数组的区别是什么?
+与类型化数组等数据结构不同, 本项目中的数据结构将缓冲区视作一种可分配和释放的线性内存来使用.
 在这种情况下, 数十万个数据结构共享同一个缓冲区, 从而允许指针的存在, 让链表和节点这样的数据结构能够被实现.
 
 ### 数据结构是跨平台的吗?
@@ -141,11 +141,11 @@ interface ICopy<T> {
 字面量之所以存在, 是因为存在需要表示特定数据类型, 但又不希望往缓冲区里写入数据的情况.
 由于字面量以JavaScript数据类型表示, 使用字面量可以显著加强性能.
 
-#### FloatLiteral
+#### Float32Literal
 ```ts
-function float(val: number): FloatLiteral
+function float(val: number): Float32Literal
 
-class FloatLiteral
+class Float32Literal
 extends BaseLiteral
 implements IReadableWritable<number>
          , IHash {
@@ -153,11 +153,11 @@ implements IReadableWritable<number>
 }
 ```
 
-#### DoubleLiteral
+#### Float64Literal
 ```ts
-function double(val: number): DoubleLiteral
+function double(val: number): Float64Literal
 
-class DoubleLiteral extends BaseLiteral
+class Float64Literal extends BaseLiteral
 implements IReadableWritable<number>
          , IHash {
   constructor(value: number)
@@ -254,12 +254,12 @@ implements IReadableWritable<string>
 一旦对象丢失, 则缓冲区相关数据的数据结构信息和所有权都会一并遗失.
 在抛弃对象时, 需要手动执行`destroy`方法来释放缓冲区数据.
 
-#### Float
+#### Float32
 ```ts
-class Float
+class Float32
 extends BaseObject
-implements ICopy<Float>
-         , IClone<Float>
+implements ICopy<Float32>
+         , IClone<Float32>
          , IReadableWritable<number>
          , IHash
          , IDestroy {
@@ -267,12 +267,12 @@ implements ICopy<Float>
 }
 ```
 
-#### Double
+#### Float64
 ```ts
-class Double
+class Float64
 extends BaseObject
-implements ICopy<Double>
-         , IClone<Double>
+implements ICopy<Float64>
+         , IClone<Float64>
          , IReadableWritable<number>
          , IHash
          , IDestroy {
@@ -600,14 +600,14 @@ implements IClone<HashSet<View>>
 视图是用于读写缓冲区数据结构的低级API.
 由于视图对相关数据的生命周期一无所知, 使用视图总是会有一定风险.
 
-#### FloatView
+#### Float32View
 在缓冲区的表示:
 ```ts
-type Float = [float32]
+type Float32 = [float32]
 ```
 
 ```ts
-class FloatView
+class Float32View
 extends BaseView
 implements IHash
          , IReference
@@ -619,14 +619,14 @@ implements IHash
 }
 ```
 
-#### DoubleView
+#### Float64View
 在缓冲区的表示:
 ```ts
-type Double = [float64]
+type Float64 = [float64]
 ```
 
 ```ts
-class DoubleView
+class Float64View
 extends BaseView
 implements IHash
          , IReference
@@ -1027,7 +1027,6 @@ implements IReference
     index: U
   ): ReturnTypeOfConstructor<Structure[U]>
 }
-
 ```
 
 #### StructView

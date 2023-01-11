@@ -1,43 +1,39 @@
-import { Double } from '@objects/double'
-import { DoubleView } from '@views/double-view'
+import { Float32 } from '@objects/float32'
+import { Float32View } from '@views/float32-view'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { getError } from 'return-style'
-import { float64ToBuffer } from '@test/utils'
+import { float32ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 import { BaseObject } from '@objects/base-object'
 
-describe('Double', () => {
+describe('Float32', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new Double(allocator, 1)
+    const result = new Float32(allocator, 1)
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(result.get()).toBe(1)
     expect(allocate).toBeCalledTimes(1)
-    expect(allocate).toBeCalledWith(DoubleView.byteLength)
+    expect(allocate).toBeCalledWith(Float32View.byteLength)
   })
 
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const result = new Double(allocator, 1)
+      const result = new Float32(allocator, 1)
 
       result.destroy()
 
       expect(free).toBeCalledTimes(1)
-      expect(free).toBeCalledWith(result._view.byteOffset, DoubleView.byteLength)
+      expect(free).toBeCalledWith(result._view.byteOffset, Float32View.byteLength)
     })
 
     it('cannot destory twice', () => {
-      const allocator = {
-        buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
-      } satisfies IAllocator
-      const result = new Double(allocator, 1)
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const result = new Float32(allocator, 1)
       result.destroy()
 
       const err = getError(() => result.destroy())
@@ -52,7 +48,7 @@ describe('Double', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new Double(allocator, 1)
+        const obj1 = new Float32(allocator, 1)
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -63,21 +59,21 @@ describe('Double', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new Double(allocator, 1)
+        const obj1 = new Float32(allocator, 1)
         const obj2 = obj1.clone()
 
         obj1.destroy()
         obj2.destroy()
 
         expect(free).toBeCalledTimes(1)
-        expect(free).toBeCalledWith(obj1._view.byteOffset, DoubleView.byteLength)
+        expect(free).toBeCalledWith(obj1._view.byteOffset, Float32View.byteLength)
       })
     })
   })
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Double(allocator, 1)
+    const obj = new Float32(allocator, 1)
 
     const result = obj.clone()
 
@@ -89,7 +85,7 @@ describe('Double', () => {
 
   test('copy', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Double(allocator, 1)
+    const obj = new Float32(allocator, 1)
 
     const result = obj.copy()
 
@@ -101,7 +97,7 @@ describe('Double', () => {
 
   test('get', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Double(allocator, 1)
+    const obj = new Float32(allocator, 1)
 
     const result = obj.get()
 
@@ -110,7 +106,7 @@ describe('Double', () => {
 
   test('set', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Double(allocator, 1)
+    const obj = new Float32(allocator, 1)
 
     obj.set(2)
 
@@ -119,7 +115,7 @@ describe('Double', () => {
 
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Double(allocator, 1)
+    const obj = new Float32(allocator, 1)
     const hasher = {
       write: jest.fn()
     } satisfies IHasher
@@ -127,6 +123,6 @@ describe('Double', () => {
     obj.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).nthCalledWith(1, float64ToBuffer(1))
+    expect(hasher.write).nthCalledWith(1, float32ToBuffer(1))
   })
 })

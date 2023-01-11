@@ -1,18 +1,18 @@
 import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
-import { DoubleView } from '@views/double-view'
+import { Float32View } from '@views/float32-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { BaseObject } from '@objects/base-object'
 
-export class Double
+export class Float32
 extends BaseObject
-implements ICopy<Double>
-         , IClone<Double>
+implements ICopy<Float32>
+         , IClone<Float32>
          , IReadableWritable<number>
          , IHash
          , IDestroy {
-  readonly _view: DoubleView
+  readonly _view: Float32View
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
@@ -30,15 +30,15 @@ implements ICopy<Double>
       this.allocator = allocator
       this._counter = new ReferenceCounter()
 
-      const byteOffset = allocator.allocate(DoubleView.byteLength)
-      const view = new DoubleView(allocator.buffer, byteOffset)
+      const offset = allocator.allocate(Float32View.byteLength)
+      const view = new Float32View(allocator.buffer, offset)
       view.set(value)
       this._view = view
     } else {
       const [allocator, byteOffset, counter] = args
       this.allocator = allocator
 
-      const view = new DoubleView(allocator.buffer, byteOffset)
+      const view = new Float32View(allocator.buffer, byteOffset)
       this._view = view
 
       counter.increment()
@@ -59,16 +59,16 @@ implements ICopy<Double>
     }
   }
 
-  clone(): Double {
+  clone(): Float32 {
     this.fsm.assertAllocated()
 
-    return new Double(this.allocator, this._view.byteOffset, this._counter)
+    return new Float32(this.allocator, this._view.byteOffset, this._counter)
   }
 
-  copy(): Double {
+  copy(): Float32 {
     this.fsm.assertAllocated()
 
-    return new Double(this.allocator, this.get())
+    return new Float32(this.allocator, this.get())
   }
 
   get(): number {

@@ -1,25 +1,25 @@
-import { FloatLiteral, float } from '@literals/float-literal'
+import { Float32Literal, float32 } from '@literals/float32-literal'
 import { IHasher } from '@src/interfaces'
 import { float64ToBuffer } from '@test/utils'
 import { BaseLiteral } from '@literals/base-literal'
 
-test('float', () => {
-  const result = float(1)
+test('Float32', () => {
+  const result = float32(1)
 
-  expect(result).toBeInstanceOf(FloatLiteral)
+  expect(result).toBeInstanceOf(Float32Literal)
   expect(result.get()).toBe(1)
 })
 
-describe('FloatLiteral', () => {
+describe('Float32Literal', () => {
   test('create', () => {
-    const result = new FloatLiteral(1)
+    const result = new Float32Literal(1)
 
     expect(result).toBeInstanceOf(BaseLiteral)
     expect(result.get()).toBe(1)
   })
 
   test('get', () => {
-    const literal = new FloatLiteral(1)
+    const literal = new Float32Literal(1)
 
     const result = literal.get()
 
@@ -27,7 +27,7 @@ describe('FloatLiteral', () => {
   })
 
   test('set', () => {
-    const literal = new FloatLiteral(1)
+    const literal = new Float32Literal(1)
 
     literal.set(2)
 
@@ -35,7 +35,7 @@ describe('FloatLiteral', () => {
   })
 
   test('hash', () => {
-    const literal = new FloatLiteral(1)
+    const literal = new Float32Literal(1)
     const hasher = {
       write: jest.fn()
     } satisfies IHasher

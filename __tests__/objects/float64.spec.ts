@@ -1,39 +1,43 @@
-import { Float } from '@objects/float'
-import { FloatView } from '@views/float-view'
+import { Float64 } from '@objects/float64'
+import { Float64View } from '@views/float64-view'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { getError } from 'return-style'
-import { float32ToBuffer } from '@test/utils'
+import { float64ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 import { BaseObject } from '@objects/base-object'
 
-describe('Float', () => {
+describe('Float64', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new Float(allocator, 1)
+    const result = new Float64(allocator, 1)
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(result.get()).toBe(1)
     expect(allocate).toBeCalledTimes(1)
-    expect(allocate).toBeCalledWith(FloatView.byteLength)
+    expect(allocate).toBeCalledWith(Float64View.byteLength)
   })
 
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const result = new Float(allocator, 1)
+      const result = new Float64(allocator, 1)
 
       result.destroy()
 
       expect(free).toBeCalledTimes(1)
-      expect(free).toBeCalledWith(result._view.byteOffset, FloatView.byteLength)
+      expect(free).toBeCalledWith(result._view.byteOffset, Float64View.byteLength)
     })
 
     it('cannot destory twice', () => {
-      const allocator = new Allocator(new ArrayBuffer(100))
-      const result = new Float(allocator, 1)
+      const allocator = {
+        buffer: new ArrayBuffer(100)
+      , allocate: jest.fn()
+      , free: jest.fn()
+      } satisfies IAllocator
+      const result = new Float64(allocator, 1)
       result.destroy()
 
       const err = getError(() => result.destroy())
@@ -48,7 +52,7 @@ describe('Float', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new Float(allocator, 1)
+        const obj1 = new Float64(allocator, 1)
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -59,21 +63,21 @@ describe('Float', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new Float(allocator, 1)
+        const obj1 = new Float64(allocator, 1)
         const obj2 = obj1.clone()
 
         obj1.destroy()
         obj2.destroy()
 
         expect(free).toBeCalledTimes(1)
-        expect(free).toBeCalledWith(obj1._view.byteOffset, FloatView.byteLength)
+        expect(free).toBeCalledWith(obj1._view.byteOffset, Float64View.byteLength)
       })
     })
   })
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Float(allocator, 1)
+    const obj = new Float64(allocator, 1)
 
     const result = obj.clone()
 
@@ -85,7 +89,7 @@ describe('Float', () => {
 
   test('copy', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Float(allocator, 1)
+    const obj = new Float64(allocator, 1)
 
     const result = obj.copy()
 
@@ -97,7 +101,7 @@ describe('Float', () => {
 
   test('get', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Float(allocator, 1)
+    const obj = new Float64(allocator, 1)
 
     const result = obj.get()
 
@@ -106,7 +110,7 @@ describe('Float', () => {
 
   test('set', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Float(allocator, 1)
+    const obj = new Float64(allocator, 1)
 
     obj.set(2)
 
@@ -115,7 +119,7 @@ describe('Float', () => {
 
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Float(allocator, 1)
+    const obj = new Float64(allocator, 1)
     const hasher = {
       write: jest.fn()
     } satisfies IHasher
@@ -123,6 +127,6 @@ describe('Float', () => {
     obj.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).nthCalledWith(1, float32ToBuffer(1))
+    expect(hasher.write).nthCalledWith(1, float64ToBuffer(1))
   })
 })

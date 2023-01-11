@@ -3,28 +3,27 @@ import { IHasher } from '@src/interfaces'
 import { BaseLiteral } from '@literals/base-literal'
 import { lazy } from 'extra-lazy'
 
-export function float(val: number): FloatLiteral {
-  return new FloatLiteral(val)
+export function float64(val: number): Float64Literal {
+  return new Float64Literal(val)
 }
 
 const getView = lazy(() => {
   // 创建ArrayBuffer是主要的性能瓶颈.
-  const buffer = new ArrayBuffer(Float32Array.BYTES_PER_ELEMENT)
+  const buffer = new ArrayBuffer(Float64Array.BYTES_PER_ELEMENT)
   const view = new DataView(buffer)
   return view
 })
 
-export class FloatLiteral
+export class Float64Literal
 extends BaseLiteral
-implements IReadableWritable<number>
-         , IHash {
+implements IReadableWritable<number>, IHash {
   constructor(private value: number) {
     super()
   }
 
   hash(hasher: IHasher): void {
     const view = getView()
-    view.setFloat32(0, this.value)
+    view.setFloat64(0, this.value)
 
     hasher.write(view.buffer)
   }

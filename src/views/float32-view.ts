@@ -3,7 +3,7 @@ import { IAllocator, IHasher } from '@src/interfaces'
 import { getSlice } from '@utils/get-slice'
 import { BaseView } from '@views/base-view'
 
-export class FloatView
+export class Float32View
 extends BaseView
 implements IHash
          , IReference
@@ -20,7 +20,7 @@ implements IHash
   }
 
   free(allocator: IAllocator) {
-    allocator.free(this.byteOffset, FloatView.byteLength)
+    allocator.free(this.byteOffset, Float32View.byteLength)
   }
 
   get(): number {
@@ -32,7 +32,7 @@ implements IHash
   }
 
   hash(hasher: IHasher): void {
-    const slice = getSlice(this.view.buffer, this.byteOffset, FloatView.byteLength)
+    const slice = getSlice(this.view.buffer, this.byteOffset, Float32View.byteLength)
 
     hasher.write(slice)
   }

@@ -1,6 +1,6 @@
 export { BaseView } from '@views/base-view'
-export { DoubleView } from './double-view'
-export { FloatView } from './float-view'
+export { Float32View } from './float32-view'
+export { Float64View } from './float64-view'
 export { Int8View } from './int8-view'
 export { Int16View } from './int16-view'
 export { Int32View } from './int32-view'
