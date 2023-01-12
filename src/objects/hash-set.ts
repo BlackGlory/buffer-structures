@@ -363,8 +363,8 @@ implements IClone<HashSet<View>>
           } else {
             const newLinkedList = this.createLinkedList(hash, value)
             linkedList.setNext(uint32(newLinkedList.byteOffset))
-            this.incrementSize()
-            this.resizeWhenOverloaded()
+            const size = this.incrementSize()
+            this.resizeWhenOverloaded(size)
             return
           }
         }
@@ -372,8 +372,8 @@ implements IClone<HashSet<View>>
     } else {
       const newLinkedList = this.createLinkedList(hash, value)
       pointer.set(uint32(newLinkedList.byteOffset))
-      this.incrementSize()
-      this.resizeWhenOverloaded()
+      const size = this.incrementSize()
+      this.resizeWhenOverloaded(size)
     }
   }
 
@@ -423,10 +423,10 @@ implements IClone<HashSet<View>>
     }
   }
 
-  private resizeWhenOverloaded() {
-    if (this.isOverloaded(this._capacity)) {
+  private resizeWhenOverloaded(size: number) {
+    if (this.isOverloaded(size, this._capacity, this.loadFactor)) {
       let newCapacity = this._capacity * this.growthFactor
-      while (this.isOverloaded(newCapacity)) {
+      while (this.isOverloaded(size, newCapacity, this.loadFactor)) {
         newCapacity *= this.growthFactor
       }
 
@@ -434,8 +434,8 @@ implements IClone<HashSet<View>>
     }
   }
 
-  private isOverloaded(capacity: number): boolean {
-    return this.size / capacity > this.loadFactor
+  private isOverloaded(size: number, capacity: number, loadFactor: number): boolean {
+    return size / capacity > loadFactor
   }
 
   private resize(newCapacity: number): void {
@@ -517,16 +517,20 @@ implements IClone<HashSet<View>>
     }
   }
 
-  private incrementSize(): void {
+  private incrementSize(): number {
     const sizeView = this._view.getViewByIndex(OuterTupleKey.Size)
     const size = sizeView.get().get()
-    sizeView.set(uint32(size + 1))
+    const newSize = size + 1
+    sizeView.set(uint32(newSize))
+    return newSize
   }
 
-  private decrementSize(): void {
+  private decrementSize(): number {
     const sizeView = this._view.getViewByIndex(OuterTupleKey.Size)
     const size = sizeView.get().get()
-    sizeView.set(uint32(size - 1))
+    const newSize = size - 1
+    sizeView.set(uint32(newSize))
+    return newSize
   }
 
   private getValueHash(value: IHash): number {
