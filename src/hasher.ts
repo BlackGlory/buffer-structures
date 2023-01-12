@@ -2,8 +2,8 @@ import { IHasher } from '@src/interfaces'
 import { NULL } from '@utils/null'
 import { h32 } from 'xxhashjs'
 
-// 当前采用纯JavaScript实现, 等待`@node-rs/xxhash`解决内存泄漏问题:
-// https://github.com/napi-rs/node-rs/issues/655
+// 一个令人惊讶的事实是, 在JIT的帮助下,
+// `xxhashjs`这个纯JavaScript实现比本机插件`@node-rs/xxhash`要快.
 export class Hasher implements IHasher {
   private hasher = h32(0)
 
