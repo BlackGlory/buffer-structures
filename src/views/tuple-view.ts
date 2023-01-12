@@ -11,7 +11,7 @@ export type ViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
-export type MapStructureToValue<
+export type MapStructureToTupleValue<
   T extends NonEmptyArray<ViewConstructor<IReadableWritable<unknown> & IHash>>
 > = {
   [Index in keyof T]: UnpackedReadableWritable<ReturnTypeOfConstructor<T[Index]>>
@@ -22,7 +22,7 @@ export class TupleView<
 >
 extends BaseView
 implements IReference
-         , IReadableWritable<MapStructureToValue<Structure>>
+         , IReadableWritable<MapStructureToTupleValue<Structure>>
          , ISized
          , IHash
          , IFree {
@@ -56,7 +56,7 @@ implements IReference
     }
   }
 
-  get(): MapStructureToValue<Structure> {
+  get(): MapStructureToTupleValue<Structure> {
     const results: any[] = []
 
     for (const view of this.iterate()) {
@@ -64,10 +64,10 @@ implements IReference
       results.push(value)
     }
 
-    return results as MapStructureToValue<Structure>
+    return results as MapStructureToTupleValue<Structure>
   }
 
-  set(values: MapStructureToValue<Structure>): void {
+  set(values: MapStructureToTupleValue<Structure>): void {
     each(this.iterate(), (view, i) => {
       const value = values[i]
       view.set(value)
@@ -76,14 +76,14 @@ implements IReference
 
   getByIndex<U extends number & keyof Structure>(
     index: U
-  ): MapStructureToValue<Structure>[U] {
+  ): MapStructureToTupleValue<Structure>[U] {
     const view = this.getViewByIndex(index)
-    return view.get() as MapStructureToValue<Structure>[U]
+    return view.get() as MapStructureToTupleValue<Structure>[U]
   }
 
   setByIndex<U extends number & keyof Structure>(
     index: U
-  , value: MapStructureToValue<Structure>[U]
+  , value: MapStructureToTupleValue<Structure>[U]
   ): void {
     const view = this.getViewByIndex(index)
     view.set(value)

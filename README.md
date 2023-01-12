@@ -410,22 +410,22 @@ class LinkedList<View extends BaseView & IHash & IReadableWritable<unknown>>
 extends BaseObject
 implements ICopy<LinkedList<View>>
          , IClone<LinkedList<View>>
-         , IReadableWritable<MapStructureToValue<Structure<View>>>
+         , IReadableWritable<MapStructureToTupleValue<Structure<View>>>
          , IHash
          , IDestroy {
   constructor(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
-  , value: MapStructureToValue<Structure<View>>
+  , value: MapStructureToTupleValue<Structure<View>>
   )
 
-  setNext(value: MapStructureToValue<Structure<View>>['next']): void
-  getNext(): MapStructureToValue<Structure<View>>['next']
+  setNext(value: MapStructureToTupleValue<Structure<View>>['next']): void
+  getNext(): MapStructureToTupleValue<Structure<View>>['next']
   getViewOfNext(): OwnershipPointerView<LinkedListView<View>>
   derefNext(): LinkedListView<View> | null
 
-  setValue(value: MapStructureToValue<Structure<View>>['value']): void
-  getValue(): MapStructureToValue<Structure<View>>['value']
+  setValue(value: MapStructureToTupleValue<Structure<View>>['value']): void
+  getValue(): MapStructureToTupleValue<Structure<View>>['value']
   getViewOfValue(): View
 }
 ```
@@ -464,22 +464,22 @@ class Tuple<
 extends BaseObject
 implements ICopy<Tuple<Structure>>
          , IClone<Tuple<Structure>>
-         , IReadableWritable<MapStructureToValue<Structure>>
+         , IReadableWritable<MapStructureToTupleValue<Structure>>
          , IHash
          , IDestroy {
   constructor(
     allocator: IAllocator
   , structure: Structure
-  , value: MapStructureToValue<Structure>
+  , value: MapStructureToTupleValue<Structure>
   )
 
   getByIndex<U extends number & keyof Structure>(
     index: U
-  ): MapStructureToValue<Structure>[U]
+  ): MapStructureToTupleValue<Structure>[U]
 
   setByIndex<U extends number & keyof Structure>(
     index: U
-  , value: MapStructureToValue<Structure>[U]
+  , value: MapStructureToTupleValue<Structure>[U]
   ): void
 
   getViewByIndex<U extends number & keyof Structure>(
@@ -499,19 +499,21 @@ class Struct<
 extends BaseObject
 implements ICopy<Struct<Structure>>
          , IClone<Struct<Structure>>
-         , IReadableWritable<MapStructureToValue<Structure>>
+         , IReadableWritable<MapStructureToStructValue<Structure>>
          , IHash
          , IDestroy {
   constructor(
     allocator: IAllocator
   , structure: Structure
-  , value: MapStructureToValue<Structure>
+  , value: MapStructureToStructValue<Structure>
   )
 
-  getByKey<U extends string & keyof Structure>(key: U): MapStructureToValue<Structure>[U]
+  getByKey<U extends string & keyof Structure>(
+    key: U
+  ): MapStructureToStructValue<Structure>[U]
   setByKey<U extends string & keyof Structure>(
     key: U
-  , value: MapStructureToValue<Structure>[U]
+  , value: MapStructureToStructValue<Structure>[U]
   ): void
   getViewByKey<U extends string & keyof Structure>(
     key: U
@@ -908,7 +910,7 @@ class LinkedListView<View extends BaseView & IReadableWritable<unknown> & IHash>
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<MapStructureToValue<Structure<View>>>
+         , IReadableWritable<MapStructureToTupleValue<Structure<View>>>
          , ISized
          , IFree {
   static getByteLength(
@@ -925,13 +927,13 @@ implements IHash
   , viewConstructor: ViewConstructor<View>
   )
 
-  setNext(value: MapStructureToValue<Structure<View>>['next']): void
-  getNext(): MapStructureToValue<Structure<View>>['next']
+  setNext(value: MapStructureToTupleValue<Structure<View>>['next']): void
+  getNext(): MapStructureToTupleValue<Structure<View>>['next']
   getViewOfNext(): OwnershipPointerView<LinkedListView<View>>
   derefNext(): LinkedListView<View> | null
 
-  setValue(value: MapStructureToValue<Structure<View>>['value']): void
-  getValue(): MapStructureToValue<Structure<View>>['value']
+  setValue(value: MapStructureToTupleValue<Structure<View>>['value']): void
+  getValue(): MapStructureToTupleValue<Structure<View>>['value']
   getViewOfValue(): View
 }
 
@@ -978,7 +980,7 @@ implements IHash
 ```
 
 #### TupleView
-缓冲区中的元组视图, 与`StructView`等价但接口不同.
+缓冲区中的元组视图, 与`StructView`相当但接口不同.
 
 在缓冲区中的表示:
 ```ts
@@ -990,7 +992,7 @@ type ViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
-type MapStructureToValue<
+type MapStructureToTupleValue<
   T extends NonEmptyArray<ViewConstructor<IReadableWritable<unknown> & IHash>>
 > = {
   [Index in keyof T]: UnpackedReadableWritable<ReturnTypeOfConstructor<T[Index]>>
@@ -1001,7 +1003,7 @@ class TupleView<
 >
 extends BaseView
 implements IReference
-         , IReadableWritable<MapStructureToValue<Structure>>
+         , IReadableWritable<MapStructureToTupleValue<Structure>>
          , ISized
          , IHash
          , IFree {
@@ -1011,10 +1013,10 @@ implements IReference
 
   getByIndex<U extends number & keyof Structure>(
     index: U
-  ): MapStructureToValue<Structure>[U]
+  ): MapStructureToTupleValue<Structure>[U]
   setByIndex<U extends number & keyof Structure>(
     index: U
-  , value: MapStructureToValue<Structure>[U]
+  , value: MapStructureToTupleValue<Structure>[U]
   ): void
   getViewByIndex<U extends number & keyof Structure>(
     index: U
@@ -1023,7 +1025,8 @@ implements IReference
 ```
 
 #### StructView
-缓冲区中的结构体视图, 与`TupleView`等价但接口不同.
+缓冲区中的结构体视图, 与`TupleView`相当但接口不同.
+大部分情况下, `StructView`的可读性更好, 但出于性能原因, 你可能更想要使用`TupleView`而不是`StructView`.
 
 在缓冲区中的表示:
 ```ts
@@ -1035,7 +1038,7 @@ type ViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
-type MapStructureToValue<
+type MapStructureToStructValue<
   Structure extends Record<
     string
   , ViewConstructor<IReadableWritable<unknown> & IHash>
@@ -1051,7 +1054,7 @@ class StructView<
 >
 extends BaseView
 implements IReference
-         , IReadableWritable<MapStructureToValue<Structure>>
+         , IReadableWritable<MapStructureToStructValue<Structure>>
          , ISized
          , IHash
          , IFree {
@@ -1059,10 +1062,10 @@ implements IReference
 
   constructor(buffer: ArrayBufferLike, byteOffset: number, structure: Structure)
 
-  getByKey<U extends string & keyof Structure>(key: U): MapStructureToValue<Structure>[U]
+  getByKey<U extends string & keyof Structure>(key: U): MapStructureToStructValue<Structure>[U]
   setByKey<U extends string & keyof Structure>(
     key: U
-  , value: MapStructureToValue<Structure>[U]
+  , value: MapStructureToStructValue<Structure>[U]
   ): void
   getViewByKey<U extends string & keyof Structure>(
     key: U

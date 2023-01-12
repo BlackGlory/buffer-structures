@@ -30,7 +30,7 @@ go(async () => {
     return {
       beforeEach() {
         allocator = new Allocator(new ArrayBuffer(50 * MB))
-        map = new HashMap(allocator, Uint16View)
+        map = new HashMap(allocator, Uint16View, { capacity: 20000 })
       }
     , iterate() {
         for (let i = 0; i < count; i++) {

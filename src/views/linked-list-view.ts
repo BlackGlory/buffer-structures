@@ -2,7 +2,7 @@ import { IHash, ISized, IReference, IReadableWritable, IFree } from '@src/traits
 import { IAllocator, IHasher } from '@src/interfaces'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { isntNull } from '@blackglory/prelude'
-import { StructView, MapStructureToValue } from '@views/struct-view'
+import { TupleView, MapStructureToTupleValue } from '@views/tuple-view'
 import { BaseView } from '@views/base-view'
 import { withLazyStatic, lazyStatic } from 'extra-lazy'
 import { NULL } from '@utils/null'
@@ -15,9 +15,14 @@ type OwnershipPointerViewConstructor<View extends BaseView & IHash & IFree> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => OwnershipPointerView<View>)
 
-export type Structure<View extends BaseView & IHash & IReadableWritable<unknown>> = {
+export type Structure<View extends BaseView & IHash & IReadableWritable<unknown>> = [
   next: OwnershipPointerViewConstructor<LinkedListView<View>>
-  value: ViewConstructor<View>
+, value: ViewConstructor<View>
+]
+
+export enum TupleKey {
+  Next
+, Value
 }
 
 const createOwnershipPointerView = withLazyStatic(<
@@ -44,7 +49,7 @@ export class LinkedListView<View extends BaseView & IReadableWritable<unknown> &
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<MapStructureToValue<Structure<View>>>
+         , IReadableWritable<MapStructureToTupleValue<Structure<View>>>
          , ISized
          , IFree {
   static getByteLength(
@@ -59,7 +64,7 @@ implements IHash
 
   readonly byteLength = LinkedListView.getByteLength(this.viewConstructor)
 
-  private view: StructView<Structure<View>>
+  private view: TupleView<Structure<View>>
 
   constructor(
     private buffer: ArrayBufferLike
@@ -68,10 +73,10 @@ implements IHash
   ) {
     super()
 
-    this.view = new StructView(buffer, byteOffset, {
-      next: createOwnershipPointerView(viewConstructor)
-    , value: viewConstructor
-    })
+    this.view = new TupleView(buffer, byteOffset, [
+      createOwnershipPointerView(viewConstructor)
+    , viewConstructor
+    ])
   }
 
   free(allocator: IAllocator): void {
@@ -79,7 +84,7 @@ implements IHash
   }
 
   hash(hasher: IHasher): void {
-    const valueView = this.view.getViewByKey('value')
+    const valueView = this.view.getViewByIndex(TupleKey.Value)
     valueView.hash(hasher)
 
     const nextView = this.derefNext()
@@ -90,36 +95,36 @@ implements IHash
     }
   }
 
-  get(): MapStructureToValue<Structure<View>> {
+  get(): MapStructureToTupleValue<Structure<View>> {
     return this.view.get()
   }
 
-  set(value: MapStructureToValue<Structure<View>>): void {
+  set(value: MapStructureToTupleValue<Structure<View>>): void {
     this.view.set(value)
   }
 
-  setNext(value: MapStructureToValue<Structure<View>>['next']): void {
-    this.view.setByKey('next', value)
+  setNext(value: MapStructureToTupleValue<Structure<View>>[TupleKey.Next]): void {
+    this.view.setByIndex(TupleKey.Next, value)
   }
 
-  getNext(): MapStructureToValue<Structure<View>>['next'] {
-    return this.view.getByKey('next')
+  getNext(): MapStructureToTupleValue<Structure<View>>[TupleKey.Next] {
+    return this.view.getByIndex(TupleKey.Next)
   }
 
-  setValue(value: MapStructureToValue<Structure<View>>['value']): void {
-    this.view.setByKey('value', value)
+  setValue(value: MapStructureToTupleValue<Structure<View>>[TupleKey.Value]): void {
+    this.view.setByIndex(TupleKey.Value, value)
   }
 
-  getValue(): MapStructureToValue<Structure<View>>['value'] {
-    return this.view.getByKey('value')
+  getValue(): MapStructureToTupleValue<Structure<View>>[TupleKey.Value] {
+    return this.view.getByIndex(TupleKey.Value)
   }
 
   getViewOfValue(): View {
-    return this.view.getViewByKey('value')
+    return this.view.getViewByIndex(TupleKey.Value)
   }
 
   getViewOfNext(): OwnershipPointerView<LinkedListView<View>> {
-    return this.view.getViewByKey('next')
+    return this.view.getViewByIndex(TupleKey.Next)
   }
 
   derefNext(): LinkedListView<View> | null {

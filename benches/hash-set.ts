@@ -30,7 +30,7 @@ go(async () => {
     return {
       beforeEach() {
         allocator = new Allocator(new ArrayBuffer(50 * MB))
-        set = new HashSet(allocator, Uint16View)
+        set = new HashSet(allocator, Uint16View, { capacity: 20000 })
       }
     , iterate() {
         for (let i = 0; i < count; i++) {

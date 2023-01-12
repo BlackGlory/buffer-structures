@@ -1,7 +1,7 @@
 import { assert } from '@blackglory/prelude'
 import { IHash, ISized, IReference, IReadableWritable, IFree, IOwnershipPointer } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
-import { StructView } from '@views/struct-view'
+import { TupleView } from '@views/tuple-view'
 import { ViewConstructor } from '@views/pointer-view'
 import { Uint32View } from '@views/uint32-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
@@ -28,6 +28,11 @@ const createInternalOwnershipPointerView = withLazyStatic(<
   }, [viewConstructor])
 })
 
+enum KeyToIndex {
+  Count
+, Value
+}
+
 /**
  * ReferenceCountedOwnershipPointerView与OwnershipPointerView的区别:
  * ReferenceCountedOwnershipPointerView附带引用计数.
@@ -42,10 +47,10 @@ implements IHash
   static readonly byteLength: number = Uint32View.byteLength
                                      + OwnershipPointerView.byteLength
 
-  private view: StructView<{
+  private view: TupleView<[
     count: typeof Uint32View
-    value: OwnershipPointerViewConstructor<View>
-  }>
+  , value: OwnershipPointerViewConstructor<View>
+  ]>
 
   constructor(
     buffer: ArrayBufferLike
@@ -54,10 +59,10 @@ implements IHash
   ) {
     super()
 
-    this.view = new StructView(buffer, byteOffset, {
-      count: Uint32View
-    , value: createInternalOwnershipPointerView(viewConstructor)
-    })
+    this.view = new TupleView(buffer, byteOffset, [
+      Uint32View
+    , createInternalOwnershipPointerView(viewConstructor)
+    ])
   }
 
   free(allocator: IAllocator): void {
@@ -86,11 +91,12 @@ implements IHash
   }
 
   set(value: { count: Uint32Literal; value: Uint32Literal | null }): void {
-    this.view.set(value)
+    this.view.set([value.count, value.value])
   }
 
   get(): { count: Uint32Literal; value: Uint32Literal | null } {
-    return this.view.get()
+    const [count, value] = this.view.get()
+    return { count, value }
   }
 
   setCount(value: Uint32Literal): void {
@@ -101,11 +107,11 @@ implements IHash
     , 'The new count must be less than or equal to Number.MAX_SAFE_INTEGER'
     )
 
-    this.view.setByKey('count', value)
+    this.view.setByIndex(KeyToIndex.Count, value)
   }
 
   getCount(): Uint32Literal {
-    return this.view.getByKey('count')
+    return this.view.getByIndex(KeyToIndex.Count)
   }
 
   incrementCount(value: Uint32Literal = uint32(1)): void {
@@ -119,15 +125,15 @@ implements IHash
   }
 
   setValue(value: Uint32Literal | null): void {
-    this.view.setByKey('value', value)
+    this.view.setByIndex(KeyToIndex.Value, value)
   }
 
   getValue(): Uint32Literal | null {
-    return this.view.getByKey('value')
+    return this.view.getByIndex(KeyToIndex.Value)
   }
 
   deref(): View | null {
-    const valueView = this.view.getViewByKey('value')
+    const valueView = this.view.getViewByIndex(KeyToIndex.Value)
     return valueView.deref()
   }
 }

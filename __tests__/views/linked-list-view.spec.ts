@@ -61,7 +61,7 @@ describe('LinkedListView', () => {
 
       const result = view.get()
 
-      expect(result).toStrictEqual({ value: uint8(value), next: uint32(next) })
+      expect(result).toStrictEqual([uint32(next), uint8(value)])
     })
 
     test('next: number', () => {
@@ -76,7 +76,7 @@ describe('LinkedListView', () => {
 
       const result = view.get()
 
-      expect(result).toStrictEqual({ value: uint8(value), next: uint32(next) })
+      expect(result).toStrictEqual([uint32(next), uint8(value)])
     })
   })
 
@@ -88,7 +88,7 @@ describe('LinkedListView', () => {
       const value = uint8(1)
       const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
-      view.set({ next, value })
+      view.set([next, value])
 
       const dataView = new DataView(buffer)
       expect(dataView.getUint32(byteOffset)).toBe(0)
@@ -102,7 +102,7 @@ describe('LinkedListView', () => {
       const value = uint8(2)
       const view = new LinkedListView(buffer, byteOffset, Uint8View)
 
-      view.set({ next, value })
+      view.set([next, value])
 
       const dataView = new DataView(buffer)
       expect(dataView.getUint32(byteOffset)).toBe(1)

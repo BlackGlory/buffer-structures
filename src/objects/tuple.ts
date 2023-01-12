@@ -1,6 +1,6 @@
 import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
-import { TupleView, ViewConstructor, MapStructureToValue } from '@views/tuple-view'
+import { TupleView, ViewConstructor, MapStructureToTupleValue } from '@views/tuple-view'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
@@ -15,7 +15,7 @@ export class Tuple<
 extends BaseObject
 implements ICopy<Tuple<Structure>>
          , IClone<Tuple<Structure>>
-         , IReadableWritable<MapStructureToValue<Structure>>
+         , IReadableWritable<MapStructureToTupleValue<Structure>>
          , IHash
          , IDestroy {
   readonly _view: TupleView<Structure>
@@ -27,7 +27,7 @@ implements ICopy<Tuple<Structure>>
   constructor(
     allocator: IAllocator
   , structure: Structure
-  , value: MapStructureToValue<Structure>
+  , value: MapStructureToTupleValue<Structure>
   )
   constructor(
     _allocator: IAllocator
@@ -39,7 +39,7 @@ implements ICopy<Tuple<Structure>>
   | [
       allocator: IAllocator
     , structure: Structure
-    , value: MapStructureToValue<Structure>
+    , value: MapStructureToTupleValue<Structure>
     ]
   | [
       allocator: IAllocator
@@ -98,13 +98,13 @@ implements ICopy<Tuple<Structure>>
     return new Tuple(this.allocator, this.structure, this.get())
   }
 
-  get(): MapStructureToValue<Structure> {
+  get(): MapStructureToTupleValue<Structure> {
     this.fsm.assertAllocated()
 
     return this._view.get()
   }
 
-  set(value: MapStructureToValue<Structure>): void {
+  set(value: MapStructureToTupleValue<Structure>): void {
     this.fsm.assertAllocated()
 
     this._view.set(value)
@@ -112,13 +112,13 @@ implements ICopy<Tuple<Structure>>
 
   getByIndex<U extends number & keyof Structure>(
     index: U
-  ): MapStructureToValue<Structure>[U] {
+  ): MapStructureToTupleValue<Structure>[U] {
     return this._view.getByIndex(index)
   }
 
   setByIndex<U extends number & keyof Structure>(
     index: U
-  , value: MapStructureToValue<Structure>[U]
+  , value: MapStructureToTupleValue<Structure>[U]
   ): void {
     this._view.setByIndex(index, value)
   }

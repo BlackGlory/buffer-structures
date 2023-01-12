@@ -5,7 +5,7 @@ import { ArrayView } from '@views/array-view'
 import { LinkedListView } from '@views/linked-list-view'
 import { Uint32View } from '@views/uint32-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { StructView } from '@views/struct-view'
+import { TupleView } from '@views/tuple-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
 import { Hasher } from '@src/hasher'
@@ -18,43 +18,57 @@ type ViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
+export enum OuterTupleKey {
+  Size
+, Buckets
+}
+
+enum InnerTupleKey {
+  Hash
+, Value
+}
+
 const createInternalViews = withLazyStatic(<
   View extends BaseView & IReadableWritable<unknown> & IHash
 >(
   viewConstructor: ViewConstructor<View>
 , capacity: number
 ) => {
-  return lazyStatic(() => {
-    class InternalStructView extends StructView<{
+  const structure = lazyStatic(() => {
+    return [Uint32View, viewConstructor] satisfies [
       hash: typeof Uint32View
-      value: ViewConstructor<View>
-    }> {
-      static byteLength = StructView.getByteLength({
-        key: Uint32View
-      , value: viewConstructor
-      })
+    , value: ViewConstructor<View>
+    ]
+  }, [viewConstructor])
+
+  return lazyStatic(() => {
+    class InternalTupleView extends TupleView<[
+      hash: typeof Uint32View
+    , value: ViewConstructor<View>
+    ]> {
+      static byteLength = TupleView.getByteLength([
+        Uint32View
+      , viewConstructor
+      ])
 
       static override getByteLength(): number {
         return this.byteLength
       }
 
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
-        super(buffer, byteOffset, {
-          hash: Uint32View
-        , value: viewConstructor
-        })
+        super(buffer, byteOffset, structure)
       }
     }
 
-    class InternalLinkedListView extends LinkedListView<InternalStructView> {
-      static byteLength = LinkedListView.getByteLength(InternalStructView)
+    class InternalLinkedListView extends LinkedListView<InternalTupleView> {
+      static byteLength = LinkedListView.getByteLength(InternalTupleView)
 
       static override getByteLength(): number {
         return this.byteLength
       }
 
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
-        super(buffer, byteOffset, InternalStructView)
+        super(buffer, byteOffset, InternalTupleView)
       }
     }
 
@@ -97,7 +111,7 @@ const createInternalViews = withLazyStatic(<
     , InternalBucketsView
     , InternalBucketsOwnershipPointerView
     }
-  }, [viewConstructor, capacity])
+  }, [structure, capacity])
 })
 
 /**
@@ -108,22 +122,22 @@ export class HashSet<View extends BaseView & IReadableWritable<unknown> & IHash>
 extends BaseObject
 implements IClone<HashSet<View>>
          , IDestroy {
-  _view: StructView<{
+  _view: TupleView<[
     size: typeof Uint32View
-    buckets: ViewConstructor<OwnershipPointerView<
+  , buckets: ViewConstructor<OwnershipPointerView<
       ArrayView<
         OwnershipPointerView<
           LinkedListView<
-            StructView<{
+            TupleView<[
               hash: typeof Uint32View
-              value: ViewConstructor<View>
-            }>
+            , value: ViewConstructor<View>
+            ]>
           >
         >
       , number
       >
     >>
-  }>
+  ]>
   readonly _counter: ReferenceCounter
   _capacity: number
   private fsm = new ObjectStateMachine()
@@ -136,7 +150,7 @@ implements IClone<HashSet<View>>
   get size(): number {
     this.fsm.assertAllocated()
 
-    return this._view.getByKey('size').get()
+    return this._view.getByIndex(OuterTupleKey.Size).get()
   }
 
   constructor(
@@ -197,13 +211,13 @@ implements IClone<HashSet<View>>
       } = createInternalViews(viewConstructor, options.capacity)
       this.InternalLinkedListView = InternalLinkedListView
 
-      const rootView = new StructView(
+      const rootView = new TupleView(
         allocator.buffer
       , byteOffset
-      , {
-          size: Uint32View
-        , buckets: InternalBucketsOwnershipPointerView
-        }
+      , [
+          Uint32View
+        , InternalBucketsOwnershipPointerView
+        ]
       )
       this._view = rootView
 
@@ -241,23 +255,23 @@ implements IClone<HashSet<View>>
       }
 
       const structByteOffset = allocator.allocate(
-        StructView.getByteLength({
-          size: Uint32View
-        , buckets: InternalBucketsOwnershipPointerView
-        })
+        TupleView.getByteLength([
+          Uint32View
+        , InternalBucketsOwnershipPointerView
+        ])
       )
-      const structView = new StructView(
+      const structView = new TupleView(
         allocator.buffer
       , structByteOffset
-      , {
-          size: Uint32View
-        , buckets: InternalBucketsOwnershipPointerView
-        }
+      , [
+          Uint32View
+        , InternalBucketsOwnershipPointerView
+        ]
       )
-      structView.set({
-        size: uint32(0)
-      , buckets: uint32(bucketsByteOffset)
-      })
+      structView.set([
+        uint32(0)
+      , uint32(bucketsByteOffset)
+      ])
 
       this._view = structView
     }
@@ -291,14 +305,14 @@ implements IClone<HashSet<View>>
   * values(): IterableIterator<View> {
     this.fsm.assertAllocated()
 
-    const buckets = this._view.getViewByKey('buckets').deref()!
+    const buckets = this._view.getViewByIndex(OuterTupleKey.Buckets).deref()!
     for (let i = 0; i < this._capacity; i++) {
       const pointer = buckets.getViewByIndex(i)
 
       let linkedList = pointer.deref()
       while (linkedList) {
         const struct = linkedList.getViewOfValue()
-        yield struct.getViewByKey('value')
+        yield struct.getViewByIndex(InnerTupleKey.Value)
         linkedList = linkedList.derefNext()
       }
     }
@@ -307,7 +321,7 @@ implements IClone<HashSet<View>>
   has(value: IHash): boolean {
     this.fsm.assertAllocated()
 
-    const buckets = this._view.getViewByKey('buckets').deref()!
+    const buckets = this._view.getViewByIndex(OuterTupleKey.Buckets).deref()!
     const hash = this.getValueHash(value)
     const index = keyHashToIndex(this._capacity, hash)
     const pointer = buckets.getViewByIndex(index)
@@ -315,7 +329,7 @@ implements IClone<HashSet<View>>
     let linkedList = pointer.deref()
     while (linkedList) {
       const struct = linkedList.getViewOfValue()
-      const keyHash = struct.getByKey('hash').get()
+      const keyHash = struct.getByIndex(InnerTupleKey.Hash).get()
       if (hash === keyHash) {
         return true
       } else {
@@ -329,7 +343,7 @@ implements IClone<HashSet<View>>
   add(value: UnpackedReadableWritable<View> & IHash): void {
     this.fsm.assertAllocated()
 
-    const buckets = this._view.getViewByKey('buckets').deref()!
+    const buckets = this._view.getViewByIndex(OuterTupleKey.Buckets).deref()!
     const hash = this.getValueHash(value)
     const index = keyHashToIndex(this._capacity, hash)
     const pointer = buckets.getViewByIndex(index)
@@ -338,9 +352,9 @@ implements IClone<HashSet<View>>
     if (linkedList) {
       while (true) {
         const struct = linkedList.getViewOfValue()
-        const keyHash = struct.getByKey('hash').get()
+        const keyHash = struct.getByIndex(InnerTupleKey.Hash).get()
         if (hash === keyHash) {
-          struct.setByKey('value', value)
+          struct.setByIndex(InnerTupleKey.Value, value)
           return
         } else {
           const nextLinkedList = linkedList.derefNext()
@@ -366,7 +380,7 @@ implements IClone<HashSet<View>>
   delete(value: IHash): void {
     this.fsm.assertAllocated()
 
-    const buckets = this._view.getViewByKey('buckets').deref()!
+    const buckets = this._view.getViewByIndex(OuterTupleKey.Buckets).deref()!
     const hash = this.getValueHash(value)
     const index = this.getIndex(hash)
     const pointer = buckets.getViewByIndex(index)
@@ -374,23 +388,23 @@ implements IClone<HashSet<View>>
     let previous:
     | OwnershipPointerView<
         LinkedListView<
-          StructView<{
+          TupleView<[
             hash: typeof Uint32View
-            value: ViewConstructor<View>
-          }>
+          , value: ViewConstructor<View>
+          ]>
         >
       >
     | LinkedListView<
-        StructView<{
+        TupleView<[
           hash: typeof Uint32View
-          value: ViewConstructor<View>
-        }>
+        , value: ViewConstructor<View>
+        ]>
       >
     = pointer
     let linkedList = pointer.deref()
     while (linkedList) {
       const struct = linkedList.getViewOfValue()
-      const keyHash = struct.getByKey('hash').get()
+      const keyHash = struct.getByIndex(InnerTupleKey.Hash).get()
       if (hash === keyHash) {
         const next = linkedList.getNext()
         if (previous instanceof OwnershipPointerView) {
@@ -426,7 +440,7 @@ implements IClone<HashSet<View>>
 
   private resize(newCapacity: number): void {
     if (this._capacity !== newCapacity) {
-      const oldBuckets = this._view.getViewByKey('buckets').deref()!
+      const oldBuckets = this._view.getViewByIndex(OuterTupleKey.Buckets).deref()!
       const {
         InternalBucketsView
       , InternalBucketsOwnershipPointerView
@@ -453,7 +467,7 @@ implements IClone<HashSet<View>>
         }
 
         while (oldLinkedList) {
-          const { hash, value } = oldLinkedList.getValue()
+          const [hash, value] = oldLinkedList.getValue()
           const newIndex = keyHashToIndex(newCapacity, hash.get())
 
           const newPointer = newBuckets.getViewByIndex(newIndex)
@@ -461,9 +475,9 @@ implements IClone<HashSet<View>>
           if (newLinkedList) {
             while (true) {
               const struct = newLinkedList.getViewOfValue()
-              const newKeyHash = struct.getByKey('hash')
+              const newKeyHash = struct.getByIndex(InnerTupleKey.Hash)
               if (hash === newKeyHash) {
-                struct.setByKey('value', value)
+                struct.setByIndex(InnerTupleKey.Value, value)
                 break
               } else {
                 const nextNewLinkedList = newLinkedList.derefNext()
@@ -487,30 +501,30 @@ implements IClone<HashSet<View>>
         }
       }
 
-      const newStructView = new StructView(
+      const newTupleView = new TupleView(
         this.allocator.buffer
       , this._view.byteOffset
-      , {
-          size: Uint32View
-        , buckets: InternalBucketsOwnershipPointerView
-        }
+      , [
+          Uint32View
+        , InternalBucketsOwnershipPointerView
+        ]
       )
-      newStructView.setByKey('buckets', uint32(newBucketsByteOffset))
+      newTupleView.setByIndex(OuterTupleKey.Buckets, uint32(newBucketsByteOffset))
 
-      this._view = newStructView
+      this._view = newTupleView
       this._capacity = newCapacity
       oldBuckets.free(this.allocator)
     }
   }
 
   private incrementSize(): void {
-    const sizeView = this._view.getViewByKey('size')
+    const sizeView = this._view.getViewByIndex(OuterTupleKey.Size)
     const size = sizeView.get().get()
     sizeView.set(uint32(size + 1))
   }
 
   private decrementSize(): void {
-    const sizeView = this._view.getViewByKey('size')
+    const sizeView = this._view.getViewByIndex(OuterTupleKey.Size)
     const size = sizeView.get().get()
     sizeView.set(uint32(size - 1))
   }
@@ -530,13 +544,7 @@ implements IClone<HashSet<View>>
   private createLinkedList(hash: number, value: UnpackedReadableWritable<View>) {
     const byteOffset = this.allocator.allocate(this.InternalLinkedListView.getByteLength())
     const linkedList = new this.InternalLinkedListView(this.allocator.buffer, byteOffset)
-    linkedList.set({
-      next: null
-    , value: {
-        hash: uint32(hash)
-      , value
-      }
-    })
+    linkedList.set([null, [uint32(hash), value]])
     return linkedList
   }
 }
