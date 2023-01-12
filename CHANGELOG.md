@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/BlackGlory/buffer-structures/compare/v0.1.2...v0.2.0) (2023-01-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* Changed traits of `ReferenceCountedOwnershipPointerView`
+* Changed traits of `LinkedList`, `LinkedListView`
+
+* improve performance ([96ec469](https://github.com/BlackGlory/buffer-structures/commit/96ec469cc25ea3ed48c068786b2ae0ebf9aee3cf))
+* improve performance ([28fec1e](https://github.com/BlackGlory/buffer-structures/commit/28fec1e48a40fce7f4b87f7ecd81466e500237f2))
+
 ### [0.1.2](https://github.com/BlackGlory/buffer-structures/compare/v0.1.1...v0.1.2) (2023-01-11)
 
 ### [0.1.1](https://github.com/BlackGlory/buffer-structures/compare/v0.1.0...v0.1.1) (2023-01-11)
