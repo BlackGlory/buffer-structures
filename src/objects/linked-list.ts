@@ -1,7 +1,7 @@
 import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { LinkedListView, ViewConstructor, Structure, TupleKey } from '@views/linked-list-view'
+import { LinkedListView, ViewConstructor, LinkedListStructure, TupleKey } from '@views/linked-list-view'
 import { MapStructureToTupleValue } from '@views/tuple-view'
 import { ObjectStateMachine } from '@utils/object-state-machine'
 import { ReferenceCounter } from '@utils/reference-counter'
@@ -12,7 +12,7 @@ export class LinkedList<View extends BaseView & IHash & IReadableWritable<unknow
 extends BaseObject
 implements ICopy<LinkedList<View>>
          , IClone<LinkedList<View>>
-         , IReadableWritable<MapStructureToTupleValue<Structure<View>>>
+         , IReadableWritable<MapStructureToTupleValue<LinkedListStructure<View>>>
          , IHash
          , IDestroy {
   readonly _view: LinkedListView<View>
@@ -24,7 +24,7 @@ implements ICopy<LinkedList<View>>
   constructor(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
-  , value: MapStructureToTupleValue<Structure<View>>
+  , value: MapStructureToTupleValue<LinkedListStructure<View>>
   )
   constructor(
     _allocator: IAllocator
@@ -36,7 +36,7 @@ implements ICopy<LinkedList<View>>
   | [
       allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
-    , value: MapStructureToTupleValue<Structure<View>>
+    , value: MapStructureToTupleValue<LinkedListStructure<View>>
     ]
   | [
       allocator: IAllocator
@@ -108,27 +108,27 @@ implements ICopy<LinkedList<View>>
     return new LinkedList(this.allocator, this.viewConstructor, this.get())
   }
 
-  get(): MapStructureToTupleValue<Structure<View>> {
+  get(): MapStructureToTupleValue<LinkedListStructure<View>> {
     return this._view.get()
   }
 
-  set(value: MapStructureToTupleValue<Structure<View>>): void {
+  set(value: MapStructureToTupleValue<LinkedListStructure<View>>): void {
     this._view.set(value)
   }
 
-  setNext(value: MapStructureToTupleValue<Structure<View>>[TupleKey.Next]): void {
+  setNext(value: MapStructureToTupleValue<LinkedListStructure<View>>[TupleKey.Next]): void {
     this._view.setNext(value)
   }
 
-  getNext(): MapStructureToTupleValue<Structure<View>>[TupleKey.Next] {
+  getNext(): MapStructureToTupleValue<LinkedListStructure<View>>[TupleKey.Next] {
     return this._view.getNext()
   }
 
-  setValue(value: MapStructureToTupleValue<Structure<View>>[TupleKey.Value]): void {
+  setValue(value: MapStructureToTupleValue<LinkedListStructure<View>>[TupleKey.Value]): void {
     this._view.setValue(value)
   }
 
-  getValue(): MapStructureToTupleValue<Structure<View>>[TupleKey.Value] {
+  getValue(): MapStructureToTupleValue<LinkedListStructure<View>>[TupleKey.Value] {
     return this._view.getValue()
   }
 

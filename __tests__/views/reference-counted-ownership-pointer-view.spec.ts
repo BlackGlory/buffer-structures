@@ -75,10 +75,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       , 50
       , Uint8View
       )
-      pointerView.set({
-        count: uint32(1)
-      , value: uint32(1)
-      })
+      pointerView.set([uint32(1), uint32(1)])
 
       pointerView.free(allocator)
 
@@ -121,10 +118,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       , 50
       , Uint8View
       )
-      pointerView.set({
-        count: uint32(1)
-      , value: uint32(10)
-      })
+      pointerView.set([uint32(1), uint32(10)])
 
       pointerView.freePointed(allocator)
 
@@ -150,10 +144,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
 
       const result = pointerView.get()
 
-      expect(result).toStrictEqual({
-        count: uint32(count)
-      , value: null
-      })
+      expect(result).toStrictEqual([uint32(count), null])
     })
 
     test('value: non-null', () => {
@@ -172,7 +163,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
 
       const result = pointerView.get()
 
-      expect(result).toStrictEqual({ count: uint32(count), value: uint32(value) })
+      expect(result).toStrictEqual([uint32(count), uint32(value)])
     })
   })
 
@@ -188,7 +179,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       , Uint8View
       )
 
-      pointerView.set({ count, value })
+      pointerView.set([count, value])
 
       const dataView = new DataView(buffer)
       expect(dataView.getUint32(byteOffset)).toBe(1)
@@ -206,7 +197,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       , Uint8View
       )
 
-      pointerView.set({ count, value })
+      pointerView.set([count, value])
 
       const dataView = new DataView(buffer)
       expect(dataView.getUint32(byteOffset)).toBe(1)
@@ -399,7 +390,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
     test('null', () => {
       const buffer = new ArrayBuffer(100)
       const pointerView = new ReferenceCountedOwnershipPointerView(buffer, 50, Uint8View)
-      pointerView.set({ count: uint32(1), value: null })
+      pointerView.set([uint32(1), null])
       const hasher = {
         write: jest.fn()
       } satisfies IHasher
@@ -415,7 +406,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       const dataView = new Uint8View(buffer, 1)
       dataView.set(uint8(10))
       const pointerView = new ReferenceCountedOwnershipPointerView(buffer, 50, Uint8View)
-      pointerView.set({ count: uint32(1), value: uint32(1) })
+      pointerView.set([uint32(1), uint32(1)])
       const hasher = {
         write: jest.fn()
       } satisfies IHasher

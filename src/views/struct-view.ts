@@ -51,7 +51,7 @@ implements IReference
   }
 
   free(allocator: IAllocator): void {
-    for (const { view } of this.iterate()) {
+    for (const [, view] of this.iterate()) {
       if (isOwnershiptPointer(view)) {
         view.freePointed(allocator)
       }
@@ -61,7 +61,7 @@ implements IReference
   }
 
   hash(hasher: IHasher): void {
-    for (const { view } of this.iterate()) {
+    for (const [, view] of this.iterate()) {
       view.hash(hasher)
     }
   }
@@ -69,7 +69,7 @@ implements IReference
   get(): MapStructureToValue<Structure> {
     const results: Record<string, any> = {}
 
-    for (const { key, view } of this.iterate()) {
+    for (const [key, view] of this.iterate()) {
       const value = view.get()
       results[key] = value
     }
@@ -78,7 +78,7 @@ implements IReference
   }
 
   set(values: MapStructureToValue<Structure>): void {
-    for (const { key, view } of this.iterate()) {
+    for (const [key, view] of this.iterate()) {
       const value = values[key]
       view.set(value)
     }
@@ -119,14 +119,14 @@ implements IReference
            )
   }
 
-  private * iterate(): IterableIterator<{
+  private * iterate(): IterableIterator<[
     key: string
   , view: IReadableWritable<unknown> & IHash
-  }> {
+  ]> {
     let offset: number = this.byteOffset
     for (const [key, constructor] of this.getEntries()) {
       const view = new constructor(this.buffer, offset)
-      yield { key, view }
+      yield [key, view]
       offset += constructor.byteLength
     }
   }

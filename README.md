@@ -410,22 +410,22 @@ class LinkedList<View extends BaseView & IHash & IReadableWritable<unknown>>
 extends BaseObject
 implements ICopy<LinkedList<View>>
          , IClone<LinkedList<View>>
-         , IReadableWritable<MapStructureToTupleValue<Structure<View>>>
+         , IReadableWritable<MapStructureToTupleValue<LinkedListStructure<View>>>
          , IHash
          , IDestroy {
   constructor(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
-  , value: MapStructureToTupleValue<Structure<View>>
+  , value: MapStructureToTupleValue<LinkedListStructure<View>>
   )
 
-  setNext(value: MapStructureToTupleValue<Structure<View>>['next']): void
-  getNext(): MapStructureToTupleValue<Structure<View>>['next']
-  getViewOfNext(): OwnershipPointerView<LinkedListView<View>>
+  setNext(value: MapStructureToTupleValue<LinkedListStructure<View>>['next']): void
+  getNext(): MapStructureToTupleValue<LinkedListStructure<View>>['next']
+  getViewOfNext(): OwnershipPointerView<LinkedListStructure<View>>
   derefNext(): LinkedListView<View> | null
 
-  setValue(value: MapStructureToTupleValue<Structure<View>>['value']): void
-  getValue(): MapStructureToTupleValue<Structure<View>>['value']
+  setValue(value: MapStructureToTupleValue<LinkedListStructure<View>>['value']): void
+  getValue(): MapStructureToTupleValue<LinkedListStructure<View>>['value']
   getViewOfValue(): View
 }
 ```
@@ -861,7 +861,7 @@ class ReferenceCountedOwnershipPointerView<View extends BaseView & IHash & IFree
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<{ count: Uint32Literal; value: Uint32Literal | null }>
+         , IReadableWritable<[count: Uint32Literal, value: Uint32Literal | null]>
          , IFree
          , IOwnershipPointer {
   static readonly byteLength: number
@@ -901,16 +901,16 @@ type OwnershipPointerViewConstructor<View extends BaseView & IHash & IFree> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => OwnershipPointerView<View>)
 
-type Structure<View extends BaseView & IHash & IReadableWritable<unknown>> = {
+type LinkedListStructure<View extends BaseView & IHash & IReadableWritable<unknown>> = [
   next: OwnershipPointerViewConstructor<LinkedListView<View>>
-  value: ViewConstructor<View>
-}
+, value: ViewConstructor<View>
+]
 
 class LinkedListView<View extends BaseView & IReadableWritable<unknown> & IHash>
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<MapStructureToTupleValue<Structure<View>>>
+         , IReadableWritable<MapStructureToTupleValue<LinkedListStructure<View>>>
          , ISized
          , IFree {
   static getByteLength(
@@ -927,16 +927,15 @@ implements IHash
   , viewConstructor: ViewConstructor<View>
   )
 
-  setNext(value: MapStructureToTupleValue<Structure<View>>['next']): void
-  getNext(): MapStructureToTupleValue<Structure<View>>['next']
+  setNext(value: MapStructureToTupleValue<LinkedListStructure<View>>['next']): void
+  getNext(): MapStructureToTupleValue<LinkedListStructure<View>>['next']
   getViewOfNext(): OwnershipPointerView<LinkedListView<View>>
   derefNext(): LinkedListView<View> | null
 
-  setValue(value: MapStructureToTupleValue<Structure<View>>['value']): void
-  getValue(): MapStructureToTupleValue<Structure<View>>['value']
+  setValue(value: MapStructureToTupleValue<LinkedListStructure<View>>['value']): void
+  getValue(): MapStructureToTupleValue<LinkedListStructure<View>>['value']
   getViewOfValue(): View
 }
-
 ```
 
 #### ArrayView

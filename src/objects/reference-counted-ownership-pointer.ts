@@ -59,10 +59,7 @@ implements IClone<ReferenceCountedOwnershipPointer<View>>
       , byteOffset
       , viewConstructor
       )
-      view.set({
-        count: uint32(1)
-      , value: uint32(valueByteOffset)
-      })
+      view.set([uint32(1), uint32(valueByteOffset)])
       this._view = view
     } else {
       const [, allocator, viewConstructor, byteOffset] = args

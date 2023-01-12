@@ -563,13 +563,7 @@ implements IClone<HashMap<KeyView, ValueView>>
   private createLinkedList(keyHash: number, value: UnpackedReadableWritable<ValueView>) {
     const byteOffset = this.allocator.allocate(this.InternalLinkedListView.getByteLength())
     const linkedList = new this.InternalLinkedListView(this.allocator.buffer, byteOffset)
-    linkedList.set([
-      null
-    , [
-        uint32(keyHash)
-      , value
-      ]
-    ])
+    linkedList.set([null, [uint32(keyHash), value]])
     return linkedList
   }
 }

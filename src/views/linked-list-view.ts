@@ -15,7 +15,9 @@ type OwnershipPointerViewConstructor<View extends BaseView & IHash & IFree> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => OwnershipPointerView<View>)
 
-export type Structure<View extends BaseView & IHash & IReadableWritable<unknown>> = [
+export type LinkedListStructure<
+  View extends BaseView & IHash & IReadableWritable<unknown>
+> = [
   next: OwnershipPointerViewConstructor<LinkedListView<View>>
 , value: ViewConstructor<View>
 ]
@@ -49,7 +51,7 @@ export class LinkedListView<View extends BaseView & IReadableWritable<unknown> &
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<MapStructureToTupleValue<Structure<View>>>
+         , IReadableWritable<MapStructureToTupleValue<LinkedListStructure<View>>>
          , ISized
          , IFree {
   static getByteLength(
@@ -64,7 +66,7 @@ implements IHash
 
   readonly byteLength = LinkedListView.getByteLength(this.viewConstructor)
 
-  private view: TupleView<Structure<View>>
+  private view: TupleView<LinkedListStructure<View>>
 
   constructor(
     private buffer: ArrayBufferLike
@@ -95,27 +97,27 @@ implements IHash
     }
   }
 
-  get(): MapStructureToTupleValue<Structure<View>> {
+  get(): MapStructureToTupleValue<LinkedListStructure<View>> {
     return this.view.get()
   }
 
-  set(value: MapStructureToTupleValue<Structure<View>>): void {
+  set(value: MapStructureToTupleValue<LinkedListStructure<View>>): void {
     this.view.set(value)
   }
 
-  setNext(value: MapStructureToTupleValue<Structure<View>>[TupleKey.Next]): void {
+  setNext(value: MapStructureToTupleValue<LinkedListStructure<View>>[TupleKey.Next]): void {
     this.view.setByIndex(TupleKey.Next, value)
   }
 
-  getNext(): MapStructureToTupleValue<Structure<View>>[TupleKey.Next] {
+  getNext(): MapStructureToTupleValue<LinkedListStructure<View>>[TupleKey.Next] {
     return this.view.getByIndex(TupleKey.Next)
   }
 
-  setValue(value: MapStructureToTupleValue<Structure<View>>[TupleKey.Value]): void {
+  setValue(value: MapStructureToTupleValue<LinkedListStructure<View>>[TupleKey.Value]): void {
     this.view.setByIndex(TupleKey.Value, value)
   }
 
-  getValue(): MapStructureToTupleValue<Structure<View>>[TupleKey.Value] {
+  getValue(): MapStructureToTupleValue<LinkedListStructure<View>>[TupleKey.Value] {
     return this.view.getByIndex(TupleKey.Value)
   }
 

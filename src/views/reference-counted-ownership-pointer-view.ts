@@ -41,7 +41,7 @@ export class ReferenceCountedOwnershipPointerView<View extends BaseView & IHash 
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<{ count: Uint32Literal; value: Uint32Literal | null }>
+         , IReadableWritable<[count: Uint32Literal, value: Uint32Literal | null]>
          , IFree
          , IOwnershipPointer {
   static readonly byteLength: number = Uint32View.byteLength
@@ -90,13 +90,12 @@ implements IHash
     }
   }
 
-  set(value: { count: Uint32Literal; value: Uint32Literal | null }): void {
-    this.view.set([value.count, value.value])
+  set(value: [count: Uint32Literal, value: Uint32Literal | null]): void {
+    this.view.set(value)
   }
 
-  get(): { count: Uint32Literal; value: Uint32Literal | null } {
-    const [count, value] = this.view.get()
-    return { count, value }
+  get(): [count: Uint32Literal, value: Uint32Literal | null] {
+    return this.view.get()
   }
 
   setCount(value: Uint32Literal): void {
