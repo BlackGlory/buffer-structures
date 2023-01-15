@@ -3,7 +3,7 @@ import { IAllocator, IHasher } from '@src/interfaces'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { LinkedListView, ViewConstructor, LinkedListStructure, TupleKey } from '@views/linked-list-view'
 import { MapStructureToTupleValue } from '@views/tuple-view'
-import { ObjectStateMachine, ReferenceCounter } from './utils'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
 
@@ -20,25 +20,37 @@ implements ICopy<LinkedList<View>>
   private allocator: IAllocator
   private viewConstructor: ViewConstructor<View>
 
-  constructor(
+  static create<View extends BaseView & IHash & IReadableWritable<unknown>>(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , value: MapStructureToTupleValue<LinkedListStructure<View>>
+  ): LinkedList<View> {
+    return new this(ConstructorType.Create, allocator, viewConstructor, value)
+  }
+
+  private constructor(
+    type: ConstructorType.Create
+  , allocator: IAllocator
+  , viewConstructor: ViewConstructor<View>
+  , value: MapStructureToTupleValue<LinkedListStructure<View>>
   )
-  constructor(
-    _allocator: IAllocator
-  , _viewConstructor: ViewConstructor<View>
-  , _byteOffset: number
-  , _counter: ReferenceCounter
+  private constructor(
+    type: ConstructorType.Clone
+  , allocator: IAllocator
+  , viewConstructor: ViewConstructor<View>
+  , byteOffset: number
+  , counter: ReferenceCounter
   )
-  constructor(...args:
+  private constructor(...args:
   | [
-      allocator: IAllocator
+      type: ConstructorType.Create
+    , allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
     , value: MapStructureToTupleValue<LinkedListStructure<View>>
     ]
   | [
-      allocator: IAllocator
+      type: ConstructorType.Clone
+    , allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
     , byteOffset: number
     , counter: ReferenceCounter
@@ -46,34 +58,42 @@ implements ICopy<LinkedList<View>>
   ) {
     super()
 
-    if (args.length === 3) {
-      const [allocator, viewConstructor, value] = args
-      this.allocator = allocator
-      this.viewConstructor = viewConstructor
-      this._counter = new ReferenceCounter()
+    const [type] = args
+    switch (type) {
+      case ConstructorType.Create: {
+        const [, allocator, viewConstructor, value] = args
+        this.allocator = allocator
+        this.viewConstructor = viewConstructor
+        this._counter = new ReferenceCounter()
 
-      const byteOffset = allocator.allocate(LinkedListView.getByteLength(viewConstructor))
-      const view = new LinkedListView<View>(
-        allocator.buffer
-      , byteOffset
-      , viewConstructor
-      )
-      view.set(value)
-      this._view = view
-    } else {
-      const [allocator, viewConstructor, byteOffset, counter] = args
-      this.allocator = allocator
-      this.viewConstructor = viewConstructor
+        const byteOffset = allocator.allocate(LinkedListView.getByteLength(viewConstructor))
+        const view = new LinkedListView<View>(
+          allocator.buffer
+        , byteOffset
+        , viewConstructor
+        )
+        view.set(value)
+        this._view = view
 
-      const view = new LinkedListView<View>(
-        allocator.buffer
-      , byteOffset
-      , viewConstructor
-      )
-      this._view = view
+        return
+      }
+      case ConstructorType.Clone: {
+        const [, allocator, viewConstructor, byteOffset, counter] = args
+        this.allocator = allocator
+        this.viewConstructor = viewConstructor
 
-      counter.increment()
-      this._counter = counter
+        const view = new LinkedListView<View>(
+          allocator.buffer
+        , byteOffset
+        , viewConstructor
+        )
+        this._view = view
+
+        counter.increment()
+        this._counter = counter
+
+        return
+      }
     }
   }
 
@@ -94,7 +114,8 @@ implements ICopy<LinkedList<View>>
     this.fsm.assertAllocated()
 
     return new LinkedList(
-      this.allocator
+      ConstructorType.Clone
+    , this.allocator
     , this.viewConstructor
     , this._view.byteOffset
     , this._counter
@@ -104,7 +125,12 @@ implements ICopy<LinkedList<View>>
   copy(): LinkedList<View> {
     this.fsm.assertAllocated()
 
-    return new LinkedList(this.allocator, this.viewConstructor, this.get())
+    return new LinkedList(
+      ConstructorType.Create
+    , this.allocator
+    , this.viewConstructor
+    , this.get()
+    )
   }
 
   get(): MapStructureToTupleValue<LinkedListStructure<View>> {

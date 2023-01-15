@@ -16,7 +16,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new ReferenceCountedOwnershipPointer(allocator, Uint8View, 1)
+    const result = ReferenceCountedOwnershipPointer.create(allocator, Uint8View, 1)
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(allocate).toBeCalledTimes(1)
@@ -27,8 +27,8 @@ describe('ReferenceCountedOwnershipPointer', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const data = new Uint8(allocator, uint8(10))
-      const pointer = new ReferenceCountedOwnershipPointer(
+      const data = Uint8.create(allocator, uint8(10))
+      const pointer = ReferenceCountedOwnershipPointer.create(
         allocator
       , Uint8View
       , data._view.byteOffset
@@ -55,7 +55,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const pointer = new ReferenceCountedOwnershipPointer(allocator, Uint8View, 1)
+      const pointer = ReferenceCountedOwnershipPointer.create(allocator, Uint8View, 1)
       pointer.destroy()
 
       const err = getError(() => pointer.destroy())
@@ -70,7 +70,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new ReferenceCountedOwnershipPointer(allocator, Uint8View, 1)
+        const obj1 = ReferenceCountedOwnershipPointer.create(allocator, Uint8View, 1)
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -81,8 +81,8 @@ describe('ReferenceCountedOwnershipPointer', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const data = new Uint8(allocator, uint8(10))
-        const obj1 = new ReferenceCountedOwnershipPointer(
+        const data = Uint8.create(allocator, uint8(10))
+        const obj1 = ReferenceCountedOwnershipPointer.create(
           allocator
         , Uint8View
         , data._view.byteOffset
@@ -105,7 +105,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new ReferenceCountedOwnershipPointer(allocator, Uint8View, 1)
+    const obj = ReferenceCountedOwnershipPointer.create(allocator, Uint8View, 1)
 
     const result = obj.clone()
 
@@ -118,7 +118,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
   describe('deref', () => {
     test('null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new ReferenceCountedOwnershipPointer(allocator, Uint8View, 0)
+      const obj = ReferenceCountedOwnershipPointer.create(allocator, Uint8View, 0)
 
       const result = obj.deref()
 
@@ -129,7 +129,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const dataView = new Uint8View(allocator.buffer, 50)
       dataView.set(uint8(100))
-      const obj = new ReferenceCountedOwnershipPointer(allocator, Uint8View, 50)
+      const obj = ReferenceCountedOwnershipPointer.create(allocator, Uint8View, 50)
 
       const result = obj.deref()
 
@@ -142,7 +142,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
   describe('hash', () => {
     test('null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new ReferenceCountedOwnershipPointer(allocator, Uint8View, 0)
+      const obj = ReferenceCountedOwnershipPointer.create(allocator, Uint8View, 0)
       const hasher = {
         write: jest.fn()
       } satisfies IHasher
@@ -155,8 +155,8 @@ describe('ReferenceCountedOwnershipPointer', () => {
 
     test('non-null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const data = new Uint8(allocator, uint8(20))
-      const obj = new ReferenceCountedOwnershipPointer(
+      const data = Uint8.create(allocator, uint8(20))
+      const obj = ReferenceCountedOwnershipPointer.create(
         allocator
       , Uint8View
       , data._view.byteOffset

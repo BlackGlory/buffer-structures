@@ -11,7 +11,7 @@ describe('String', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new String(allocator, string('foo'))
+    const result = String.create(allocator, string('foo'))
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(result.get()).toStrictEqual(string('foo'))
@@ -26,7 +26,7 @@ describe('String', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const result = new String(allocator, string('foo'))
+      const result = String.create(allocator, string('foo'))
 
       result.destroy()
 
@@ -40,7 +40,7 @@ describe('String', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const result = new String(allocator, string('foo'))
+      const result = String.create(allocator, string('foo'))
       result.destroy()
 
       const err = getError(() => result.destroy())
@@ -55,7 +55,7 @@ describe('String', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new String(allocator, string('foo'))
+        const obj1 = String.create(allocator, string('foo'))
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -66,7 +66,7 @@ describe('String', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new String(allocator, string('foo'))
+        const obj1 = String.create(allocator, string('foo'))
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -80,7 +80,7 @@ describe('String', () => {
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new String(allocator, string('foo'))
+    const obj = String.create(allocator, string('foo'))
 
     const result = obj.clone()
 
@@ -92,7 +92,7 @@ describe('String', () => {
 
   test('copy', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new String(allocator, string('foo'))
+    const obj = String.create(allocator, string('foo'))
 
     const result = obj.copy()
 
@@ -104,7 +104,7 @@ describe('String', () => {
 
   test('get', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new String(allocator, string('foo'))
+    const obj = String.create(allocator, string('foo'))
 
     const result = obj.get()
 
@@ -113,7 +113,7 @@ describe('String', () => {
 
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new String(allocator, string('foo'))
+    const obj = String.create(allocator, string('foo'))
     const hasher = {
       write: jest.fn()
     } satisfies IHasher

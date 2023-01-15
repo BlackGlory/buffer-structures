@@ -16,7 +16,7 @@ describe('LinkedList', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new LinkedList(
+    const result = LinkedList.create(
       allocator
     , Uint8View
     , [null, uint8(1)]
@@ -32,7 +32,7 @@ describe('LinkedList', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const result = new LinkedList(
+      const result = LinkedList.create(
         allocator
       , Uint8View
       , [null, uint8(1)]
@@ -46,7 +46,7 @@ describe('LinkedList', () => {
 
     it('cannot destory twice', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const result = new LinkedList(
+      const result = LinkedList.create(
         allocator
       , Uint8View
       , [null, uint8(1)]
@@ -65,7 +65,7 @@ describe('LinkedList', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new LinkedList(
+        const obj1 = LinkedList.create(
           allocator
         , Uint8View
         , [null, uint8(1)]
@@ -80,7 +80,7 @@ describe('LinkedList', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new LinkedList(
+        const obj1 = LinkedList.create(
           allocator
         , Uint8View
         , [null, uint8(1)]
@@ -98,7 +98,7 @@ describe('LinkedList', () => {
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new LinkedList(
+    const obj = LinkedList.create(
       allocator
     , Uint8View
     , [null, uint8(1)]
@@ -114,7 +114,7 @@ describe('LinkedList', () => {
 
   test('copy', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new LinkedList(
+    const obj = LinkedList.create(
       allocator
     , Uint8View
     , [null, uint8(1)]
@@ -131,7 +131,7 @@ describe('LinkedList', () => {
   describe('get', () => {
     test('next: null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new LinkedList(
+      const obj = LinkedList.create(
         allocator
       , Uint8View
       , [null, uint8(1)]
@@ -144,7 +144,7 @@ describe('LinkedList', () => {
 
     test('next: number', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new LinkedList(
+      const obj = LinkedList.create(
         allocator
       , Uint8View
       , [uint32(1), uint8(2)]
@@ -159,7 +159,7 @@ describe('LinkedList', () => {
   describe('set', () => {
     test('next: null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new LinkedList(
+      const obj = LinkedList.create(
         allocator
       , Uint8View
       , [uint32(1), uint8(2)]
@@ -172,7 +172,7 @@ describe('LinkedList', () => {
 
     test('next: number', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new LinkedList(
+      const obj = LinkedList.create(
         allocator
       , Uint8View
       , [null, uint8(1)]
@@ -187,7 +187,7 @@ describe('LinkedList', () => {
   describe('getNext', () => {
     test('null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new LinkedList(
+      const obj = LinkedList.create(
         allocator
       , Uint8View
       , [null, uint8(1)]
@@ -200,7 +200,7 @@ describe('LinkedList', () => {
 
     test('number', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new LinkedList(
+      const obj = LinkedList.create(
         allocator
       , Uint8View
       , [uint32(1), uint8(2)]
@@ -215,7 +215,7 @@ describe('LinkedList', () => {
   describe('setNext', () => {
     test('null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new LinkedList(
+      const obj = LinkedList.create(
         allocator
       , Uint8View
       , [uint32(1), uint8(2)]
@@ -228,7 +228,7 @@ describe('LinkedList', () => {
 
     test('number', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new LinkedList(
+      const obj = LinkedList.create(
         allocator
       , Uint8View
       , [null, uint8(1)]
@@ -242,7 +242,7 @@ describe('LinkedList', () => {
 
   test('getValue', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new LinkedList(
+    const obj = LinkedList.create(
       allocator
     , Uint8View
     , [null, uint8(1)]
@@ -255,7 +255,7 @@ describe('LinkedList', () => {
 
   test('setValue', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new LinkedList(
+    const obj = LinkedList.create(
       allocator
     , Uint8View
     , [null, uint8(1)]
@@ -268,7 +268,7 @@ describe('LinkedList', () => {
 
   test('getViewOfValue', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new LinkedList(
+    const obj = LinkedList.create(
       allocator
     , Uint8View
     , [null, uint8(1)]
@@ -281,7 +281,7 @@ describe('LinkedList', () => {
 
   test('getViewOfNext', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new LinkedList(
+    const obj = LinkedList.create(
       allocator
     , Uint8View
     , [uint32(50), uint8(1)]
@@ -295,7 +295,7 @@ describe('LinkedList', () => {
   describe('derefNext', () => {
     test('null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new LinkedList(
+      const obj = LinkedList.create(
         allocator
       , Uint8View
       , [null, uint8(1)]
@@ -308,7 +308,7 @@ describe('LinkedList', () => {
 
     test('non-null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new LinkedList(
+      const obj = LinkedList.create(
         allocator
       , Uint8View
       , [uint32(50), uint8(1)]
@@ -324,7 +324,7 @@ describe('LinkedList', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const view = new LinkedListView(allocator.buffer, 50, Uint8View)
     view.setValue(uint8(20))
-    const obj = new LinkedList(
+    const obj = LinkedList.create(
       allocator
     , Uint8View
     , [uint32(50), uint8(10)]

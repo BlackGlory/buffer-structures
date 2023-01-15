@@ -262,7 +262,7 @@ implements ICopy<Float32>
          , IReadableWritable<Float32Literal>
          , IHash
          , IDestroy {
-  constructor(allocator: IAllocator, value: number)
+  static create(allocator: IAllocator, value: number): Float32
 }
 ```
 
@@ -275,7 +275,7 @@ implements ICopy<Float64>
          , IReadableWritable<Float64Literal>
          , IHash
          , IDestroy {
-  constructor(allocator: IAllocator, value: number)
+  static create(allocator: IAllocator, value: number): Float64
 }
 ```
 
@@ -288,7 +288,7 @@ implements ICopy<Int8>
          , IReadableWritable<Int8Literal>
          , IHash
          , IDestroy {
-  constructor(allocator: IAllocator, value: number)
+  static create(allocator: IAllocator, value: number): Int8
 }
 ```
 
@@ -301,7 +301,7 @@ implements ICopy<Int16>
          , IReadableWritable<Int16Literal>
          , IHash
          , IDestroy {
-  constructor(allocator: IAllocator, value: number)
+  static create(allocator: IAllocator, value: number): Int16
 }
 ```
 
@@ -314,7 +314,7 @@ implements ICopy<Int32>
          , IReadableWritable<Int32Literal>
          , IHash
          , IDestroy {
-  constructor(allocator: IAllocator, value: number)
+  static create(allocator: IAllocator, value: number): Int32
 }
 ```
 
@@ -327,7 +327,7 @@ implements ICopy<Uint8>
          , IReadableWritable<Uint8Literal>
          , IHash
          , IDestroy {
-  constructor(allocator: IAllocator, value: number)
+  static create(allocator: IAllocator, value: number): Uint8
 }
 ```
 
@@ -340,7 +340,7 @@ implements ICopy<Uint16>
          , IReadableWritable<Uint16Literal>
          , IHash
          , IDestroy {
-  constructor(allocator: IAllocator, value: number)
+  static create(allocator: IAllocator, value: number): Uint16
 }
 ```
 
@@ -353,7 +353,7 @@ implements ICopy<Uint32>
          , IReadableWritable<Uint32Literal>
          , IHash
          , IDestroy {
-  constructor(allocator: IAllocator, value: number)
+  static create(allocator: IAllocator, value: number): Uint32
 }
 ```
 
@@ -366,7 +366,7 @@ implements ICopy<String>
          , IReadable<StrintLiteral>
          , IHash
          , IDestroy {
-  constructor(allocator: IAllocator, value: string)
+  static create(allocator: IAllocator, value: string): String
 }
 ```
 
@@ -377,11 +377,11 @@ extends BaseObject
 implements IClone<OwnershipPointer<View>>
          , IHash
          , IDestroy {
-  constructor(
+  static create<View extends BaseView & IHash & IFree>(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , valueByteOffset: number
-  )
+  ): OwnershipPointer<View>
 
   deref(): View | null
 }
@@ -394,11 +394,11 @@ extends BaseObject
 implements IClone<ReferenceCountedOwnershipPointer<View>>
          , IHash
          , IDestroy {
-  constructor(
+  static create<View extends BaseView & IHash & IFree>(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , valueByteOffset: number
-  )
+  ): ReferenceCountedOwnershipPointer<View>
 
   deref(): View | null
 }
@@ -413,11 +413,11 @@ implements ICopy<LinkedList<View>>
          , IReadableWritable<MapStructureToTupleValue<LinkedListStructure<View>>>
          , IHash
          , IDestroy {
-  constructor(
+  static create<View extends BaseView & IHash & IReadableWritable<unknown>>(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , value: MapStructureToTupleValue<LinkedListStructure<View>>
-  )
+  ): LinkedList<View>
 
   setNext(value: MapStructureToTupleValue<LinkedListStructure<View>>['next']): void
   getNext(): MapStructureToTupleValue<LinkedListStructure<View>>['next']
@@ -441,12 +441,15 @@ implements ICopy<Array<View, Length>>
          , IClone<Array<View, Length>>
          , IHash
          , IDestroy {
-  constructor(
+  static create<
+    View extends BaseView & IReadableWritable<unknown> & IHash
+  , Length extends number
+  >(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , length: Length
   , values?: FixedLengthArray<UnpackedReadableWritable<View>, Length>
-  )
+  ): Array<View, Length>
 
   getByIndex(index: number): UnpackedReadableWritable<View>
   setByIndex(index: number, value: UnpackedReadableWritable<View>): void
@@ -467,11 +470,15 @@ implements ICopy<Tuple<Structure>>
          , IReadableWritable<MapStructureToTupleValue<Structure>>
          , IHash
          , IDestroy {
-  constructor(
+  static create<
+    Structure extends NonEmptyArray<
+      ViewConstructor<IReadableWritable<unknown> & IHash>
+    >
+  >(
     allocator: IAllocator
   , structure: Structure
   , value: MapStructureToTupleValue<Structure>
-  )
+  ): Tuple<Structure>
 
   getByIndex<U extends number & keyof Structure>(
     index: U
@@ -502,11 +509,16 @@ implements ICopy<Struct<Structure>>
          , IReadableWritable<MapStructureToStructValue<Structure>>
          , IHash
          , IDestroy {
-  constructor(
+  static create<
+    Structure extends Record<
+      string
+    , ViewConstructor<IReadableWritable<unknown> & IHash>
+    >
+  >(
     allocator: IAllocator
   , structure: Structure
   , value: MapStructureToStructValue<Structure>
-  )
+  ): Struct<Structure>
 
   getByKey<U extends string & keyof Structure>(
     key: U
@@ -538,9 +550,10 @@ class HashMap<
 extends BaseObject
 implements IClone<HashMap<KeyView, ValueView>>
          , IDestroy {
-  get size(): number
-
-  constructor(
+  static create<
+    KeyView extends BaseView & IHash
+  , ValueView extends BaseView & IReadableWritable<unknown> & IHash
+  >(
     allocator: IAllocator
   , valueViewConstructor: ViewConstructor<ValueView>
   , options?: {
@@ -548,7 +561,9 @@ implements IClone<HashMap<KeyView, ValueView>>
       loadFactor?: number
       growthFactor?: number
     }
-  )
+  ): HashMap<KeyView, ValueView>
+
+  get size(): number
 
   values(): IterableIterator<ValueView>
   has(key: IHash): boolean
@@ -572,9 +587,7 @@ class HashSet<View extends BaseView & IReadableWritable<unknown> & IHash>
 extends BaseObject
 implements IClone<HashSet<View>>
          , IDestroy {
-  get size(): number
-
-  constructor(
+  static create<View extends BaseView & IReadableWritable<unknown> & IHash>(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , options?: {
@@ -582,7 +595,9 @@ implements IClone<HashSet<View>>
       loadFactor?: number
       growthFactor?: number
     }
-  )
+  ): HashSet<View>
+
+  get size(): number
 
   values(): IterableIterator<View>
   has(value: IHash): boolean

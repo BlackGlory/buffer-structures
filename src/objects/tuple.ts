@@ -2,8 +2,7 @@ import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { TupleView, ViewConstructor, MapStructureToTupleValue } from '@views/tuple-view'
 import { NonEmptyArray } from '@blackglory/prelude'
-import { ObjectStateMachine } from './utils'
-import { ReferenceCounter } from './utils'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import { BaseObject } from '@objects/base-object'
 
@@ -24,25 +23,41 @@ implements ICopy<Tuple<Structure>>
   private allocator: IAllocator
   private structure: Structure
 
-  constructor(
+  static create<
+    Structure extends NonEmptyArray<
+      ViewConstructor<IReadableWritable<unknown> & IHash>
+    >
+  >(
     allocator: IAllocator
   , structure: Structure
   , value: MapStructureToTupleValue<Structure>
+  ): Tuple<Structure> {
+    return new this(ConstructorType.Create, allocator, structure, value)
+  }
+
+  private constructor(
+    type: ConstructorType.Create
+  , allocator: IAllocator
+  , structure: Structure
+  , value: MapStructureToTupleValue<Structure>
   )
-  constructor(
-    _allocator: IAllocator
-  , _structure: Structure
-  , _byteOffset: number
-  , _counter: ReferenceCounter
+  private constructor(
+    type: ConstructorType.Clone
+  , allocator: IAllocator
+  , structure: Structure
+  , byteOffset: number
+  , counter: ReferenceCounter
   )
-  constructor(...args:
+  private constructor(...args:
   | [
-      allocator: IAllocator
+      type: ConstructorType.Create
+    , allocator: IAllocator
     , structure: Structure
     , value: MapStructureToTupleValue<Structure>
     ]
   | [
-      allocator: IAllocator
+      type: ConstructorType.Clone
+    , allocator: IAllocator
     , structure: Structure
     , byteOffset: number
     , counter: ReferenceCounter
@@ -50,26 +65,34 @@ implements ICopy<Tuple<Structure>>
   ) {
     super()
 
-    if (args.length === 3) {
-      const [allocator, structure, value] = args
-      this.allocator = allocator
-      this.structure = structure
-      this._counter = new ReferenceCounter()
+    const [type] = args
+    switch (type) {
+      case ConstructorType.Create: {
+        const [, allocator, structure, value] = args
+        this.allocator = allocator
+        this.structure = structure
+        this._counter = new ReferenceCounter()
 
-      const byteOffset = allocator.allocate(TupleView.getByteLength(structure))
-      const view = new TupleView<Structure>(allocator.buffer, byteOffset, structure)
-      view.set(value)
-      this._view = view
-    } else {
-      const [allocator, structure, byteOffset, counter] = args
-      this.allocator = allocator
-      this.structure = structure
+        const byteOffset = allocator.allocate(TupleView.getByteLength(structure))
+        const view = new TupleView<Structure>(allocator.buffer, byteOffset, structure)
+        view.set(value)
+        this._view = view
 
-      const view = new TupleView<Structure>(allocator.buffer, byteOffset, structure)
-      this._view = view
+        return
+      }
+      case ConstructorType.Clone: {
+        const [, allocator, structure, byteOffset, counter] = args
+        this.allocator = allocator
+        this.structure = structure
 
-      counter.increment()
-      this._counter = counter
+        const view = new TupleView<Structure>(allocator.buffer, byteOffset, structure)
+        this._view = view
+
+        counter.increment()
+        this._counter = counter
+
+        return
+      }
     }
   }
 
@@ -89,13 +112,24 @@ implements ICopy<Tuple<Structure>>
   clone(): Tuple<Structure> {
     this.fsm.assertAllocated()
 
-    return new Tuple(this.allocator, this.structure, this._view.byteOffset, this._counter)
+    return new Tuple(
+      ConstructorType.Clone
+    , this.allocator
+    , this.structure
+    , this._view.byteOffset
+    , this._counter
+    )
   }
 
   copy(): Tuple<Structure> {
     this.fsm.assertAllocated()
 
-    return new Tuple(this.allocator, this.structure, this.get())
+    return new Tuple(
+      ConstructorType.Create
+    , this.allocator
+    , this.structure
+    , this.get()
+    )
   }
 
   get(): MapStructureToTupleValue<Structure> {

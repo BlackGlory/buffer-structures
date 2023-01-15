@@ -12,7 +12,7 @@ describe('Float64', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new Float64(allocator, float64(1))
+    const result = Float64.create(allocator, float64(1))
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(result.get()).toStrictEqual(float64(1))
@@ -24,7 +24,7 @@ describe('Float64', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const result = new Float64(allocator, float64(1))
+      const result = Float64.create(allocator, float64(1))
 
       result.destroy()
 
@@ -38,7 +38,7 @@ describe('Float64', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const result = new Float64(allocator, float64(1))
+      const result = Float64.create(allocator, float64(1))
       result.destroy()
 
       const err = getError(() => result.destroy())
@@ -53,7 +53,7 @@ describe('Float64', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new Float64(allocator, float64(1))
+        const obj1 = Float64.create(allocator, float64(1))
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -64,7 +64,7 @@ describe('Float64', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new Float64(allocator, float64(1))
+        const obj1 = Float64.create(allocator, float64(1))
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -78,7 +78,7 @@ describe('Float64', () => {
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Float64(allocator, float64(1))
+    const obj = Float64.create(allocator, float64(1))
 
     const result = obj.clone()
 
@@ -90,7 +90,7 @@ describe('Float64', () => {
 
   test('copy', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Float64(allocator, float64(1))
+    const obj = Float64.create(allocator, float64(1))
 
     const result = obj.copy()
 
@@ -102,7 +102,7 @@ describe('Float64', () => {
 
   test('get', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Float64(allocator, float64(1))
+    const obj = Float64.create(allocator, float64(1))
 
     const result = obj.get()
 
@@ -111,7 +111,7 @@ describe('Float64', () => {
 
   test('set', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Float64(allocator, float64(1))
+    const obj = Float64.create(allocator, float64(1))
 
     obj.set(float64(2))
 
@@ -120,7 +120,7 @@ describe('Float64', () => {
 
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Float64(allocator, float64(1))
+    const obj = Float64.create(allocator, float64(1))
     const hasher = {
       write: jest.fn()
     } satisfies IHasher

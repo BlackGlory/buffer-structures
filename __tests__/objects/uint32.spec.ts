@@ -12,7 +12,7 @@ describe('Uint32', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new Uint32(allocator, uint32(1))
+    const result = Uint32.create(allocator, uint32(1))
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(result.get()).toStrictEqual(uint32(1))
@@ -24,7 +24,7 @@ describe('Uint32', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const obj = new Uint32(allocator, uint32(1))
+      const obj = Uint32.create(allocator, uint32(1))
 
       obj.destroy()
 
@@ -38,7 +38,7 @@ describe('Uint32', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const result = new Uint32(allocator, uint32(1))
+      const result = Uint32.create(allocator, uint32(1))
       result.destroy()
 
       const err = getError(() => result.destroy())
@@ -53,7 +53,7 @@ describe('Uint32', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new Uint32(allocator, uint32(1))
+        const obj1 = Uint32.create(allocator, uint32(1))
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -64,7 +64,7 @@ describe('Uint32', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new Uint32(allocator, uint32(1))
+        const obj1 = Uint32.create(allocator, uint32(1))
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -78,7 +78,7 @@ describe('Uint32', () => {
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Uint32(allocator, uint32(1))
+    const obj = Uint32.create(allocator, uint32(1))
 
     const result = obj.clone()
 
@@ -90,7 +90,7 @@ describe('Uint32', () => {
 
   test('copy', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Uint32(allocator, uint32(1))
+    const obj = Uint32.create(allocator, uint32(1))
 
     const result = obj.copy()
 
@@ -102,7 +102,7 @@ describe('Uint32', () => {
 
   test('get', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Uint32(allocator, uint32(1))
+    const obj = Uint32.create(allocator, uint32(1))
 
     const result = obj.get()
 
@@ -111,7 +111,7 @@ describe('Uint32', () => {
 
   test('set', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Uint32(allocator, uint32(1))
+    const obj = Uint32.create(allocator, uint32(1))
 
     obj.set(uint32(2))
 
@@ -120,7 +120,7 @@ describe('Uint32', () => {
 
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Uint32(allocator, uint32(1))
+    const obj = Uint32.create(allocator, uint32(1))
     const hasher = {
       write: jest.fn()
     } satisfies IHasher

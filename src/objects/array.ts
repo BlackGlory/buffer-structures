@@ -2,7 +2,7 @@ import { ICopy, IClone, IDestroy, IHash, IReadableWritable } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { UnpackedReadableWritable } from '@src/types'
 import { ViewConstructor, ArrayView } from '@views/array-view'
-import { ObjectStateMachine, ReferenceCounter } from './utils'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
 import { FixedLengthArray } from 'justypes'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
@@ -23,28 +23,50 @@ implements ICopy<Array<View, Length>>
   private viewConstructor: ViewConstructor<View>
   private length: Length
 
-  constructor(
+  static create<
+    View extends BaseView & IReadableWritable<unknown> & IHash
+  , Length extends number
+  >(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , length: Length
   , values?: FixedLengthArray<UnpackedReadableWritable<View>, Length>
+  ): Array<View, Length> {
+    return new this<View, Length>(
+      ConstructorType.Create
+    , allocator
+    , viewConstructor
+    , length
+    , values
+    )
+  }
+
+  private constructor(
+    type: ConstructorType.Create
+  , allocator: IAllocator
+  , viewConstructor: ViewConstructor<View>
+  , length: Length
+  , values?: FixedLengthArray<UnpackedReadableWritable<View>, Length>
   )
-  constructor(
-    _allocator: IAllocator
-  , _viewConstructor: ViewConstructor<View>
-  , _length: Length
-  , _byteOffset: number
-  , _counter: ReferenceCounter
+  private constructor(
+    type: ConstructorType.Clone
+  , allocator: IAllocator
+  , viewConstructor: ViewConstructor<View>
+  , length: Length
+  , byteOffset: number
+  , counter: ReferenceCounter
   )
-  constructor(...args:
+  private constructor(...args:
   | [
-      allocator: IAllocator
+      type: ConstructorType.Create
+    , allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
     , length: Length
     , values?: FixedLengthArray<View, Length>
     ]
   | [
-      allocator: IAllocator
+      type: ConstructorType.Clone
+    , allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
     , length: Length
     , byteOffset: number
@@ -53,42 +75,50 @@ implements ICopy<Array<View, Length>>
   ) {
     super()
 
-    if (args.length === 5) {
-      const [allocator, viewConstructor, length, byteOffset, counter] = args
-      this.allocator = allocator
-      this.viewConstructor = viewConstructor
-      this.length = length
+    const [type] = args
+    switch (type) {
+      case ConstructorType.Create: {
+        const [, allocator, viewConstructor, length, values] = args
+        this.allocator = allocator
+        this.viewConstructor = viewConstructor
+        this.length = length
+        this._counter = new ReferenceCounter()
 
-      const view = new ArrayView<View, Length>(
-        allocator.buffer
-      , byteOffset
-      , viewConstructor
-      , length
-      )
-      this._view = view
+        const byteOffset = allocator.allocate(
+          ArrayView.getByteLength(viewConstructor, length)
+        )
+        const view = new ArrayView<View, Length>(
+          allocator.buffer
+        , byteOffset
+        , viewConstructor
+        , length
+        )
+        if (values) {
+          view.set(values)
+        }
+        this._view = view
 
-      counter.increment()
-      this._counter = counter
-    } else {
-      const [allocator, viewConstructor, length, values] = args
-      this.allocator = allocator
-      this.viewConstructor = viewConstructor
-      this.length = length
-      this._counter = new ReferenceCounter()
-
-      const byteOffset = allocator.allocate(
-        ArrayView.getByteLength(viewConstructor, length)
-      )
-      const view = new ArrayView<View, Length>(
-        allocator.buffer
-      , byteOffset
-      , viewConstructor
-      , length
-      )
-      if (values) {
-        view.set(values)
+        return
       }
-      this._view = view
+      case ConstructorType.Clone: {
+        const [, allocator, viewConstructor, length, byteOffset, counter] = args
+        this.allocator = allocator
+        this.viewConstructor = viewConstructor
+        this.length = length
+
+        const view = new ArrayView<View, Length>(
+          allocator.buffer
+        , byteOffset
+        , viewConstructor
+        , length
+        )
+        this._view = view
+
+        counter.increment()
+        this._counter = counter
+
+        return
+      }
     }
   }
 
@@ -109,7 +139,8 @@ implements ICopy<Array<View, Length>>
     this.fsm.assertAllocated()
 
     return new Array(
-      this.allocator
+      ConstructorType.Clone
+    , this.allocator
     , this.viewConstructor
     , this.length
     , this._view.byteOffset
@@ -120,7 +151,13 @@ implements ICopy<Array<View, Length>>
   copy(): Array<View, Length> {
     this.fsm.assertAllocated()
 
-    return new Array(this.allocator, this.viewConstructor, this.length, this.get())
+    return new Array(
+      ConstructorType.Create
+    , this.allocator
+    , this.viewConstructor
+    , this.length
+    , this.get()
+    )
   }
 
   get(): FixedLengthArray<UnpackedReadableWritable<View>, Length> {

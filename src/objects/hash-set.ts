@@ -6,7 +6,7 @@ import { LinkedListView } from '@views/linked-list-view'
 import { Uint32View } from '@views/uint32-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { TupleView } from '@views/tuple-view'
-import { ObjectStateMachine, ReferenceCounter } from './utils'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
 import { Hasher } from '@src/hasher'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
@@ -152,7 +152,7 @@ implements IClone<HashSet<View>>
     return this._view.getByIndex(OuterTupleKey.Size).get()
   }
 
-  constructor(
+  static create<View extends BaseView & IReadableWritable<unknown> & IHash>(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , options?: {
@@ -160,21 +160,36 @@ implements IClone<HashSet<View>>
       loadFactor?: number
       growthFactor?: number
     }
+  ): HashSet<View> {
+    return new this(ConstructorType.Create, allocator, viewConstructor, options)
+  }
+
+  private constructor(
+    type: ConstructorType.Create
+  , allocator: IAllocator
+  , viewConstructor: ViewConstructor<View>
+  , options?: {
+      capacity?: number
+      loadFactor?: number
+      growthFactor?: number
+    }
   )
-  constructor(
-    _allocator: IAllocator
-  , _viewConstructor: ViewConstructor<View>
-  , _options: {
+  private constructor(
+    type: ConstructorType.Clone
+  , allocator: IAllocator
+  , viewConstructor: ViewConstructor<View>
+  , options: {
       capacity: number
       loadFactor: number
       growthFactor: number
     }
-  , _byteOffset: number
-  , _counter: ReferenceCounter
+  , byteOffset: number
+  , counter: ReferenceCounter
   )
-  constructor(...args:
+  private constructor(...args:
   | [
-      allocator: IAllocator
+      type: ConstructorType.Create
+    , allocator: IAllocator
     , valueViewConstructor: ViewConstructor<View>
     , options?: {
         capacity?: number
@@ -183,7 +198,8 @@ implements IClone<HashSet<View>>
       }
     ]
   | [
-      allocator: IAllocator
+      type: ConstructorType.Clone
+    , allocator: IAllocator
     , valueViewConstructor: ViewConstructor<View>
     , options: {
         capacity: number
@@ -196,83 +212,91 @@ implements IClone<HashSet<View>>
   ) {
     super()
 
-    if (args.length === 5) {
-      const [allocator, viewConstructor, options, byteOffset, counter] = args
-      this.allocator = allocator
-      this.viewConstructor = viewConstructor
-      this._capacity = options.capacity
-      this.loadFactor = options.loadFactor
-      this.growthFactor = options.growthFactor
+    const [type] = args
+    switch (type) {
+      case ConstructorType.Create: {
+        const [
+        , allocator
+        , viewConstructor
+        , {
+            capacity = 1
+          , loadFactor = 0.75
+          , growthFactor = 2
+          } = {}
+        ] = args
+        this.allocator = allocator
+        this.viewConstructor = viewConstructor
+        this._counter = new ReferenceCounter()
+        this._capacity = capacity
+        this.loadFactor = loadFactor
+        this.growthFactor = growthFactor
 
-      const {
-        InternalLinkedListView
-      , InternalBucketsOwnershipPointerView
-      } = createInternalViews(viewConstructor, options.capacity)
-      this.InternalLinkedListView = InternalLinkedListView
-
-      const rootView = new TupleView(
-        allocator.buffer
-      , byteOffset
-      , [
-          Uint32View
+        const {
+          InternalLinkedListView
         , InternalBucketsOwnershipPointerView
-        ]
-      )
-      this._view = rootView
+        , InternalBucketsView
+        } = createInternalViews(viewConstructor, capacity)
+        this.InternalLinkedListView = InternalLinkedListView
 
-      counter.increment()
-      this._counter = counter
-    } else {
-      const [
-        allocator
-      , viewConstructor
-      , {
-          capacity = 1
-        , loadFactor = 0.75
-        , growthFactor = 2
-        } = {}
-      ] = args
-      this.allocator = allocator
-      this.viewConstructor = viewConstructor
-      this._counter = new ReferenceCounter()
-      this._capacity = capacity
-      this.loadFactor = loadFactor
-      this.growthFactor = growthFactor
+        const bucketsByteOffset = allocator.allocate(InternalBucketsView.byteLength)
+        const bucketsView = new InternalBucketsView(allocator.buffer, bucketsByteOffset)
+        // 初始化buckets中的每一个指针, 防止指向错误的位置.
+        for (let i = 0; i < capacity; i++) {
+          bucketsView.setByIndex(i, null)
+        }
 
-      const {
-        InternalLinkedListView
-      , InternalBucketsOwnershipPointerView
-      , InternalBucketsView
-      } = createInternalViews(viewConstructor, capacity)
-      this.InternalLinkedListView = InternalLinkedListView
-
-      const bucketsByteOffset = allocator.allocate(InternalBucketsView.byteLength)
-      const bucketsView = new InternalBucketsView(allocator.buffer, bucketsByteOffset)
-      // 初始化buckets中的每一个指针, 防止指向错误的位置.
-      for (let i = 0; i < capacity; i++) {
-        bucketsView.setByIndex(i, null)
-      }
-
-      const structByteOffset = allocator.allocate(
-        TupleView.getByteLength([
-          Uint32View
-        , InternalBucketsOwnershipPointerView
+        const structByteOffset = allocator.allocate(
+          TupleView.getByteLength([
+            Uint32View
+          , InternalBucketsOwnershipPointerView
+          ])
+        )
+        const structView = new TupleView(
+          allocator.buffer
+        , structByteOffset
+        , [
+            Uint32View
+          , InternalBucketsOwnershipPointerView
+          ]
+        )
+        structView.set([
+          uint32(0)
+        , uint32(bucketsByteOffset)
         ])
-      )
-      const structView = new TupleView(
-        allocator.buffer
-      , structByteOffset
-      , [
-          Uint32View
-        , InternalBucketsOwnershipPointerView
-        ]
-      )
-      structView.set([
-        uint32(0)
-      , uint32(bucketsByteOffset)
-      ])
 
-      this._view = structView
+        this._view = structView
+
+        return
+      }
+      case ConstructorType.Clone: {
+        const [, allocator, viewConstructor, options, byteOffset, counter] = args
+        this.allocator = allocator
+        this.viewConstructor = viewConstructor
+        this._capacity = options.capacity
+        this.loadFactor = options.loadFactor
+        this.growthFactor = options.growthFactor
+
+        const {
+          InternalLinkedListView
+        , InternalBucketsOwnershipPointerView
+        } = createInternalViews(viewConstructor, options.capacity)
+        this.InternalLinkedListView = InternalLinkedListView
+
+        const rootView = new TupleView(
+          allocator.buffer
+        , byteOffset
+        , [
+            Uint32View
+          , InternalBucketsOwnershipPointerView
+          ]
+        )
+        this._view = rootView
+
+        counter.increment()
+        this._counter = counter
+
+        return
+      }
     }
   }
 
@@ -289,7 +313,8 @@ implements IClone<HashSet<View>>
     this.fsm.assertAllocated()
 
     return new HashSet(
-      this.allocator
+      ConstructorType.Clone
+    , this.allocator
     , this.viewConstructor
     , {
         capacity: this._capacity

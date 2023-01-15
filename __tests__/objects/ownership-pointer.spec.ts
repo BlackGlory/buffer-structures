@@ -15,7 +15,7 @@ describe('OwnershipPointer', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new OwnershipPointer(allocator, Uint8View, 1)
+    const result = OwnershipPointer.create(allocator, Uint8View, 1)
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(allocate).toBeCalledTimes(1)
@@ -26,8 +26,8 @@ describe('OwnershipPointer', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const data = new Uint8(allocator, uint8(50))
-      const pointer = new OwnershipPointer(allocator, Uint8View, data._view.byteOffset)
+      const data = Uint8.create(allocator, uint8(50))
+      const pointer = OwnershipPointer.create(allocator, Uint8View, data._view.byteOffset)
 
       pointer.destroy()
 
@@ -42,7 +42,7 @@ describe('OwnershipPointer', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const pointer = new OwnershipPointer(allocator, Uint8View, 1)
+      const pointer = OwnershipPointer.create(allocator, Uint8View, 1)
       pointer.destroy()
 
       const err = getError(() => pointer.destroy())
@@ -57,7 +57,7 @@ describe('OwnershipPointer', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new OwnershipPointer(allocator, Uint8View, 1)
+        const obj1 = OwnershipPointer.create(allocator, Uint8View, 1)
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -68,8 +68,8 @@ describe('OwnershipPointer', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const data = new Uint8(allocator, uint8(10))
-        const obj1 = new OwnershipPointer(allocator, Uint8View, data._view.byteOffset)
+        const data = Uint8.create(allocator, uint8(10))
+        const obj1 = OwnershipPointer.create(allocator, Uint8View, data._view.byteOffset)
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -84,7 +84,7 @@ describe('OwnershipPointer', () => {
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new OwnershipPointer(allocator, Uint8View, 1)
+    const obj = OwnershipPointer.create(allocator, Uint8View, 1)
 
     const result = obj.clone()
 
@@ -97,7 +97,7 @@ describe('OwnershipPointer', () => {
   describe('deref', () => {
     test('null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new OwnershipPointer(allocator, Uint8View, 0)
+      const obj = OwnershipPointer.create(allocator, Uint8View, 0)
 
       const result = obj.deref()
 
@@ -108,7 +108,7 @@ describe('OwnershipPointer', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const dataView = new Uint8View(allocator.buffer, 50)
       dataView.set(uint8(100))
-      const obj = new OwnershipPointer(allocator, Uint8View, 50)
+      const obj = OwnershipPointer.create(allocator, Uint8View, 50)
 
       const result = obj.deref()
 
@@ -121,7 +121,7 @@ describe('OwnershipPointer', () => {
   describe('hash', () => {
     test('null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = new OwnershipPointer(allocator, Uint8View, 0)
+      const obj = OwnershipPointer.create(allocator, Uint8View, 0)
       const hasher = {
         write: jest.fn()
       } satisfies IHasher
@@ -134,8 +134,8 @@ describe('OwnershipPointer', () => {
 
     test('non-null', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const data = new Uint8(allocator, uint8(20))
-      const obj = new OwnershipPointer(allocator, Uint8View, data._view.byteOffset)
+      const data = Uint8.create(allocator, uint8(20))
+      const obj = OwnershipPointer.create(allocator, Uint8View, data._view.byteOffset)
       const hasher = {
         write: jest.fn()
       } satisfies IHasher

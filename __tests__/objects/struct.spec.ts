@@ -15,7 +15,7 @@ describe('Struct', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new Struct(
+    const result = Struct.create(
       allocator
     , {
         foo: Uint8View
@@ -43,7 +43,7 @@ describe('Struct', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const result = new Struct(
+      const result = Struct.create(
         allocator
       , {
           foo: Uint8View
@@ -64,7 +64,7 @@ describe('Struct', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const result = new Struct(
+      const result = Struct.create(
         allocator
       , {
           foo: Uint8View
@@ -86,7 +86,7 @@ describe('Struct', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new Struct(
+        const obj1 = Struct.create(
           allocator
         , {
             foo: Uint8View
@@ -104,7 +104,7 @@ describe('Struct', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new Struct(
+        const obj1 = Struct.create(
           allocator
         , {
             foo: Uint8View
@@ -125,7 +125,7 @@ describe('Struct', () => {
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Struct(
+    const obj = Struct.create(
       allocator
     , {
         foo: Uint8View
@@ -144,7 +144,7 @@ describe('Struct', () => {
 
   test('copy', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Struct(
+    const obj = Struct.create(
       allocator
     , {
         foo: Uint8View
@@ -163,7 +163,7 @@ describe('Struct', () => {
 
   test('get', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Struct(
+    const obj = Struct.create(
       allocator
     , {
         foo: Uint8View
@@ -182,7 +182,7 @@ describe('Struct', () => {
 
   test('set', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Struct(
+    const obj = Struct.create(
       allocator
     , {
         foo: Uint8View
@@ -204,7 +204,7 @@ describe('Struct', () => {
 
   test('getByKey', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Struct(
+    const obj = Struct.create(
       allocator
     , {
         foo: Uint8View
@@ -220,7 +220,7 @@ describe('Struct', () => {
 
   test('setByKey', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Struct(
+    const obj = Struct.create(
       allocator
     , {
         foo: Uint8View
@@ -239,7 +239,7 @@ describe('Struct', () => {
 
   test('getViewByKey', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Struct(
+    const obj = Struct.create(
       allocator
     , {
         foo: Uint8View
@@ -257,7 +257,7 @@ describe('Struct', () => {
 
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Struct(
+    const obj = Struct.create(
       allocator
     , {
         foo: Uint8View

@@ -1,7 +1,7 @@
 import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { StructView, ViewConstructor, MapStructureToValue } from '@views/struct-view'
-import { ObjectStateMachine, ReferenceCounter } from './utils'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import { BaseObject } from '@objects/base-object'
 
@@ -23,21 +23,42 @@ implements ICopy<Struct<Structure>>
   private allocator: IAllocator
   private structure: Structure
 
-  constructor(
+  static create<
+    Structure extends Record<
+      string
+    , ViewConstructor<IReadableWritable<unknown> & IHash>
+    >
+  >(
     allocator: IAllocator
   , structure: Structure
   , value: MapStructureToValue<Structure>
+  ): Struct<Structure> {
+    return new this(ConstructorType.Create, allocator, structure, value)
+  }
+
+  private constructor(
+    type: ConstructorType.Create
+  , allocator: IAllocator
+  , structure: Structure
+  , value: MapStructureToValue<Structure>
   )
-  constructor(
-    _allocator: IAllocator
-  , _structure: Structure
-  , _byteOffset: number
-  , _counter: ReferenceCounter
+  private constructor(
+    type: ConstructorType.Clone
+  , allocator: IAllocator
+  , structure: Structure
+  , byteOffset: number
+  , counter: ReferenceCounter
   )
-  constructor(...args:
-  | [allocator: IAllocator, structure: Structure, value: MapStructureToValue<Structure>]
+  private constructor(...args:
   | [
-      allocator: IAllocator
+      type: ConstructorType.Create
+    , allocator: IAllocator
+    , structure: Structure
+    , value: MapStructureToValue<Structure>
+    ]
+  | [
+      type: ConstructorType.Clone
+    , allocator: IAllocator
     , structure: Structure
     , byteOffset: number
     , counter: ReferenceCounter
@@ -45,26 +66,34 @@ implements ICopy<Struct<Structure>>
   ) {
     super()
 
-    if (args.length === 3) {
-      const [allocator, structure, value] = args
-      this.allocator = allocator
-      this.structure = structure
-      this._counter = new ReferenceCounter()
+    const [type] = args
+    switch (type) {
+      case ConstructorType.Create: {
+        const [, allocator, structure, value] = args
+        this.allocator = allocator
+        this.structure = structure
+        this._counter = new ReferenceCounter()
 
-      const offset = allocator.allocate(StructView.getByteLength(structure))
-      const view = new StructView<Structure>(allocator.buffer, offset, structure)
-      view.set(value)
-      this._view = view
-    } else {
-      const [allocator, structure, byteOffset, counter] = args
-      this.allocator = allocator
-      this.structure = structure
+        const offset = allocator.allocate(StructView.getByteLength(structure))
+        const view = new StructView<Structure>(allocator.buffer, offset, structure)
+        view.set(value)
+        this._view = view
 
-      const view = new StructView<Structure>(allocator.buffer, byteOffset, structure)
-      this._view = view
+        return
+      }
+      case ConstructorType.Clone: {
+        const [, allocator, structure, byteOffset, counter] = args
+        this.allocator = allocator
+        this.structure = structure
 
-      counter.increment()
-      this._counter = counter
+        const view = new StructView<Structure>(allocator.buffer, byteOffset, structure)
+        this._view = view
+
+        counter.increment()
+        this._counter = counter
+
+        return
+      }
     }
   }
 
@@ -84,13 +113,24 @@ implements ICopy<Struct<Structure>>
   clone(): Struct<Structure> {
     this.fsm.assertAllocated()
 
-    return new Struct(this.allocator, this.structure, this._view.byteOffset, this._counter)
+    return new Struct(
+      ConstructorType.Clone
+    , this.allocator
+    , this.structure
+    , this._view.byteOffset
+    , this._counter
+    )
   }
 
   copy(): Struct<Structure> {
     this.fsm.assertAllocated()
 
-    return new Struct(this.allocator, this.structure, this.get())
+    return new Struct(
+      ConstructorType.Create
+    , this.allocator
+    , this.structure
+    , this.get()
+    )
   }
 
   get(): MapStructureToValue<Structure> {

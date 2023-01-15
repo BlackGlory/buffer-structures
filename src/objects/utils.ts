@@ -1,6 +1,11 @@
 import { assert } from '@blackglory/prelude'
 import { FiniteStateMachine } from 'extra-fsm'
 
+export enum ConstructorType {
+  Create
+, Clone
+}
+
 enum ObjectState {
   Allocated
 , Freed

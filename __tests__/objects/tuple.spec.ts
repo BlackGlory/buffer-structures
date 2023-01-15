@@ -15,7 +15,7 @@ describe('Tuple', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new Tuple(
+    const result = Tuple.create(
       allocator
     , [Uint8View, Uint16View]
     , [uint8(1), uint16(2)]
@@ -34,7 +34,7 @@ describe('Tuple', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const obj = new Tuple(
+      const obj = Tuple.create(
         allocator
       , [Uint8View, Uint16View]
       , [uint8(1), uint16(2)]
@@ -52,7 +52,7 @@ describe('Tuple', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const obj = new Tuple(
+      const obj = Tuple.create(
         allocator
       , [Uint8View, Uint16View]
       , [uint8(1), uint16(2)]
@@ -71,7 +71,7 @@ describe('Tuple', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new Tuple(
+        const obj1 = Tuple.create(
           allocator
         , [Uint8View, Uint16View]
         , [uint8(1), uint16(2)]
@@ -86,7 +86,7 @@ describe('Tuple', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new Tuple(
+        const obj1 = Tuple.create(
           allocator
         , [Uint8View, Uint16View]
         , [uint8(1), uint16(2)]
@@ -104,7 +104,7 @@ describe('Tuple', () => {
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Tuple(
+    const obj = Tuple.create(
       allocator
     , [Uint8View, Uint16View]
     , [uint8(1), uint16(2)]
@@ -120,7 +120,7 @@ describe('Tuple', () => {
 
   test('copy', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Tuple(
+    const obj = Tuple.create(
       allocator
     , [Uint8View, Uint16View]
     , [uint8(1), uint16(2)]
@@ -136,7 +136,7 @@ describe('Tuple', () => {
 
   test('get', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Tuple(
+    const obj = Tuple.create(
       allocator
     , [Uint8View, Uint16View]
     , [uint8(1), uint16(2)]
@@ -149,7 +149,7 @@ describe('Tuple', () => {
 
   test('set', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Tuple(
+    const obj = Tuple.create(
       allocator
     , [Uint8View, Uint16View]
     , [uint8(1), uint16(2)]
@@ -162,7 +162,7 @@ describe('Tuple', () => {
 
   test('getByIndex', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Tuple(
+    const obj = Tuple.create(
       allocator
     , [Uint8View, Uint16View]
     , [uint8(1), uint16(2)]
@@ -175,7 +175,7 @@ describe('Tuple', () => {
 
   test('setByIndex', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Tuple(
+    const obj = Tuple.create(
       allocator
     , [Uint8View, Uint16View]
     , [uint8(1), uint16(2)]
@@ -188,7 +188,7 @@ describe('Tuple', () => {
 
   test('getViewByIndex', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Tuple(
+    const obj = Tuple.create(
       allocator
     , [Uint8View, Uint16View]
     , [uint8(1), uint16(2)]
@@ -203,7 +203,7 @@ describe('Tuple', () => {
 
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Tuple(
+    const obj = Tuple.create(
       allocator
     , [Uint8View, Uint16View]
     , [uint8(10), uint16(20)]

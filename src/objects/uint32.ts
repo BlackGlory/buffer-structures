@@ -1,7 +1,7 @@
 import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { Uint32View } from '@views/uint32-view'
-import { ObjectStateMachine, ReferenceCounter } from './utils'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
 import { BaseObject } from '@objects/base-object'
 import { Uint32Literal } from '@literals/uint32-literal'
 
@@ -17,32 +17,62 @@ implements ICopy<Uint32>
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
-  constructor(allocator: IAllocator, value: Uint32Literal)
-  constructor(_allocator: IAllocator, _byteOffset: number, _counter: ReferenceCounter)
+  static create(allocator: IAllocator, value: Uint32Literal): Uint32 {
+    return new this(ConstructorType.Create, allocator, value)
+  }
+
+  constructor(
+    type: ConstructorType.Create
+  , allocator: IAllocator
+  , value: Uint32Literal
+  )
+  constructor(
+    type: ConstructorType.Clone
+  , allocator: IAllocator
+  , byteOffset: number
+  , counter: ReferenceCounter
+  )
   constructor(...args:
-  | [allocator: IAllocator, value: Uint32Literal]
-  | [allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
+  | [
+      type: ConstructorType.Create
+    , allocator: IAllocator
+    , value: Uint32Literal
+    ]
+  | [
+      type: ConstructorType.Clone
+    , allocator: IAllocator
+    , byteOffset: number
+    , counter: ReferenceCounter
+    ]
   ) {
     super()
 
-    if (args.length === 2) {
-      const [allocator, value] = args
-      this.allocator = allocator
-      this._counter = new ReferenceCounter()
+    const [type] = args
+    switch (type) {
+      case ConstructorType.Create: {
+        const [, allocator, value] = args
+        this.allocator = allocator
+        this._counter = new ReferenceCounter()
 
-      const offset = allocator.allocate(Uint32View.byteLength)
-      const view = new Uint32View(allocator.buffer, offset)
-      view.set(value)
-      this._view = view
-    } else {
-      const [allocator, byteOffset, counter] = args
-      this.allocator = allocator
+        const offset = allocator.allocate(Uint32View.byteLength)
+        const view = new Uint32View(allocator.buffer, offset)
+        view.set(value)
+        this._view = view
 
-      const view = new Uint32View(allocator.buffer, byteOffset)
-      this._view = view
+        return
+      }
+      case ConstructorType.Clone: {
+        const [, allocator, byteOffset, counter] = args
+        this.allocator = allocator
 
-      counter.increment()
-      this._counter = counter
+        const view = new Uint32View(allocator.buffer, byteOffset)
+        this._view = view
+
+        counter.increment()
+        this._counter = counter
+
+        return
+      }
     }
   }
 
@@ -62,13 +92,18 @@ implements ICopy<Uint32>
   clone(): Uint32 {
     this.fsm.assertAllocated()
 
-    return new Uint32(this.allocator, this._view.byteOffset, this._counter)
+    return new Uint32(
+      ConstructorType.Clone
+    , this.allocator
+    , this._view.byteOffset
+    , this._counter
+    )
   }
 
   copy(): Uint32 {
     this.fsm.assertAllocated()
 
-    return new Uint32(this.allocator, this.get())
+    return new Uint32(ConstructorType.Create, this.allocator, this.get())
   }
 
   get(): Uint32Literal {

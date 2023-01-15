@@ -2,13 +2,11 @@ import { IHash, IFree, IClone, IDestroy } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { ViewConstructor } from '@views/pointer-view'
 import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-ownership-pointer-view'
-import { ObjectStateMachine } from './utils'
+import { ObjectStateMachine, ConstructorType } from './utils'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
 import { NULL } from '@src/null'
 import { uint32 } from '@literals/uint32-literal'
-
-const internalOverrideSymbol = Symbol()
 
 export class ReferenceCountedOwnershipPointer<View extends BaseView & IHash & IFree>
 extends BaseObject
@@ -20,25 +18,35 @@ implements IClone<ReferenceCountedOwnershipPointer<View>>
   private allocator: IAllocator
   private viewConstructor: ViewConstructor<View>
 
-  constructor(
+  static create<View extends BaseView & IHash & IFree>(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , valueByteOffset: number
+  ): ReferenceCountedOwnershipPointer<View> {
+    return new this(ConstructorType.Create, allocator, viewConstructor, valueByteOffset)
+  }
+
+  private constructor(
+    type: ConstructorType.Create
+  , allocator: IAllocator
+  , viewConstructor: ViewConstructor<View>
+  , valueByteOffset: number
   )
-  constructor(
-    symbol: typeof internalOverrideSymbol
+  private constructor(
+    type: ConstructorType.Clone
   , allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , byteOffset: number
   )
-  constructor(...args:
+  private constructor(...args:
   | [
-      allocator: IAllocator
+      type: ConstructorType.Create
+    , allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
     , valueByteOffset: number
     ]
   | [
-      internalOverride: typeof internalOverrideSymbol
+      type: ConstructorType.Clone
     , allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
     , byteOffset: number
@@ -46,33 +54,41 @@ implements IClone<ReferenceCountedOwnershipPointer<View>>
   ) {
     super()
 
-    if (args.length === 3) {
-      const [allocator, viewConstructor, valueByteOffset] = args
-      this.allocator = allocator
-      this.viewConstructor = viewConstructor
+    const [type] = args
+    switch (type) {
+      case ConstructorType.Create: {
+        const [, allocator, viewConstructor, valueByteOffset] = args
+        this.allocator = allocator
+        this.viewConstructor = viewConstructor
 
-      const byteOffset = allocator.allocate(
-        ReferenceCountedOwnershipPointerView.byteLength
-      )
-      const view = new ReferenceCountedOwnershipPointerView(
-        allocator.buffer
-      , byteOffset
-      , viewConstructor
-      )
-      view.set([uint32(1), uint32(valueByteOffset)])
-      this._view = view
-    } else {
-      const [, allocator, viewConstructor, byteOffset] = args
-      this.allocator = allocator
-      this.viewConstructor = viewConstructor
+        const byteOffset = allocator.allocate(
+          ReferenceCountedOwnershipPointerView.byteLength
+        )
+        const view = new ReferenceCountedOwnershipPointerView(
+          allocator.buffer
+        , byteOffset
+        , viewConstructor
+        )
+        view.set([uint32(1), uint32(valueByteOffset)])
+        this._view = view
 
-      const view = new ReferenceCountedOwnershipPointerView(
-        allocator.buffer
-      , byteOffset
-      , viewConstructor
-      )
-      view.incrementCount()
-      this._view = view
+        return
+      }
+      case ConstructorType.Clone: {
+        const [, allocator, viewConstructor, byteOffset] = args
+        this.allocator = allocator
+        this.viewConstructor = viewConstructor
+
+        const view = new ReferenceCountedOwnershipPointerView(
+          allocator.buffer
+        , byteOffset
+        , viewConstructor
+        )
+        view.incrementCount()
+        this._view = view
+
+        return
+      }
     }
   }
 
@@ -89,7 +105,7 @@ implements IClone<ReferenceCountedOwnershipPointer<View>>
     this.fsm.assertAllocated()
 
     return new ReferenceCountedOwnershipPointer(
-      internalOverrideSymbol
+      ConstructorType.Clone
     , this.allocator
     , this.viewConstructor
     , this._view.byteOffset

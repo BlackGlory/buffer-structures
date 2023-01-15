@@ -12,7 +12,7 @@ describe('Int16', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new Int16(allocator, int16(1))
+    const result = Int16.create(allocator, int16(1))
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(result.get()).toStrictEqual(int16(1))
@@ -24,7 +24,7 @@ describe('Int16', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const result = new Int16(allocator, int16(1))
+      const result = Int16.create(allocator, int16(1))
 
       result.destroy()
 
@@ -34,7 +34,7 @@ describe('Int16', () => {
 
     it('cannot destory twice', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const result = new Int16(allocator, int16(1))
+      const result = Int16.create(allocator, int16(1))
       result.destroy()
 
       const err = getError(() => result.destroy())
@@ -49,7 +49,7 @@ describe('Int16', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new Int16(allocator, int16(1))
+        const obj1 = Int16.create(allocator, int16(1))
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -60,7 +60,7 @@ describe('Int16', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new Int16(allocator, int16(1))
+        const obj1 = Int16.create(allocator, int16(1))
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -74,7 +74,7 @@ describe('Int16', () => {
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Int16(allocator, int16(1))
+    const obj = Int16.create(allocator, int16(1))
 
     const result = obj.clone()
 
@@ -86,7 +86,7 @@ describe('Int16', () => {
 
   test('copy', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Int16(allocator, int16(1))
+    const obj = Int16.create(allocator, int16(1))
 
     const result = obj.copy()
 
@@ -98,7 +98,7 @@ describe('Int16', () => {
 
   test('get', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Int16(allocator, int16(1))
+    const obj = Int16.create(allocator, int16(1))
 
     const result = obj.get()
 
@@ -107,7 +107,7 @@ describe('Int16', () => {
 
   test('set', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Int16(allocator, int16(1))
+    const obj = Int16.create(allocator, int16(1))
 
     obj.set(int16(2))
 
@@ -116,7 +116,7 @@ describe('Int16', () => {
 
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Int16(allocator, int16(1))
+    const obj = Int16.create(allocator, int16(1))
     const hasher = {
       write: jest.fn()
     } satisfies IHasher

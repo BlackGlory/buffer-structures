@@ -2,7 +2,7 @@ import { IHash, IFree, IClone, IDestroy } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { ViewConstructor } from '@views/pointer-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { ObjectStateMachine, ReferenceCounter } from './utils'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
 import { NULL } from '@src/null'
@@ -19,25 +19,37 @@ implements IClone<OwnershipPointer<View>>
   private allocator: IAllocator
   private viewConstructor: ViewConstructor<View>
 
-  constructor(
+  static create<View extends BaseView & IHash & IFree>(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , valueByteOffset: number
+  ): OwnershipPointer<View> {
+    return new this(ConstructorType.Create, allocator, viewConstructor, valueByteOffset)
+  }
+
+  private constructor(
+    type: ConstructorType.Create
+  , allocator: IAllocator
+  , viewConstructor: ViewConstructor<View>
+  , valueByteOffset: number
   )
-  constructor(
-    _allocator: IAllocator
-  , _viewConstructor: ViewConstructor<View>
-  , _byteOffset: number
-  , _counter: ReferenceCounter
+  private constructor(
+    type: ConstructorType.Clone
+  , allocator: IAllocator
+  , viewConstructor: ViewConstructor<View>
+  , byteOffset: number
+  , counter: ReferenceCounter
   )
-  constructor(...args:
+  private constructor(...args:
   | [
-      allocator: IAllocator
+      type: ConstructorType.Create
+    , allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
     , valueByteOffset: number
     ]
   | [
-      allocator: IAllocator
+      type: ConstructorType.Clone
+    , allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
     , byteOffset: number
     , counter: ReferenceCounter
@@ -45,30 +57,38 @@ implements IClone<OwnershipPointer<View>>
   ) {
     super()
 
-    if (args.length === 3) {
-      const [allocator, viewConstructor, valueByteOffset] = args
-      this.allocator = allocator
-      this.viewConstructor = viewConstructor
-      this._counter = new ReferenceCounter()
+    const [type] = args
+    switch (type) {
+      case ConstructorType.Create: {
+        const [, allocator, viewConstructor, valueByteOffset] = args
+        this.allocator = allocator
+        this.viewConstructor = viewConstructor
+        this._counter = new ReferenceCounter()
 
-      const byteOffset = allocator.allocate(OwnershipPointerView.byteLength)
-      const view = new OwnershipPointerView(
-        allocator.buffer
-      , byteOffset
-      , viewConstructor
-      )
-      view.set(uint32(valueByteOffset))
-      this._view = view
-    } else {
-      const [allocator, viewConstructor, byteOffset, counter] = args
-      this.allocator = allocator
-      this.viewConstructor = viewConstructor
+        const byteOffset = allocator.allocate(OwnershipPointerView.byteLength)
+        const view = new OwnershipPointerView(
+          allocator.buffer
+        , byteOffset
+        , viewConstructor
+        )
+        view.set(uint32(valueByteOffset))
+        this._view = view
 
-      const view = new OwnershipPointerView(allocator.buffer, byteOffset, viewConstructor)
-      this._view = view
+        return
+      }
+      case ConstructorType.Clone: {
+        const [, allocator, viewConstructor, byteOffset, counter] = args
+        this.allocator = allocator
+        this.viewConstructor = viewConstructor
 
-      counter.increment()
-      this._counter = counter
+        const view = new OwnershipPointerView(allocator.buffer, byteOffset, viewConstructor)
+        this._view = view
+
+        counter.increment()
+        this._counter = counter
+
+        return
+      }
     }
   }
 
@@ -85,7 +105,8 @@ implements IClone<OwnershipPointer<View>>
     this.fsm.assertAllocated()
 
     return new OwnershipPointer(
-      this.allocator
+      ConstructorType.Clone
+    , this.allocator
     , this.viewConstructor
     , this._view.byteOffset
     , this._counter

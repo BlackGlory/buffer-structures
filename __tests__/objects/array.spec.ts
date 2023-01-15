@@ -13,7 +13,7 @@ describe('Array', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = new Array(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
+    const result = Array.create(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(result.get()).toStrictEqual([uint8(1), uint8(2), uint8(3)])
@@ -25,7 +25,7 @@ describe('Array', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const obj = new Array(allocator, Uint8View, 3)
+      const obj = Array.create(allocator, Uint8View, 3)
 
       obj.destroy()
 
@@ -39,7 +39,7 @@ describe('Array', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const obj = new Array(allocator, Uint8View, 3)
+      const obj = Array.create(allocator, Uint8View, 3)
       obj.destroy()
 
       const err = getError(() => obj.destroy())
@@ -54,7 +54,7 @@ describe('Array', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = new Array(allocator, Uint8View, 3)
+        const obj1 = Array.create(allocator, Uint8View, 3)
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -65,7 +65,7 @@ describe('Array', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = new Array(allocator, Uint8View, 3)
+        const obj1 = Array.create(allocator, Uint8View, 3)
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -79,7 +79,7 @@ describe('Array', () => {
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 3)
+    const obj = Array.create(allocator, Uint8View, 3)
 
     const result = obj.clone()
 
@@ -91,7 +91,7 @@ describe('Array', () => {
 
   test('copy', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 3)
+    const obj = Array.create(allocator, Uint8View, 3)
 
     const result = obj.copy()
 
@@ -103,7 +103,7 @@ describe('Array', () => {
 
   test('get', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
+    const obj = Array.create(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
 
     const result = obj.get()
 
@@ -112,7 +112,7 @@ describe('Array', () => {
 
   test('set', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
+    const obj = Array.create(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
 
     obj.set([uint8(10), uint8(20), uint8(30)])
 
@@ -121,7 +121,7 @@ describe('Array', () => {
 
   test('getByIndex', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
+    const obj = Array.create(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
 
     const result = obj.getByIndex(1)
 
@@ -130,7 +130,7 @@ describe('Array', () => {
 
   test('setByIndex', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
+    const obj = Array.create(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
 
     obj.setByIndex(1, uint8(10))
 
@@ -139,7 +139,7 @@ describe('Array', () => {
 
   test('getViewByIndex', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 2, [uint8(1), uint8(2)])
+    const obj = Array.create(allocator, Uint8View, 2, [uint8(1), uint8(2)])
 
     const view1 = obj.getViewByIndex(0)
     const view2 = obj.getViewByIndex(1)
@@ -150,7 +150,7 @@ describe('Array', () => {
 
   test('hash', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = new Array(allocator, Uint8View, 2, [uint8(1), uint8(2)])
+    const obj = Array.create(allocator, Uint8View, 2, [uint8(1), uint8(2)])
     const hasher = {
       write: jest.fn()
     } satisfies IHasher
