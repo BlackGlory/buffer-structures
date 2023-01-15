@@ -568,7 +568,11 @@ implements IClone<HashMap<KeyView, ValueView>>
 
   destroy(): void
   clone(): HashMap<KeyView, ValueView>
+
+  entries(): IterableIterator<[KeyView, ValueView]>
+  keys(): IterableIterator<KeyView>
   values(): IterableIterator<ValueView>
+
   has(key: IHash): boolean
   get(key: IHash): ValueView | undefined
   set(

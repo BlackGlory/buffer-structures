@@ -12,6 +12,7 @@ import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
 import { withLazyStatic, lazyStatic } from 'extra-lazy'
 import { uint32 } from '@literals/uint32-literal'
+import { map } from 'iterable-operator'
 
 type ViewConstructor<View> =
   ISized
@@ -362,7 +363,7 @@ implements IClone<HashMap<KeyView, ValueView>>
     )
   }
 
-  * values(): IterableIterator<ValueView> {
+  * entries(): IterableIterator<[KeyView, ValueView]> {
     this.fsm.assertAllocated()
 
     const buckets = this._view.getViewByIndex(OuterTupleKey.Buckets).deref()!
@@ -372,10 +373,21 @@ implements IClone<HashMap<KeyView, ValueView>>
       let linkedList = pointer.deref()
       while (linkedList) {
         const struct = linkedList.getViewOfValue()
-        yield struct.getViewByIndex(InnerTupleKey.Value)
+        yield [
+          struct.getViewByIndex(InnerTupleKey.Key)
+        , struct.getViewByIndex(InnerTupleKey.Value)
+        ]
         linkedList = linkedList.derefNext()
       }
     }
+  }
+
+  keys(): IterableIterator<KeyView> {
+    return map(this.entries(), ([key]) => key)
+  }
+
+  values(): IterableIterator<ValueView> {
+    return map(this.entries(), ([, value]) => value)
   }
 
   has(key: IHash): boolean {

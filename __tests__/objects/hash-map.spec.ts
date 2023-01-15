@@ -193,6 +193,57 @@ describe('HashMap', () => {
     })
   })
 
+  describe('entries', () => {
+    test('empty', () => {
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
+
+      const iter = obj.entries()
+      const result = toArray(iter).map(([key, value]) => [key.get(), value.get()])
+
+      expect(result).toStrictEqual([])
+    })
+
+    test('non-empty', () => {
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
+      obj.set(uint8(1), uint8(10))
+      obj.set(uint8(2), uint8(20))
+
+      const iter = obj.entries()
+      const result = toArray(iter).map(([key, value]) => [key.get(), value.get()])
+
+      expect(result).toStrictEqual([
+        [uint8(2), uint8(20)]
+      , [uint8(1), uint8(10)]
+      ])
+    })
+  })
+
+  describe('keys', () => {
+    test('empty', () => {
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
+
+      const iter = obj.keys()
+      const result = toArray(iter).map(x => x.get())
+
+      expect(result).toStrictEqual([])
+    })
+
+    test('non-empty', () => {
+      const allocator = new Allocator(new ArrayBuffer(100))
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
+      obj.set(uint8(1), uint8(10))
+      obj.set(uint8(2), uint8(20))
+
+      const iter = obj.keys()
+      const result = toArray(iter).map(x => x.get())
+
+      expect(result).toStrictEqual([uint8(2), uint8(1)])
+    })
+  })
+
   describe('values', () => {
     test('empty', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
