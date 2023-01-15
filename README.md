@@ -544,17 +544,18 @@ type ViewConstructor<View> =
  * 扩容无法发生在添加项目之前, 因为在添加前无法知道添加项目后的负载情况会增长还是不变.
  */
 class HashMap<
-  KeyView extends BaseView & IHash
+  KeyView extends BaseView & IReadableWritable<unknown> & IHash
 , ValueView extends BaseView & IReadableWritable<unknown> & IHash
 >
 extends BaseObject
 implements IClone<HashMap<KeyView, ValueView>>
          , IDestroy {
   static create<
-    KeyView extends BaseView & IHash
+    KeyView extends BaseView & IReadableWritable<unknown> & IHash
   , ValueView extends BaseView & IReadableWritable<unknown> & IHash
   >(
     allocator: IAllocator
+  , keyViewConstructor: ViewConstructor<KeyView>
   , valueViewConstructor: ViewConstructor<ValueView>
   , options?: {
       capacity?: number
@@ -565,10 +566,15 @@ implements IClone<HashMap<KeyView, ValueView>>
 
   get size(): number
 
+  destroy(): void
+  clone(): HashMap<KeyView, ValueView>
   values(): IterableIterator<ValueView>
   has(key: IHash): boolean
   get(key: IHash): ValueView | undefined
-  set(key: IHash, value: UnpackedReadableWritable<ValueView>): void
+  set(
+    key: IHash & UnpackedReadableWritable<KeyView>
+  , value: UnpackedReadableWritable<ValueView>
+  ): void
   delete(key: IHash): void
 }
 ```

@@ -15,7 +15,7 @@ describe('HashMap', () => {
     const allocate = jest.spyOn(allocator, 'allocate')
     const capacity = 10
 
-    const result = HashMap.create(allocator, Uint8View, { capacity })
+    const result = HashMap.create(allocator, Uint8View, Uint8View, { capacity })
 
     expect(result).toBeInstanceOf(BaseObject)
     expect(allocate).toBeCalledTimes(2)
@@ -31,7 +31,7 @@ describe('HashMap', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const capacity = 1
       const loadFactor = 1
-      const obj = HashMap.create(allocator, Uint8View, { capacity, loadFactor })
+      const obj = HashMap.create(allocator, Uint8View, Uint8View, { capacity, loadFactor })
       const bucketsByteOffset = obj._view.getByIndex(OuterTupleKey.Buckets)
 
       obj.set(uint8(1), uint8(10))
@@ -47,7 +47,12 @@ describe('HashMap', () => {
       const capacity = 1
       const loadFactor = 0.75
       const growthFactor = 3
-      const obj = HashMap.create(allocator, Uint8View, { capacity, loadFactor, growthFactor })
+      const obj = HashMap.create(
+        allocator
+      , Uint8View
+      , Uint8View
+      , { capacity, loadFactor, growthFactor }
+      )
       const bucketsByteOffset = obj._view.getByIndex(OuterTupleKey.Buckets)
 
       obj.set(uint8(1), uint8(10))
@@ -63,7 +68,7 @@ describe('HashMap', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
-      const obj = HashMap.create(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
       const buckets = obj._view.getViewByIndex(OuterTupleKey.Buckets).deref()!
 
       obj.destroy()
@@ -79,7 +84,7 @@ describe('HashMap', () => {
       , allocate: jest.fn()
       , free: jest.fn()
       } satisfies IAllocator
-      const obj = HashMap.create(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
       obj.destroy()
 
       const err = getError(() => obj.destroy())
@@ -94,7 +99,7 @@ describe('HashMap', () => {
         , allocate: jest.fn()
         , free: jest.fn()
         } satisfies IAllocator
-        const obj1 = HashMap.create(allocator, Uint8View)
+        const obj1 = HashMap.create(allocator, Uint8View, Uint8View)
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -105,7 +110,7 @@ describe('HashMap', () => {
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
-        const obj1 = HashMap.create(allocator, Uint8View)
+        const obj1 = HashMap.create(allocator, Uint8View, Uint8View)
         const buckets = obj1._view.getViewByIndex(OuterTupleKey.Buckets).deref()!
         const obj2 = obj1.clone()
 
@@ -121,7 +126,7 @@ describe('HashMap', () => {
 
   test('clone', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const obj = HashMap.create(allocator, Uint8View)
+    const obj = HashMap.create(allocator, Uint8View, Uint8View)
 
     const result = obj.clone()
 
@@ -134,7 +139,7 @@ describe('HashMap', () => {
   describe('size', () => {
     test('initial value', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
 
       const result = obj.size
 
@@ -144,7 +149,7 @@ describe('HashMap', () => {
     describe('set', () => {
       test('new item', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+        const obj = HashMap.create(allocator, Uint8View, Uint8View)
 
         obj.set(uint8(1), uint8(1))
         const result = obj.size
@@ -154,7 +159,7 @@ describe('HashMap', () => {
 
       test('old item', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+        const obj = HashMap.create(allocator, Uint8View, Uint8View)
         obj.set(uint8(1), uint8(1))
 
         obj.set(uint8(1), uint8(2))
@@ -167,7 +172,7 @@ describe('HashMap', () => {
     describe('delete', () => {
       test('exist item', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+        const obj = HashMap.create(allocator, Uint8View, Uint8View)
         obj.set(uint8(1), uint8(1))
 
         obj.delete(uint8(1))
@@ -178,7 +183,7 @@ describe('HashMap', () => {
 
       test('non-exist item', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+        const obj = HashMap.create(allocator, Uint8View, Uint8View)
 
         obj.delete(uint8(1))
         const result = obj.size
@@ -191,7 +196,7 @@ describe('HashMap', () => {
   describe('values', () => {
     test('empty', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
 
       const iter = obj.values()
       const result = toArray(iter).map(x => x.get())
@@ -201,7 +206,7 @@ describe('HashMap', () => {
 
     test('non-empty', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
       obj.set(uint8(1), uint8(10))
       obj.set(uint8(2), uint8(20))
 
@@ -215,7 +220,7 @@ describe('HashMap', () => {
   describe('has', () => {
     test('item does not exist', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
       const key = uint8(1)
 
       const result = obj.has(key)
@@ -225,7 +230,7 @@ describe('HashMap', () => {
 
     test('item exists', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
       const key = uint8(1)
       const value = uint8(2)
       obj.set(key, value)
@@ -239,7 +244,7 @@ describe('HashMap', () => {
   describe('get', () => {
     test('item does not exist', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
       const key = uint8(1)
 
       const result = obj.get(key)
@@ -249,7 +254,7 @@ describe('HashMap', () => {
 
     test('item exists', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
       const key = uint8(1)
       const value = uint8(2)
       obj.set(key, value)
@@ -264,7 +269,7 @@ describe('HashMap', () => {
   describe('set', () => {
     test('item does not exist', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
       const key = uint8(1)
       const value = uint8(2)
 
@@ -275,7 +280,7 @@ describe('HashMap', () => {
 
     test('item exists', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
       const key = uint8(1)
       const value = uint8(2)
       const newValue = uint8(3)
@@ -290,7 +295,7 @@ describe('HashMap', () => {
   describe('delete', () => {
     test('item does not exist', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
       const key = uint8(1)
 
       obj.delete(key)
@@ -300,7 +305,7 @@ describe('HashMap', () => {
 
     test('item exists', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const obj = HashMap.create<Uint8View, Uint8View>(allocator, Uint8View)
+      const obj = HashMap.create(allocator, Uint8View, Uint8View)
       const key = uint8(1)
       const value = uint8(2)
       obj.set(key, value)
