@@ -1,8 +1,7 @@
 import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { Float64View } from '@views/float64-view'
-import { ObjectStateMachine } from '@utils/object-state-machine'
-import { ReferenceCounter } from '@utils/reference-counter'
+import { ObjectStateMachine, ReferenceCounter } from './utils'
 import { BaseObject } from '@objects/base-object'
 import { Float64Literal } from '@literals/float64-literal'
 

@@ -2,7 +2,7 @@ import { IHash, IReference, IReadableWritable, IFree, IOwnershipPointer } from '
 import { IAllocator, IHasher } from '@src/interfaces'
 import { isntNull } from '@blackglory/prelude'
 import { BaseView } from '@views/base-view'
-import { NULL } from '@utils/null'
+import { NULL } from '@src/null'
 import { uint32, Uint32Literal } from '@literals/uint32-literal'
 
 export type ViewConstructor<View extends BaseView> = new (

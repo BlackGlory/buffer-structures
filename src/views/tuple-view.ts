@@ -3,7 +3,7 @@ import { IAllocator, IHasher } from '@src/interfaces'
 import { UnpackedReadableWritable } from '@src/types'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ReturnTypeOfConstructor } from 'hotypes'
-import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
+import { isOwnershiptPointer } from './utils'
 import { each } from 'iterable-operator'
 import { BaseView } from '@views/base-view'
 

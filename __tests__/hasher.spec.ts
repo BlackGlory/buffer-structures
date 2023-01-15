@@ -1,5 +1,5 @@
 import { Hasher } from '@src/hasher'
-import { NULL } from '@utils/null'
+import { NULL } from '@src/null'
 import { bytesToBuffer } from '@test/utils'
 
 describe('Hasher', () => {

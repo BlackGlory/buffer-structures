@@ -1,6 +1,6 @@
 import { IHash, IReference, IReadableWritable, IFree } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
-import { getSlice } from '@utils/get-slice'
+import { getSlice } from './utils'
 import { BaseView } from '@views/base-view'
 import { float64, Float64Literal } from '@literals/float64-literal'
 

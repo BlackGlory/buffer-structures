@@ -2,10 +2,10 @@ import { IHash, IFree, IClone, IDestroy } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { ViewConstructor } from '@views/pointer-view'
 import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-ownership-pointer-view'
-import { ObjectStateMachine } from '@utils/object-state-machine'
+import { ObjectStateMachine } from './utils'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
-import { NULL } from '@utils/null'
+import { NULL } from '@src/null'
 import { uint32 } from '@literals/uint32-literal'
 
 const internalOverrideSymbol = Symbol()

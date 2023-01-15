@@ -7,7 +7,7 @@ import { uint8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 import { OwnershipPointerView } from '@src/views/ownership-pointer-view'
 import { BaseObject } from '@objects/base-object'
-import { NULL } from '@utils/null'
+import { NULL } from '@src/null'
 import { uint8 } from '@literals/uint8-literal'
 import { uint32 } from '@literals/uint32-literal'
 

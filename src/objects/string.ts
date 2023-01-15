@@ -1,8 +1,8 @@
 import { ICopy, IClone, IDestroy, IReadable, IHash } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { StringView } from '@views/string-view'
-import { ObjectStateMachine } from '@utils/object-state-machine'
-import { ReferenceCounter } from '@utils/reference-counter'
+import { ObjectStateMachine, ReferenceCounter } from './utils'
+import {} from './utils'
 import { BaseObject } from '@objects/base-object'
 import { StringLiteral } from '@literals/string-literal'
 

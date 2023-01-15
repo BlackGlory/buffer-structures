@@ -1,8 +1,8 @@
 import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { Uint8View } from '@views/uint8-view'
-import { ObjectStateMachine } from '@utils/object-state-machine'
-import { ReferenceCounter } from '@utils/reference-counter'
+import { ObjectStateMachine, ReferenceCounter } from './utils'
+import {} from './utils'
 import { BaseObject } from '@objects/base-object'
 import { Uint8Literal } from '@literals/uint8-literal'
 

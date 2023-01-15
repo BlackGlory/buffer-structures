@@ -1,8 +1,7 @@
 import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { Int16View } from '@views/int16-view'
-import { ObjectStateMachine } from '@utils/object-state-machine'
-import { ReferenceCounter } from '@utils/reference-counter'
+import { ObjectStateMachine, ReferenceCounter } from './utils'
 import { BaseObject } from '@objects/base-object'
 import { Int16Literal } from '@literals/int16-literal'
 

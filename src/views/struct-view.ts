@@ -4,7 +4,7 @@ import { UnpackedReadableWritable } from '@src/types'
 import { pipe } from 'extra-utils'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import * as Iter from 'iterable-operator'
-import { isOwnershiptPointer } from '@utils/is-ownership-pointer'
+import { isOwnershiptPointer } from './utils'
 import { BaseView } from '@views/base-view'
 import { lazy } from 'extra-lazy'
 

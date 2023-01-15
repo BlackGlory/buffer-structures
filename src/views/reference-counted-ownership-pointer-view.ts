@@ -7,7 +7,7 @@ import { Uint32View } from '@views/uint32-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { BaseView } from '@views/base-view'
 import { withLazyStatic, lazyStatic } from 'extra-lazy'
-import { NULL } from '@utils/null'
+import { NULL } from '@src/null'
 import { Uint32Literal, uint32 } from '@literals/uint32-literal'
 
 type OwnershipPointerViewConstructor<View extends BaseView & IHash & IFree> =

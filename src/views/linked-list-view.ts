@@ -5,7 +5,7 @@ import { isntNull } from '@blackglory/prelude'
 import { TupleView, MapStructureToTupleValue } from '@views/tuple-view'
 import { BaseView } from '@views/base-view'
 import { withLazyStatic, lazyStatic } from 'extra-lazy'
-import { NULL } from '@utils/null'
+import { NULL } from '@src/null'
 
 export type ViewConstructor<View extends BaseView> =
   ISized

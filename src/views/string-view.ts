@@ -1,7 +1,7 @@
 import { IHash, ISized, IReference, IReadableWritable, IFree } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { Uint32View } from '@views/uint32-view'
-import { getSlice } from '@utils/get-slice'
+import { getSlice } from './utils'
 import { BaseView } from '@views/base-view'
 import { uint32 } from '@literals/uint32-literal'
 import { string, StringLiteral } from '@literals/string-literal'

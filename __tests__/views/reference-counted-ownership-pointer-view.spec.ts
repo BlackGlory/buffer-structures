@@ -5,7 +5,7 @@ import { Uint32View } from '@views/uint32-view'
 import { uint8ToBuffer } from '@test/utils'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { BaseView } from '@views/base-view'
-import { NULL } from '@utils/null'
+import { NULL } from '@src/null'
 import { uint8 } from '@literals/uint8-literal'
 import { uint32 } from '@literals/uint32-literal'
 

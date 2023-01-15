@@ -7,7 +7,7 @@ import { getError } from 'return-style'
 import { uint8ToBuffer } from '@test/utils'
 import { Allocator } from '@src/allocator'
 import { BaseObject } from '@objects/base-object'
-import { NULL } from '@utils/null'
+import { NULL } from '@src/null'
 import { uint8 } from '@literals/uint8-literal'
 
 describe('OwnershipPointer', () => {
