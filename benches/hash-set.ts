@@ -30,7 +30,7 @@ go(async () => {
     return {
       beforeEach() {
         allocator = new Allocator(new ArrayBuffer(50 * MB))
-        set = new HashSet(allocator, Uint16View, { capacity: 20000 })
+        set = HashSet.create(allocator, Uint16View, { capacity: 20000 })
       }
     , iterate() {
         for (let i = 0; i < count; i++) {
@@ -57,7 +57,7 @@ go(async () => {
   benchmark.addCase('HashSet#has', () => {
     const count = 10000
     const allocator = new Allocator(new ArrayBuffer(50 * MB))
-    const set = new HashSet(allocator, Uint16View)
+    const set = HashSet.create(allocator, Uint16View)
     for (let i = 0; i < count; i += 2) {
       set.add(uint16(i))
     }

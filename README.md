@@ -575,10 +575,6 @@ implements IClone<HashMap<KeyView, ValueView>>
 
 #### HashSet
 ```ts
-type ViewConstructor<View> =
-  ISized
-& (new (buffer: ArrayBufferLike, byteOffset: number) => View)
-
 /**
  * 在向HashSet添加新的项目后, HashSet可能会尝试对内部数组进行扩容, 从而确保当前负载总是低于或等于负载因子.
  * 扩容无法发生在添加项目之前, 因为在添加前无法知道添加项目后的负载情况会增长还是不变.
@@ -1084,5 +1080,54 @@ implements IReference
   getViewByKey<U extends string & keyof Structure>(
     key: U
   ): ReturnTypeOfConstructor<Structure[U]>
+}
+```
+
+#### HashSetView
+```ts
+type ViewConstructor<View> =
+  ISized
+& (new (buffer: ArrayBufferLike, byteOffset: number) => View)
+
+/**
+ * 在向HashSet添加新的项目后, HashSet可能会尝试对内部数组进行扩容, 从而确保当前负载总是低于或等于负载因子.
+ * 扩容无法发生在添加项目之前, 因为在添加前无法知道添加项目后的负载情况会增长还是不变.
+ */
+export class HashSetView<View extends BaseView & IReadableWritable<unknown> & IHash>
+extends BaseView
+implements IReference
+         , IFree {
+  get capacity(): number
+  readonly loadFactor: number
+  readonly growthFactor: number
+
+  constructor(
+    buffer: ArrayBufferLike
+  , byteOffset: number
+  , viewConstructor: ViewConstructor<View>
+  , options: {
+      capacity: number
+      loadFactor: number
+      growthFactor: number
+    }
+  )
+
+  getSize(): number
+  values(): IterableIterator<View>
+  has(value: IHash): boolean
+  add(allocator: IAllocator, value: UnpackedReadableWritable<View> & IHash): void
+  delete(allocator: IAllocator, value: IHash): void
+
+  getViewOfBuckets(): ArrayView<
+    OwnershipPointerView<
+      LinkedListView<
+        TupleView<[
+          hash: typeof Uint32View
+        , value: ViewConstructor<View>
+        ]>
+      >
+    >
+  , number
+  > | null
 }
 ```
