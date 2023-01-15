@@ -24,6 +24,8 @@ implements IClone<HashSet<View>>
   private viewConstructor: ViewConstructor<View>
 
   get capacity(): number {
+    this.fsm.assertAllocated()
+
     return this._view.capacity
   }
 

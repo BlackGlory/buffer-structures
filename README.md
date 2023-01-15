@@ -15,7 +15,7 @@ JavaScript跨上下文的数据传输严重依赖于序列化和复制, 这直�
 ## 已知问题
 ### 性能问题
 微基准测试的结果表明, 本库的性能表现不及预期, 在大多数情况下, 你都不应该使用此库.
-举例来说, 由于本库提供的HashSet比原生Set慢几个数量级, 任何大量访问HashSet的项目都会因此出现严重的性能问题.
+举例来说, 由于本库提供的HashMap比原生Map慢几个数量级, 任何大量访问HashMap的项目都会因此出现严重的性能问题.
 经过调查, 可以确定性能瓶颈在于语言本身, 很难通过不严重降低代码可读性的方式进一步提升性能.
 
 ## 常见问题
@@ -535,10 +535,6 @@ implements ICopy<Struct<Structure>>
 
 #### HashMap
 ```ts
-type ViewConstructor<View> =
-  ISized
-& (new (buffer: ArrayBufferLike, byteOffset: number) => View)
-
 /**
  * 在向HashMap添加新的项目后, HashMap可能会尝试对内部数组进行扩容, 从而确保当前负载总是低于或等于负载因子.
  * 扩容无法发生在添加项目之前, 因为在添加前无法知道添加项目后的负载情况会增长还是不变.
@@ -1122,18 +1118,80 @@ implements IReference
     }
   )
 
-  getSize(): number
   values(): IterableIterator<View>
   has(value: IHash): boolean
   add(allocator: IAllocator, value: UnpackedReadableWritable<View> & IHash): void
   delete(allocator: IAllocator, value: IHash): void
 
+  getSize(): number
   getViewOfBuckets(): ArrayView<
     OwnershipPointerView<
       LinkedListView<
         TupleView<[
           hash: typeof Uint32View
         , value: ViewConstructor<View>
+        ]>
+      >
+    >
+  , number
+  > | null
+}
+```
+
+#### HashMapView
+```ts
+type ViewConstructor<View> =
+  ISized
+& (new (buffer: ArrayBufferLike, byteOffset: number) => View)
+
+/**
+ * 在向HashMap添加新的项目后, HashMap可能会尝试对内部数组进行扩容, 从而确保当前负载总是低于或等于负载因子.
+ * 扩容无法发生在添加项目之前, 因为在添加前无法知道添加项目后的负载情况会增长还是不变.
+ */
+class HashMapView<
+  KeyView extends BaseView & IReadableWritable<unknown> & IHash
+, ValueView extends BaseView & IReadableWritable<unknown> & IHash
+>
+extends BaseView
+implements IReference
+         , IFree {
+  get capacity(): number
+  readonly loadFactor: number
+  readonly growthFactor: number
+
+  constructor(
+    buffer: ArrayBufferLike
+  , byteOffset: number
+  , keyViewConstructor: ViewConstructor<KeyView>
+  , valueViewConstructor: ViewConstructor<ValueView>
+  , options: {
+      capacity: number
+      loadFactor: number
+      growthFactor: number
+    }
+  )
+
+  entries(): IterableIterator<[KeyView, ValueView]>
+  keys(): IterableIterator<KeyView>
+  values(): IterableIterator<ValueView>
+
+  has(key: IHash): boolean
+  get(key: IHash): ValueView | undefined
+  set(
+    allocator: IAllocator
+  , key: IHash & UnpackedReadableWritable<KeyView>
+  , value: UnpackedReadableWritable<ValueView>
+  ): void
+  delete(allocator: IAllocator, key: IHash): void
+
+  getSize(): number
+  getViewOfBuckets(): ArrayView<
+    OwnershipPointerView<
+      LinkedListView<
+        TupleView<[
+          hash: typeof Uint32View
+        , key: ViewConstructor<KeyView>
+        , value: ViewConstructor<ValueView>
         ]>
       >
     >

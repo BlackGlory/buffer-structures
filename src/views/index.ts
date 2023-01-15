@@ -16,3 +16,4 @@ export { ReferenceCountedOwnershipPointerView } from './reference-counted-owners
 export { LinkedListView } from './linked-list-view'
 export { ArrayView } from './array-view'
 export { HashSetView } from './hash-set-view'
+export { HashMapView } from './hash-map-view'

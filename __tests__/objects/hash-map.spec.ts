@@ -1,5 +1,5 @@
 import { toArray } from '@blackglory/prelude'
-import { HashMap, OuterTupleKey } from '@objects/hash-map'
+import { HashMap } from '@objects/hash-map'
 import { IAllocator } from '@src/interfaces'
 import { Uint8View } from '@views/uint8-view'
 import { Uint32View } from '@views/uint32-view'
@@ -32,13 +32,13 @@ describe('HashMap', () => {
       const capacity = 1
       const loadFactor = 1
       const obj = HashMap.create(allocator, Uint8View, Uint8View, { capacity, loadFactor })
-      const bucketsByteOffset = obj._view.getByIndex(OuterTupleKey.Buckets)
+      const bucketsByteOffset = obj._view.getViewOfBuckets()
 
       obj.set(uint8(1), uint8(10))
 
-      expect(obj._view.getByIndex(OuterTupleKey.Buckets)).toStrictEqual(bucketsByteOffset)
-      expect(obj._view.getViewByIndex(OuterTupleKey.Buckets).deref()!.length).toBe(1)
-      expect(obj._capacity).toBe(1)
+      expect(obj._view.getViewOfBuckets()).toStrictEqual(bucketsByteOffset)
+      expect(obj._view.getViewOfBuckets()!.length).toBe(1)
+      expect(obj.capacity).toBe(1)
       expect(obj.get(uint8(1))!.get()).toStrictEqual(uint8(10))
     })
 
@@ -53,13 +53,13 @@ describe('HashMap', () => {
       , Uint8View
       , { capacity, loadFactor, growthFactor }
       )
-      const bucketsByteOffset = obj._view.getByIndex(OuterTupleKey.Buckets)
+      const bucketsByteOffset = obj._view.getViewOfBuckets()
 
       obj.set(uint8(1), uint8(10))
 
-      expect(obj._view.getByIndex(OuterTupleKey.Buckets)).not.toBe(bucketsByteOffset)
-      expect(obj._view.getViewByIndex(OuterTupleKey.Buckets).deref()!.length).toBe(3)
-      expect(obj._capacity).toBe(3)
+      expect(obj._view.getViewOfBuckets()!.byteOffset).not.toBe(bucketsByteOffset)
+      expect(obj._view.getViewOfBuckets()!.length).toBe(3)
+      expect(obj.capacity).toBe(3)
       expect(obj.get(uint8(1))!.get()).toStrictEqual(uint8(10))
     })
   })
@@ -69,13 +69,13 @@ describe('HashMap', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
       const obj = HashMap.create(allocator, Uint8View, Uint8View)
-      const buckets = obj._view.getViewByIndex(OuterTupleKey.Buckets).deref()!
+      const buckets = obj._view.getViewOfBuckets()!
 
       obj.destroy()
 
       expect(free).toBeCalledTimes(2)
       expect(free).nthCalledWith(1, buckets.byteOffset, buckets.byteLength)
-      expect(free).nthCalledWith(2, obj._view.byteOffset, obj._view.byteLength)
+      expect(free).nthCalledWith(2, obj._view.byteOffset, obj._view._view.byteLength)
     })
 
     it('cannot destory twice', () => {
@@ -111,7 +111,7 @@ describe('HashMap', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
         const obj1 = HashMap.create(allocator, Uint8View, Uint8View)
-        const buckets = obj1._view.getViewByIndex(OuterTupleKey.Buckets).deref()!
+        const buckets = obj1._view.getViewOfBuckets()!
         const obj2 = obj1.clone()
 
         obj1.destroy()
@@ -119,7 +119,7 @@ describe('HashMap', () => {
 
         expect(free).toBeCalledTimes(2)
         expect(free).nthCalledWith(1, buckets.byteOffset, buckets.byteLength)
-        expect(free).nthCalledWith(2, obj1._view.byteOffset, obj1._view.byteLength)
+        expect(free).nthCalledWith(2, obj1._view.byteOffset, obj1._view._view.byteLength)
       })
     })
   })
