@@ -174,7 +174,7 @@ implements IReference
   private _capacity: number
   readonly loadFactor: number
   readonly growthFactor: number
-  private InternalLinkedListView
+  private InternalLinkedListView: ViewConstructor<IInternalLinkedListView<View>>
 
   get capacity(): number {
     return this._capacity
@@ -357,7 +357,7 @@ implements IReference
     }
   }
 
-  private resizeWhenOverloaded(allocator: IAllocator, size: number) {
+  private resizeWhenOverloaded(allocator: IAllocator, size: number): void {
     if (this.isOverloaded(size, this._capacity, this.loadFactor)) {
       let newCapacity = this._capacity * this.growthFactor
       while (this.isOverloaded(size, newCapacity, this.loadFactor)) {
@@ -483,7 +483,7 @@ implements IReference
     allocator: IAllocator
   , hash: number
   , value: UnpackedReadableWritable<View>
-  ) {
+  ): IInternalLinkedListView<View> {
     const byteOffset = allocator.allocate(this.InternalLinkedListView.byteLength)
     const linkedList = new this.InternalLinkedListView(allocator.buffer, byteOffset)
     linkedList.set([null, [uint32(hash), value]])
