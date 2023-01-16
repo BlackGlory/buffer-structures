@@ -12,6 +12,7 @@ import { withLazyStatic, lazyStatic } from 'extra-lazy'
 import { uint32, Uint32Literal } from '@literals/uint32-literal'
 import { map } from 'iterable-operator'
 import { assert } from '@blackglory/prelude'
+import { HashBucketsView } from '@views/hash-buckets-view'
 
 export type ViewConstructor<View> =
   ISized
@@ -23,8 +24,7 @@ enum OuterTupleKey {
 }
 
 enum InnerTupleKey {
-  Hash
-, Key
+  Key
 , Value
 }
 
@@ -32,30 +32,14 @@ type IInternalTupleView<
   KeyView extends BaseView & IReadableWritable<unknown> & IHash
 , ValueView extends BaseView & IReadableWritable<unknown> & IHash
 > = TupleView<[
-  hash: typeof Uint32View
-, key: ViewConstructor<KeyView>
+  key: ViewConstructor<KeyView>
 , value: ViewConstructor<ValueView>
 ]>
-
-type IInternalLinkedListView<
-  KeyView extends BaseView & IReadableWritable<unknown> & IHash
-, ValueView extends BaseView & IReadableWritable<unknown> & IHash
-> = LinkedListView<IInternalTupleView<KeyView, ValueView>>
-
-type IInternalLinkedListOwnershipPointerView<
-  KeyView extends BaseView & IReadableWritable<unknown> & IHash
-, ValueView extends BaseView & IReadableWritable<unknown> & IHash
-> = OwnershipPointerView<IInternalLinkedListView<KeyView, ValueView>>
-
-type IInternalBucketsView<
-  KeyView extends BaseView & IReadableWritable<unknown> & IHash
-, ValueView extends BaseView & IReadableWritable<unknown> & IHash
-> = ArrayView<IInternalLinkedListOwnershipPointerView<KeyView, ValueView>, number>
 
 type IInternalBucketsOwnershipPointerView<
   KeyView extends BaseView & IReadableWritable<unknown> & IHash
 , ValueView extends BaseView & IReadableWritable<unknown> & IHash
-> = OwnershipPointerView<IInternalBucketsView<KeyView, ValueView>>
+> = OwnershipPointerView<HashBucketsView<IInternalTupleView<KeyView, ValueView>>>
 
 export const createInternalViews = withLazyStatic(<
   KeyView extends BaseView & IReadableWritable<unknown> & IHash
@@ -65,8 +49,7 @@ export const createInternalViews = withLazyStatic(<
 , valueViewConstructor: ViewConstructor<ValueView>
 , capacity: number
 ): {
-  InternalLinkedListView: ViewConstructor<IInternalLinkedListView<KeyView, ValueView>>
-  InternalBucketsView: ViewConstructor<IInternalBucketsView<KeyView, ValueView>>
+  InternalTupleView: ViewConstructor<IInternalTupleView<KeyView, ValueView>>
   InternalBucketsOwnershipPointerView: ViewConstructor<IInternalBucketsOwnershipPointerView<KeyView, ValueView>>
 } => {
   const structure = lazyStatic(() => {
@@ -78,83 +61,45 @@ export const createInternalViews = withLazyStatic(<
   }, [valueViewConstructor])
 
   return lazyStatic((): {
-    InternalLinkedListView: ViewConstructor<IInternalLinkedListView<KeyView, ValueView>>
-    InternalBucketsView: ViewConstructor<IInternalBucketsView<KeyView, ValueView>>
+    InternalTupleView: ViewConstructor<IInternalTupleView<KeyView, ValueView>>
     InternalBucketsOwnershipPointerView: ViewConstructor<IInternalBucketsOwnershipPointerView<KeyView, ValueView>>
   } => {
     class InternalTupleView
     extends TupleView<[
-      hash: typeof Uint32View
-    , key: ViewConstructor<KeyView>
+      key: ViewConstructor<KeyView>
     , value: ViewConstructor<ValueView>
     ]>
     implements IInternalTupleView<KeyView, ValueView> {
       static byteLength = TupleView.getByteLength([
-        Uint32View
-      , keyViewConstructor
+        keyViewConstructor
       , valueViewConstructor
       ])
 
-      static override getByteLength(): number {
-        return this.byteLength
-      }
-
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
-        super(buffer, byteOffset, structure)
+        super(buffer, byteOffset, [
+          keyViewConstructor
+        , valueViewConstructor
+        ])
       }
     }
 
-    class InternalLinkedListView
-    extends LinkedListView<InternalTupleView>
-    implements IInternalLinkedListView<KeyView, ValueView> {
-      static byteLength = LinkedListView.getByteLength(InternalTupleView)
-
-      static override getByteLength(): number {
-        return this.byteLength
-      }
-
+    class InternalHashBucketsView extends HashBucketsView<InternalTupleView> {
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
-        super(buffer, byteOffset, InternalTupleView)
-      }
-    }
-
-    class InternalLinkedListOwnershipPointerView
-    extends OwnershipPointerView<InternalLinkedListView>
-    implements IInternalLinkedListOwnershipPointerView<KeyView, ValueView> {
-      constructor(buffer: ArrayBufferLike, byteOffset: number) {
-        super(buffer, byteOffset, InternalLinkedListView)
-      }
-    }
-
-    class InternalBucketsView
-    extends ArrayView<InternalLinkedListOwnershipPointerView, number>
-    implements IInternalBucketsView<KeyView, ValueView> {
-      static byteLength = ArrayView.getByteLength(
-        InternalLinkedListOwnershipPointerView
-      , capacity
-      )
-
-      static override getByteLength(): number {
-        return this.byteLength
-      }
-
-      constructor(buffer: ArrayBufferLike, byteOffset: number) {
-        super(buffer, byteOffset, InternalLinkedListOwnershipPointerView, capacity)
+        super(buffer, byteOffset, InternalTupleView, capacity)
       }
     }
 
     class InternalBucketsOwnershipPointerView
-    extends OwnershipPointerView<InternalBucketsView>
+    extends OwnershipPointerView<HashBucketsView<InternalTupleView>>
     implements IInternalBucketsOwnershipPointerView<KeyView, ValueView> {
       constructor(buffer: ArrayBufferLike, byteOffset: number) {
-        super(buffer, byteOffset, InternalBucketsView)
+        super(buffer, byteOffset, InternalHashBucketsView)
       }
     }
 
     return {
-      InternalLinkedListView
+      InternalTupleView
     , InternalBucketsOwnershipPointerView
-    , InternalBucketsView
     }
   }, [structure, capacity])
 })
@@ -164,20 +109,7 @@ type HashMapStructure<
 , ValueView extends BaseView & IReadableWritable<unknown> & IHash
 > = [
   size: typeof Uint32View
-, buckets: ViewConstructor<OwnershipPointerView<
-    ArrayView<
-      OwnershipPointerView<
-        LinkedListView<
-          TupleView<[
-            hash: typeof Uint32View
-          , key: ViewConstructor<KeyView>
-          , value: ViewConstructor<ValueView>
-          ]>
-        >
-      >
-    , number
-    >
-  >>
+, buckets: ViewConstructor<IInternalBucketsOwnershipPointerView<KeyView, ValueView>>
 ]
 
 /**
@@ -191,21 +123,21 @@ export class HashMapView<
 extends BaseView
 implements IReference
          , IFree {
-  _view: TupleView<HashMapStructure<KeyView, ValueView>>
   static byteLength = TupleView.getByteLength([
     Uint32View
   , OwnershipPointerView
   ])
 
-  private _capacity: number
+  _view: TupleView<HashMapStructure<KeyView, ValueView>>
   public readonly loadFactor: number
   public readonly growthFactor: number
-  private InternalLinkedListView: ViewConstructor<
-    IInternalLinkedListView<KeyView, ValueView>
-  >
+  private InternalTupleView: ViewConstructor<IInternalTupleView<KeyView, ValueView>>
 
   get capacity(): number {
-    return this._capacity
+    const buckets = this.derefBuckets()
+    assert(buckets, 'The buckets does not exist')
+
+    return buckets.capacity
   }
 
   constructor(
@@ -221,23 +153,23 @@ implements IReference
   ) {
     super()
 
-    this._capacity = capacity
     this.loadFactor = loadFactor
     this.growthFactor = growthFactor
 
     const {
-      InternalLinkedListView
-    , InternalBucketsOwnershipPointerView
-    } = createInternalViews(keyViewConstructor, valueViewConstructor, capacity)
-    this.InternalLinkedListView = InternalLinkedListView
+      InternalBucketsOwnershipPointerView
+    , InternalTupleView
+    } = createInternalViews(
+      keyViewConstructor
+    , valueViewConstructor
+    , capacity
+    )
+    this.InternalTupleView = InternalTupleView
 
     const rootView = new TupleView(
       buffer
     , byteOffset
-    , [
-        Uint32View
-      , InternalBucketsOwnershipPointerView
-      ]
+    , [Uint32View, InternalBucketsOwnershipPointerView]
     )
     this._view = rootView
   }
@@ -266,38 +198,18 @@ implements IReference
     return this._view.setByIndex(OuterTupleKey.Buckets, value)
   }
 
-  derefBuckets(): ArrayView<
-    OwnershipPointerView<
-      LinkedListView<
-        TupleView<[
-          hash: typeof Uint32View
-        , key: ViewConstructor<KeyView>
-        , value: ViewConstructor<ValueView>
-        ]>
-      >
-    >
-  , number
-  > | null {
+  derefBuckets(): HashBucketsView<IInternalTupleView<KeyView, ValueView>> | null {
     return this._view.getViewByIndex(OuterTupleKey.Buckets).deref()
   }
 
-  * itemEntries(): IterableIterator<[KeyView, ValueView]> {
+  itemEntries(): IterableIterator<[KeyView, ValueView]> {
     const buckets = this.derefBuckets()
     assert(buckets, 'buckets does not exist')
 
-    for (let i = 0; i < this._capacity; i++) {
-      const pointer = buckets.getViewByIndex(i)
-
-      let linkedList = pointer.deref()
-      while (linkedList) {
-        const struct = linkedList.getViewOfValue()
-        yield [
-          struct.getViewByIndex(InnerTupleKey.Key)
-        , struct.getViewByIndex(InnerTupleKey.Value)
-        ]
-        linkedList = linkedList.derefNext()
-      }
-    }
+    return map(buckets.itemValues(), view => [
+      view.getViewByIndex(InnerTupleKey.Key)
+    , view.getViewByIndex(InnerTupleKey.Value)
+    ])
   }
 
   itemKeys(): IterableIterator<KeyView> {
@@ -312,82 +224,29 @@ implements IReference
     const buckets = this.derefBuckets()
     assert(buckets, 'buckets does not exist')
 
-    const hash = this.getKeyHash(key)
-    const index = keyHashToIndex(this._capacity, hash)
-    const pointer = buckets.getViewByIndex(index)
-
-    let linkedList = pointer.deref()
-    while (linkedList) {
-      const struct = linkedList.getViewOfValue()
-      const keyHash = struct.getByIndex(InnerTupleKey.Hash)
-      if (hash === keyHash.get()) {
-        return true
-      } else {
-        linkedList = linkedList.derefNext()
-      }
-    }
-
-    return false
+    const hash = this.getItemHash(key)
+    return buckets.hasItem(hash)
   }
 
   getItem(key: IHash): ValueView | undefined {
     const buckets = this.derefBuckets()
     assert(buckets, 'buckets does not exist')
 
-    const hash = this.getKeyHash(key)
-    const index = keyHashToIndex(this._capacity, hash)
-    const pointer = buckets.getViewByIndex(index)
-
-    let linkedList = pointer.deref()
-    while (linkedList) {
-      const struct = linkedList.getViewOfValue()
-      const keyHash = struct.getByIndex(InnerTupleKey.Hash)
-      if (hash === keyHash.get()) {
-        const value = struct.getViewByIndex(InnerTupleKey.Value)
-        return value
-      } else {
-        linkedList = linkedList.derefNext()
-      }
-    }
+    const hash = this.getItemHash(key)
+    const view = buckets.getItem(hash)
+    return view?.getViewByIndex(InnerTupleKey.Value)
   }
 
   setItem(
     allocator: IAllocator
-  , key: IHash & UnpackedReadableWritable<KeyView>
+  , key: UnpackedReadableWritable<KeyView> & IHash
   , value: UnpackedReadableWritable<ValueView>
   ): void {
     const buckets = this.derefBuckets()
     assert(buckets, 'buckets does not exist')
 
-    const hash = this.getKeyHash(key)
-    const index = keyHashToIndex(this._capacity, hash)
-    const pointer = buckets.getViewByIndex(index)
-
-    let linkedList = pointer.deref()
-    if (linkedList) {
-      while (true) {
-        const struct = linkedList.getViewOfValue()
-        const keyHash = struct.getByIndex(InnerTupleKey.Hash)
-        if (hash === keyHash.get()) {
-          struct.setByIndex(InnerTupleKey.Key, key)
-          struct.setByIndex(InnerTupleKey.Value, value)
-          return
-        } else {
-          const nextLinkedList = linkedList.derefNext()
-          if (nextLinkedList) {
-            linkedList = nextLinkedList
-          } else {
-            const newLinkedList = this.createLinkedList(allocator, hash, key, value)
-            linkedList.setNext(uint32(newLinkedList.byteOffset))
-            const size = this.incrementSize()
-            this.resizeBucketsWhenOverloaded(allocator, size)
-            return
-          }
-        }
-      }
-    } else {
-      const newLinkedList = this.createLinkedList(allocator, hash, key, value)
-      pointer.set(uint32(newLinkedList.byteOffset))
+    const hash = this.getItemHash(key)
+    if (buckets.addItem(allocator, hash, [key, value])) {
       const size = this.incrementSize()
       this.resizeBucketsWhenOverloaded(allocator, size)
     }
@@ -395,55 +254,25 @@ implements IReference
 
   deleteItem(allocator: IAllocator, key: IHash): void {
     const buckets = this.derefBuckets()
-    assert(buckets, 'buckets does not exist')
+    assert(buckets, 'The buckets does not exist')
 
-    const hash = this.getKeyHash(key)
-    const index = keyHashToIndex(this._capacity, hash)
-    const pointer = buckets.getViewByIndex(index)
-
-    let previous:
-    | OwnershipPointerView<
-        LinkedListView<
-          TupleView<[
-            hash: typeof Uint32View
-          , key: ViewConstructor<KeyView>
-          , value: ViewConstructor<ValueView>
-          ]>
-        >
-      >
-    | LinkedListView<
-        TupleView<[
-          hash: typeof Uint32View
-        , key: ViewConstructor<KeyView>
-        , value: ViewConstructor<ValueView>
-        ]>
-      >
-    = pointer
-    let linkedList = pointer.deref()
-    while (linkedList) {
-      const struct = linkedList.getViewOfValue()
-      const keyHash = struct.getByIndex(InnerTupleKey.Hash)
-      if (hash === keyHash.get()) {
-        const next = linkedList.getNext()
-        if (previous instanceof OwnershipPointerView) {
-          previous.set(next)
-        } else {
-          previous.setNext(next)
-        }
-        linkedList.setNext(null)
-        linkedList.free(allocator)
-        this.decrementSize()
-        return
-      } else {
-        previous = linkedList
-        linkedList = linkedList.derefNext()
-      }
+    const hash = this.getItemHash(key)
+    if (buckets.deleteItem(allocator, hash)) {
+      this.decrementSize()
     }
   }
 
+  private getItemHash(key: IHash): number {
+    const hasher = new Hasher()
+    key.hash(hasher)
+    const hash = hasher.finish()
+    return hash
+  }
+
   private resizeBucketsWhenOverloaded(allocator: IAllocator, size: number): void {
-    if (this.isOverloaded(size, this._capacity, this.loadFactor)) {
-      let newCapacity = this._capacity * this.growthFactor
+    const oldCapacity = this.capacity
+    if (this.isOverloaded(size, oldCapacity, this.loadFactor)) {
+      let newCapacity = oldCapacity * this.growthFactor
       while (this.isOverloaded(size, newCapacity, this.loadFactor)) {
         newCapacity *= this.growthFactor
       }
@@ -457,65 +286,33 @@ implements IReference
   }
 
   private resizeBuckets(allocator: IAllocator, newCapacity: number): void {
-    if (this._capacity !== newCapacity) {
-      const oldBuckets = this.derefBuckets()
-      assert(oldBuckets, 'buckets does not exist')
+    const oldBuckets = this.derefBuckets()
+    assert(oldBuckets, 'buckets does not exist')
 
+    if (oldBuckets.capacity !== newCapacity) {
       const {
-        InternalBucketsView
-      , InternalBucketsOwnershipPointerView
-      } = createInternalViews(this.keyViewConstructor, this.valueViewConstructor, newCapacity)
+        InternalBucketsOwnershipPointerView
+      } = createInternalViews(
+        this.keyViewConstructor
+      , this.valueViewConstructor
+      , newCapacity
+      )
 
-      const newBucketsByteOffset = allocator.allocate(InternalBucketsView.byteLength)
-      const newBuckets = new InternalBucketsView(allocator.buffer, newBucketsByteOffset)
+      const newBucketsByteOffset = allocator.allocate(
+        HashBucketsView.getByteLength(this.InternalTupleView, newCapacity)
+      )
+      const newBuckets = new HashBucketsView(
+        allocator.buffer
+      , newBucketsByteOffset
+      , this.InternalTupleView
+      , newCapacity
+      )
       // 初始化buckets中的每一个指针, 防止指向错误的位置.
       for (let i = 0; i < newCapacity; i++) {
         newBuckets.setByIndex(i, null)
       }
 
-      for (let i = 0; i < oldBuckets.length; i++) {
-        const oldPointer = oldBuckets.getViewByIndex(i)
-
-        let oldLinkedList = oldPointer.deref()
-        if (oldLinkedList) {
-          oldPointer.set(null)
-        }
-
-        while (oldLinkedList) {
-          const [keyHash, key, value] = oldLinkedList.getValue()
-          const newIndex = keyHashToIndex(newCapacity, keyHash.get())
-
-          const newPointer = newBuckets.getViewByIndex(newIndex)
-          let newLinkedList = newPointer.deref()
-          if (newLinkedList) {
-            while (true) {
-              const struct = newLinkedList.getViewOfValue()
-              const newKeyHash = struct.getByIndex(InnerTupleKey.Hash)
-              if (keyHash === newKeyHash) {
-                struct.setByIndex(InnerTupleKey.Key, key)
-                struct.setByIndex(InnerTupleKey.Value, value)
-                break
-              } else {
-                const nextNewLinkedList = newLinkedList.derefNext()
-                if (nextNewLinkedList) {
-                  newLinkedList = nextNewLinkedList
-                } else {
-                  const nextOldLinkedList = oldLinkedList.derefNext()
-                  oldLinkedList.setNext(null)
-                  newLinkedList.setNext(uint32(oldLinkedList.byteOffset))
-                  oldLinkedList = nextOldLinkedList
-                  break
-                }
-              }
-            }
-          } else {
-            const nextOldLinkedList = oldLinkedList.derefNext()
-            oldLinkedList.setNext(null)
-            newPointer.set(uint32(oldLinkedList.byteOffset))
-            oldLinkedList = nextOldLinkedList
-          }
-        }
-      }
+      oldBuckets.transfer(newBuckets)
 
       const newTupleView = new TupleView(
         allocator.buffer
@@ -528,7 +325,6 @@ implements IReference
       newTupleView.setByIndex(OuterTupleKey.Buckets, uint32(newBucketsByteOffset))
 
       this._view = newTupleView
-      this._capacity = newCapacity
       oldBuckets.free(allocator)
     }
   }
@@ -548,28 +344,4 @@ implements IReference
     sizeView.set(uint32(newSize))
     return newSize
   }
-
-  private getKeyHash(key: IHash): number {
-    const hasher = new Hasher()
-    key.hash(hasher)
-    const hash = hasher.finish()
-    return hash
-  }
-
-  private createLinkedList(
-    allocator: IAllocator
-  , hash: number
-  , key: UnpackedReadableWritable<KeyView>
-  , value: UnpackedReadableWritable<ValueView>
-  ): IInternalLinkedListView<KeyView, ValueView> {
-    const byteOffset = allocator.allocate(this.InternalLinkedListView.byteLength)
-    const linkedList = new this.InternalLinkedListView(allocator.buffer, byteOffset)
-    linkedList.set([null, [uint32(hash), key, value]])
-    return linkedList
-  }
-}
-
-function keyHashToIndex(capacity: number, hash: number): number {
-  const index = hash % capacity
-  return index
 }

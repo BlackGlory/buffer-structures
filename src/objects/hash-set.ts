@@ -1,7 +1,8 @@
 import { IHash, IReadableWritable, IClone, IDestroy } from '@src/traits'
 import { IAllocator } from '@src/interfaces'
 import { UnpackedReadableWritable } from '@src/types'
-import { HashSetView, createInternalViews, ViewConstructor } from '@views/hash-set-view'
+import { HashSetView, ViewConstructor } from '@views/hash-set-view'
+import { HashBucketsView } from '@views/hash-buckets-view'
 import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
@@ -109,10 +110,15 @@ implements IClone<HashSet<View>>
         this.viewConstructor = viewConstructor
         this._counter = new ReferenceCounter()
 
-        const { InternalBucketsView } = createInternalViews(viewConstructor, capacity)
-
-        const bucketsByteOffset = allocator.allocate(InternalBucketsView.byteLength)
-        const bucketsView = new InternalBucketsView(allocator.buffer, bucketsByteOffset)
+        const bucketsByteOffset = allocator.allocate(
+          HashBucketsView.getByteLength(viewConstructor, capacity)
+        )
+        const bucketsView = new HashBucketsView(
+          allocator.buffer
+        , bucketsByteOffset
+        , viewConstructor
+        , capacity
+        )
         // 初始化buckets中的每一个指针, 防止指向错误的位置.
         for (let i = 0; i < capacity; i++) {
           bucketsView.setByIndex(i, null)

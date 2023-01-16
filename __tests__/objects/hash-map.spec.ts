@@ -37,7 +37,7 @@ describe('HashMap', () => {
       obj.set(uint8(1), uint8(10))
 
       expect(obj._view.derefBuckets()).toStrictEqual(bucketsByteOffset)
-      expect(obj._view.derefBuckets()!.length).toBe(1)
+      expect(obj._view.derefBuckets()!.capacity).toBe(1)
       expect(obj.capacity).toBe(1)
       expect(obj.get(uint8(1))!.get()).toStrictEqual(uint8(10))
     })
@@ -58,7 +58,7 @@ describe('HashMap', () => {
       obj.set(uint8(1), uint8(10))
 
       expect(obj._view.derefBuckets()!.byteOffset).not.toBe(bucketsByteOffset)
-      expect(obj._view.derefBuckets()!.length).toBe(3)
+      expect(obj._view.derefBuckets()!.capacity).toBe(3)
       expect(obj.capacity).toBe(3)
       expect(obj.get(uint8(1))!.get()).toStrictEqual(uint8(10))
     })
@@ -94,17 +94,14 @@ describe('HashMap', () => {
 
     describe('reference counted', () => {
       test('does not call allocator.free()', () => {
-        const allocator = {
-          buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
-        } satisfies IAllocator
+        const allocator = new Allocator(new ArrayBuffer(100))
+        const free = jest.spyOn(allocator, 'free')
         const obj1 = HashMap.create(allocator, Uint8View, Uint8View)
         const obj2 = obj1.clone()
 
         obj1.destroy()
 
-        expect(allocator.free).not.toBeCalled()
+        expect(free).not.toBeCalled()
       })
 
       test('calls allocator.free()', () => {

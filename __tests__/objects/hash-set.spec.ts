@@ -37,7 +37,7 @@ describe('HashSet', () => {
       obj.add(uint8(10))
 
       expect(obj._view.derefBuckets()).toStrictEqual(bucketsByteOffsetBeforeResizing)
-      expect(obj._view.derefBuckets()!.length).toBe(1)
+      expect(obj._view.derefBuckets()!.capacity).toBe(1)
       expect(obj.capacity).toBe(1)
       expect(obj.has(uint8(10))).toBe(true)
     })
@@ -55,7 +55,7 @@ describe('HashSet', () => {
       expect(
         obj._view.derefBuckets()!.byteOffset
       ).not.toBe(bucketsByteOffsetBeforeResizing)
-      expect(obj._view.derefBuckets()!.length).toBe(3)
+      expect(obj._view.derefBuckets()!.capacity).toBe(3)
       expect(obj.capacity).toBe(3)
       expect(obj.has(uint8(10))).toBe(true)
     })
@@ -91,17 +91,14 @@ describe('HashSet', () => {
 
     describe('reference counted', () => {
       test('does not call allocator.free()', () => {
-        const allocator = {
-          buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
-        } satisfies IAllocator
+        const allocator = new Allocator(new ArrayBuffer(100))
+        const free = jest.spyOn(allocator, 'free')
         const obj1 = HashSet.create(allocator, Uint8View)
         const obj2 = obj1.clone()
 
         obj1.destroy()
 
-        expect(allocator.free).not.toBeCalled()
+        expect(free).not.toBeCalled()
       })
 
       test('calls allocator.free()', () => {

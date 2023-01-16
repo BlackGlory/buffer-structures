@@ -1,9 +1,10 @@
 import { IHash, IReference, IReadableWritable, IFree, IOwnershipPointer } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
-import { isntNull } from '@blackglory/prelude'
+import { assert, isntNull } from '@blackglory/prelude'
 import { BaseView } from '@views/base-view'
 import { NULL } from '@src/null'
 import { uint32, Uint32Literal } from '@literals/uint32-literal'
+import { isHashable } from './utils'
 
 export type ViewConstructor<View extends BaseView> = new (
   buffer: ArrayBufferLike
@@ -14,7 +15,7 @@ export type ViewConstructor<View extends BaseView> = new (
  * OwnershipPointerView与PointerView的区别:
  * 除了语义上的区别以外, 调用OwnershipPointer的free方法调用还会一并销毁它指向的数据.
  */
-export class OwnershipPointerView<View extends BaseView & IHash & IFree>
+export class OwnershipPointerView<View extends BaseView & IFree>
 extends BaseView
 implements IHash
          , IReference
@@ -48,7 +49,9 @@ implements IHash
   hash(hasher: IHasher): void {
     const view = this.deref()
     if (view) {
-      view.hash(hasher)
+      assert(isHashable(view), 'The pointed view does not support IHash')
+
+      return view.hash(hasher)
     } else {
       hasher.write(NULL)
     }

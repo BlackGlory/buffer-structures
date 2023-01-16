@@ -1097,19 +1097,7 @@ type ViewConstructor<View> =
 
 type HashSetStructure<View extends BaseView & IReadableWritable<unknown> & IHash> = [
   size: typeof Uint32View
-, buckets: ViewConstructor<OwnershipPointerView<
-    ArrayView<
-      OwnershipPointerView<
-        LinkedListView<
-          TupleView<[
-            hash: typeof Uint32View
-          , value: ViewConstructor<View>
-          ]>
-        >
-      >
-    , number
-    >
-  >>
+, buckets: ViewConstructor<IInternalBucketsOwnershipPointerView<View>>
 ]
 
 /**
@@ -1140,19 +1128,7 @@ implements IReference
   setSize(value: Uint32Literal): void
   getSize(): number
   setBuckets(value: Uint32Literal): void
-  derefBuckets(): ArrayView<
-    OwnershipPointerView<
-      LinkedListView<
-        TupleView<[
-          hash: typeof Uint32View
-        , value: ViewConstructor<View>
-        ]>
-      >
-    >
-  , number
-  > | null {
-    return this._view.getViewByIndex(OuterTupleKey.Buckets).deref()
-  }
+  derefBuckets(): HashBucketsView<View> | null
 
   itemValues(): IterableIterator<View>
 
@@ -1173,20 +1149,7 @@ type HashMapStructure<
 , ValueView extends BaseView & IReadableWritable<unknown> & IHash
 > = [
   size: typeof Uint32View
-, buckets: ViewConstructor<OwnershipPointerView<
-    ArrayView<
-      OwnershipPointerView<
-        LinkedListView<
-          TupleView<[
-            hash: typeof Uint32View
-          , key: ViewConstructor<KeyView>
-          , value: ViewConstructor<ValueView>
-          ]>
-        >
-      >
-    , number
-    >
-  >>
+, buckets: ViewConstructor<IInternalBucketsOwnershipPointerView<KeyView, ValueView>>
 ]
 
 /**
@@ -1221,18 +1184,7 @@ implements IReference
   setSize(value: Uint32Literal): void
   getSize(): number
   setBuckets(value: Uint32Literal): void
-  derefBuckets(): ArrayView<
-    OwnershipPointerView<
-      LinkedListView<
-        TupleView<[
-          hash: typeof Uint32View
-        , key: ViewConstructor<KeyView>
-        , value: ViewConstructor<ValueView>
-        ]>
-      >
-    >
-  , number
-  > | null
+  derefBuckets(): HashBucketsView<IInternalTupleView<KeyView, ValueView>> | null
 
   itemEntries(): IterableIterator<[KeyView, ValueView]>
   itemKeys(): IterableIterator<KeyView>
@@ -1246,5 +1198,60 @@ implements IReference
   , value: UnpackedReadableWritable<ValueView>
   ): void
   deleteItem(allocator: IAllocator, key: IHash): void
+}
+```
+
+#### HashBucketsView
+```ts
+class HashBucketsView<View extends BaseView & IReadableWritable<unknown> & IHash>
+extends BaseView
+implements IReference
+         , IFree
+         , ISized {
+  static getByteLength<View extends BaseView & IReadableWritable<unknown> & IHash>(
+    viewConstructor: ViewConstructor<View>
+  , capacity: number
+  )
+
+  readonly capacity: number
+
+  constructor(
+    buffer: ArrayBufferLike
+  , byteOffset: number
+  , viewConstructor: ViewConstructor<View>
+  , capacity: number
+  )
+
+  free(allocator: IAllocator): void
+
+  getByIndex(
+    index: number
+  ): UnpackedReadableWritable<IInternalLinkedListOwnershipPointerView<View>>
+  setByIndex(
+    index: number
+  , value: UnpackedReadableWritable<IInternalLinkedListOwnershipPointerView<View>>
+  ): void
+  getViewByIndex(index: number): IInternalLinkedListOwnershipPointerView<View>
+
+  itemValues(): IterableIterator<View>
+
+  hasItem(hash: number): boolean
+  getItem(hash: number): View | undefined
+
+  /**
+   * @returns 是否插入了项目.
+   */
+  addItem(
+    allocator: IAllocator
+  , hash: number
+  , value: UnpackedReadableWritable<View>
+  ): boolean
+
+  /**
+   * @returns 是否删除了项目.
+   */
+  deleteItem(allocator: IAllocator, hash: number): boolean
+
+  transfer(newBuckets: HashBucketsView<View>): void
 }
 ```
