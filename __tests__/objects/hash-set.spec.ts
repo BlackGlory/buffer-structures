@@ -32,12 +32,12 @@ describe('HashSet', () => {
       const capacity = 1
       const loadFactor = 1
       const obj = HashSet.create(allocator, Uint8View, { capacity, loadFactor })
-      const bucketsByteOffsetBeforeResizing = obj._view.getViewOfBuckets()!
+      const bucketsByteOffsetBeforeResizing = obj._view.derefBuckets()!
 
       obj.add(uint8(10))
 
-      expect(obj._view.getViewOfBuckets()).toStrictEqual(bucketsByteOffsetBeforeResizing)
-      expect(obj._view.getViewOfBuckets()!.length).toBe(1)
+      expect(obj._view.derefBuckets()).toStrictEqual(bucketsByteOffsetBeforeResizing)
+      expect(obj._view.derefBuckets()!.length).toBe(1)
       expect(obj.capacity).toBe(1)
       expect(obj.has(uint8(10))).toBe(true)
     })
@@ -48,14 +48,14 @@ describe('HashSet', () => {
       const loadFactor = 0.75
       const growthFactor = 3
       const obj = HashSet.create(allocator, Uint8View, { capacity, loadFactor, growthFactor })
-      const bucketsByteOffsetBeforeResizing = obj._view.getViewOfBuckets()
+      const bucketsByteOffsetBeforeResizing = obj._view.derefBuckets()
 
       obj.add(uint8(10))
 
       expect(
-        obj._view.getViewOfBuckets()!.byteOffset
+        obj._view.derefBuckets()!.byteOffset
       ).not.toBe(bucketsByteOffsetBeforeResizing)
-      expect(obj._view.getViewOfBuckets()!.length).toBe(3)
+      expect(obj._view.derefBuckets()!.length).toBe(3)
       expect(obj.capacity).toBe(3)
       expect(obj.has(uint8(10))).toBe(true)
     })
@@ -66,7 +66,7 @@ describe('HashSet', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
       const obj = HashSet.create(allocator, Uint8View)
-      const buckets = obj._view.getViewOfBuckets()!
+      const buckets = obj._view.derefBuckets()!
 
       obj.destroy()
 
@@ -108,7 +108,7 @@ describe('HashSet', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
         const obj1 = HashSet.create(allocator, Uint8View)
-        const buckets = obj1._view.getViewOfBuckets()!
+        const buckets = obj1._view.derefBuckets()!
         const obj2 = obj1.clone()
 
         obj1.destroy()

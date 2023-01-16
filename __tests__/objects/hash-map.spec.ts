@@ -32,12 +32,12 @@ describe('HashMap', () => {
       const capacity = 1
       const loadFactor = 1
       const obj = HashMap.create(allocator, Uint8View, Uint8View, { capacity, loadFactor })
-      const bucketsByteOffset = obj._view.getViewOfBuckets()
+      const bucketsByteOffset = obj._view.derefBuckets()
 
       obj.set(uint8(1), uint8(10))
 
-      expect(obj._view.getViewOfBuckets()).toStrictEqual(bucketsByteOffset)
-      expect(obj._view.getViewOfBuckets()!.length).toBe(1)
+      expect(obj._view.derefBuckets()).toStrictEqual(bucketsByteOffset)
+      expect(obj._view.derefBuckets()!.length).toBe(1)
       expect(obj.capacity).toBe(1)
       expect(obj.get(uint8(1))!.get()).toStrictEqual(uint8(10))
     })
@@ -53,12 +53,12 @@ describe('HashMap', () => {
       , Uint8View
       , { capacity, loadFactor, growthFactor }
       )
-      const bucketsByteOffset = obj._view.getViewOfBuckets()
+      const bucketsByteOffset = obj._view.derefBuckets()
 
       obj.set(uint8(1), uint8(10))
 
-      expect(obj._view.getViewOfBuckets()!.byteOffset).not.toBe(bucketsByteOffset)
-      expect(obj._view.getViewOfBuckets()!.length).toBe(3)
+      expect(obj._view.derefBuckets()!.byteOffset).not.toBe(bucketsByteOffset)
+      expect(obj._view.derefBuckets()!.length).toBe(3)
       expect(obj.capacity).toBe(3)
       expect(obj.get(uint8(1))!.get()).toStrictEqual(uint8(10))
     })
@@ -69,7 +69,7 @@ describe('HashMap', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const free = jest.spyOn(allocator, 'free')
       const obj = HashMap.create(allocator, Uint8View, Uint8View)
-      const buckets = obj._view.getViewOfBuckets()!
+      const buckets = obj._view.derefBuckets()!
 
       obj.destroy()
 
@@ -111,7 +111,7 @@ describe('HashMap', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
         const free = jest.spyOn(allocator, 'free')
         const obj1 = HashMap.create(allocator, Uint8View, Uint8View)
-        const buckets = obj1._view.getViewOfBuckets()!
+        const buckets = obj1._view.derefBuckets()!
         const obj2 = obj1.clone()
 
         obj1.destroy()

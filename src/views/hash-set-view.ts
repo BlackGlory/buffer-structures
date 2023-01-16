@@ -5,11 +5,11 @@ import { ArrayView } from '@views/array-view'
 import { LinkedListView } from '@views/linked-list-view'
 import { Uint32View } from '@views/uint32-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { TupleView } from '@views/tuple-view'
+import { TupleView, MapStructureToTupleValue } from '@views/tuple-view'
 import { Hasher } from '@src/hasher'
 import { BaseView } from '@views/base-view'
 import { withLazyStatic, lazyStatic } from 'extra-lazy'
-import { uint32 } from '@literals/uint32-literal'
+import { uint32, Uint32Literal } from '@literals/uint32-literal'
 import { assert } from '@blackglory/prelude'
 
 export type ViewConstructor<View> =
@@ -146,6 +146,23 @@ export const createInternalViews = withLazyStatic(<
   }, [structure, capacity])
 })
 
+type HashSetStructure<View extends BaseView & IReadableWritable<unknown> & IHash> = [
+  size: typeof Uint32View
+, buckets: ViewConstructor<OwnershipPointerView<
+    ArrayView<
+      OwnershipPointerView<
+        LinkedListView<
+          TupleView<[
+            hash: typeof Uint32View
+          , value: ViewConstructor<View>
+          ]>
+        >
+      >
+    , number
+    >
+  >>
+]
+
 /**
  * 在向HashSet添加新的项目后, HashSet可能会尝试对内部数组进行扩容, 从而确保当前负载总是低于或等于负载因子.
  * 扩容无法发生在添加项目之前, 因为在添加前无法知道添加项目后的负载情况会增长还是不变.
@@ -154,22 +171,12 @@ export class HashSetView<View extends BaseView & IReadableWritable<unknown> & IH
 extends BaseView
 implements IReference
          , IFree {
-  _view: TupleView<[
-    size: typeof Uint32View
-  , buckets: ViewConstructor<OwnershipPointerView<
-      ArrayView<
-        OwnershipPointerView<
-          LinkedListView<
-            TupleView<[
-              hash: typeof Uint32View
-            , value: ViewConstructor<View>
-            ]>
-          >
-        >
-      , number
-      >
-    >>
-  ]>
+  static byteLength: number = TupleView.getByteLength([
+    Uint32View
+  , OwnershipPointerView
+  ])
+
+  _view: TupleView<HashSetStructure<View>>
 
   private _capacity: number
   readonly loadFactor: number
@@ -202,7 +209,7 @@ implements IReference
     } = createInternalViews(viewConstructor, capacity)
     this.InternalLinkedListView = InternalLinkedListView
 
-    const structView = new TupleView(
+    const rootView = new TupleView(
       buffer
     , byteOffset
     , [
@@ -210,18 +217,34 @@ implements IReference
       , InternalBucketsOwnershipPointerView
       ]
     )
-    this._view = structView
+    this._view = rootView
   }
 
   free(allocator: IAllocator): void {
     this._view.free(allocator)
   }
 
+  set(value: MapStructureToTupleValue<HashSetStructure<View>>): void {
+    this._view.set(value)
+  }
+
+  get(): MapStructureToTupleValue<HashSetStructure<View>> {
+    return this._view.get()
+  }
+
+  setSize(value: Uint32Literal): void {
+    this._view.setByIndex(OuterTupleKey.Size, value)
+  }
+
   getSize(): number {
     return this._view.getByIndex(OuterTupleKey.Size).get()
   }
 
-  getViewOfBuckets(): ArrayView<
+  setBuckets(value: Uint32Literal): void {
+    return this._view.setByIndex(OuterTupleKey.Buckets, value)
+  }
+
+  derefBuckets(): ArrayView<
     OwnershipPointerView<
       LinkedListView<
         TupleView<[
@@ -235,8 +258,8 @@ implements IReference
     return this._view.getViewByIndex(OuterTupleKey.Buckets).deref()
   }
 
-  * values(): IterableIterator<View> {
-    const buckets = this.getViewOfBuckets()
+  * itemValues(): IterableIterator<View> {
+    const buckets = this.derefBuckets()
     assert(buckets, 'buckets does not exist')
 
     for (let i = 0; i < this._capacity; i++) {
@@ -251,8 +274,8 @@ implements IReference
     }
   }
 
-  has(value: IHash): boolean {
-    const buckets = this.getViewOfBuckets()
+  hasItem(value: IHash): boolean {
+    const buckets = this.derefBuckets()
     assert(buckets, 'buckest does not exist')
 
     const hash = this.getValueHash(value)
@@ -273,8 +296,8 @@ implements IReference
     return false
   }
 
-  add(allocator: IAllocator, value: UnpackedReadableWritable<View> & IHash): void {
-    const buckets = this.getViewOfBuckets()
+  addItem(allocator: IAllocator, value: UnpackedReadableWritable<View> & IHash): void {
+    const buckets = this.derefBuckets()
     assert(buckets, 'buckest does not exist')
 
     const hash = this.getValueHash(value)
@@ -297,7 +320,7 @@ implements IReference
             const newLinkedList = this.createLinkedList(allocator, hash, value)
             linkedList.setNext(uint32(newLinkedList.byteOffset))
             const size = this.incrementSize()
-            this.resizeWhenOverloaded(allocator, size)
+            this.resizeBucketsWhenOverloaded(allocator, size)
             return
           }
         }
@@ -306,16 +329,16 @@ implements IReference
       const newLinkedList = this.createLinkedList(allocator, hash, value)
       pointer.set(uint32(newLinkedList.byteOffset))
       const size = this.incrementSize()
-      this.resizeWhenOverloaded(allocator, size)
+      this.resizeBucketsWhenOverloaded(allocator, size)
     }
   }
 
-  delete(allocator: IAllocator, value: IHash): void {
-    const buckets = this.getViewOfBuckets()
+  deleteItem(allocator: IAllocator, value: IHash): void {
+    const buckets = this.derefBuckets()
     assert(buckets, 'buckets does not exist')
 
     const hash = this.getValueHash(value)
-    const index = this.getIndex(hash)
+    const index = this.getItemIndex(hash)
     const pointer = buckets.getViewByIndex(index)
 
     let previous:
@@ -356,14 +379,14 @@ implements IReference
     }
   }
 
-  private resizeWhenOverloaded(allocator: IAllocator, size: number): void {
+  private resizeBucketsWhenOverloaded(allocator: IAllocator, size: number): void {
     if (this.isOverloaded(size, this._capacity, this.loadFactor)) {
       let newCapacity = this._capacity * this.growthFactor
       while (this.isOverloaded(size, newCapacity, this.loadFactor)) {
         newCapacity *= this.growthFactor
       }
 
-      this.resize(allocator, newCapacity)
+      this.resizeBuckets(allocator, newCapacity)
     }
   }
 
@@ -371,9 +394,9 @@ implements IReference
     return size / capacity > loadFactor
   }
 
-  private resize(allocator: IAllocator, newCapacity: number): void {
+  private resizeBuckets(allocator: IAllocator, newCapacity: number): void {
     if (this._capacity !== newCapacity) {
-      const oldBuckets = this.getViewOfBuckets()
+      const oldBuckets = this.derefBuckets()
       assert(oldBuckets, 'buckets does not exist')
 
       const {
@@ -470,7 +493,7 @@ implements IReference
     return hash
   }
 
-  private getIndex(hash: number): number {
+  private getItemIndex(hash: number): number {
     const index = hash % this._capacity
     return index
   }

@@ -1095,6 +1095,23 @@ type ViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
 
+type HashSetStructure<View extends BaseView & IReadableWritable<unknown> & IHash> = [
+  size: typeof Uint32View
+, buckets: ViewConstructor<OwnershipPointerView<
+    ArrayView<
+      OwnershipPointerView<
+        LinkedListView<
+          TupleView<[
+            hash: typeof Uint32View
+          , value: ViewConstructor<View>
+          ]>
+        >
+      >
+    , number
+    >
+  >>
+]
+
 /**
  * 在向HashSet添加新的项目后, HashSet可能会尝试对内部数组进行扩容, 从而确保当前负载总是低于或等于负载因子.
  * 扩容无法发生在添加项目之前, 因为在添加前无法知道添加项目后的负载情况会增长还是不变.
@@ -1118,13 +1135,12 @@ implements IReference
     }
   )
 
-  values(): IterableIterator<View>
-  has(value: IHash): boolean
-  add(allocator: IAllocator, value: UnpackedReadableWritable<View> & IHash): void
-  delete(allocator: IAllocator, value: IHash): void
-
+  set(value: MapStructureToTupleValue<HashSetStructure<View>>): void
+  get(): MapStructureToTupleValue<HashSetStructure<View>>
+  setSize(value: Uint32Literal): void
   getSize(): number
-  getViewOfBuckets(): ArrayView<
+  setBuckets(value: Uint32Literal): void
+  derefBuckets(): ArrayView<
     OwnershipPointerView<
       LinkedListView<
         TupleView<[
@@ -1134,7 +1150,15 @@ implements IReference
       >
     >
   , number
-  > | null
+  > | null {
+    return this._view.getViewByIndex(OuterTupleKey.Buckets).deref()
+  }
+
+  itemValues(): IterableIterator<View>
+
+  hasItem(value: IHash): boolean
+  addItem(allocator: IAllocator, value: UnpackedReadableWritable<View> & IHash): void
+  deleteItem(allocator: IAllocator, value: IHash): void
 }
 ```
 
@@ -1143,6 +1167,27 @@ implements IReference
 type ViewConstructor<View> =
   ISized
 & (new (buffer: ArrayBufferLike, byteOffset: number) => View)
+
+type HashMapStructure<
+  KeyView extends BaseView & IReadableWritable<unknown> & IHash
+, ValueView extends BaseView & IReadableWritable<unknown> & IHash
+> = [
+  size: typeof Uint32View
+, buckets: ViewConstructor<OwnershipPointerView<
+    ArrayView<
+      OwnershipPointerView<
+        LinkedListView<
+          TupleView<[
+            hash: typeof Uint32View
+          , key: ViewConstructor<KeyView>
+          , value: ViewConstructor<ValueView>
+          ]>
+        >
+      >
+    , number
+    >
+  >>
+]
 
 /**
  * 在向HashMap添加新的项目后, HashMap可能会尝试对内部数组进行扩容, 从而确保当前负载总是低于或等于负载因子.
@@ -1171,21 +1216,12 @@ implements IReference
     }
   )
 
-  entries(): IterableIterator<[KeyView, ValueView]>
-  keys(): IterableIterator<KeyView>
-  values(): IterableIterator<ValueView>
-
-  has(key: IHash): boolean
-  get(key: IHash): ValueView | undefined
-  set(
-    allocator: IAllocator
-  , key: IHash & UnpackedReadableWritable<KeyView>
-  , value: UnpackedReadableWritable<ValueView>
-  ): void
-  delete(allocator: IAllocator, key: IHash): void
-
+  set(value: MapStructureToTupleValue<HashMapStructure<KeyView, ValueView>>): void
+  get(): MapStructureToTupleValue<HashMapStructure<KeyView, ValueView>>
+  setSize(value: Uint32Literal): void
   getSize(): number
-  getViewOfBuckets(): ArrayView<
+  setBuckets(value: Uint32Literal): void
+  derefBuckets(): ArrayView<
     OwnershipPointerView<
       LinkedListView<
         TupleView<[
@@ -1197,5 +1233,18 @@ implements IReference
     >
   , number
   > | null
+
+  itemEntries(): IterableIterator<[KeyView, ValueView]>
+  itemKeys(): IterableIterator<KeyView>
+  itemValues(): IterableIterator<ValueView>
+
+  hasItem(key: IHash): boolean
+  getItem(key: IHash): ValueView | undefined
+  setItem(
+    allocator: IAllocator
+  , key: IHash & UnpackedReadableWritable<KeyView>
+  , value: UnpackedReadableWritable<ValueView>
+  ): void
+  deleteItem(allocator: IAllocator, key: IHash): void
 }
 ```

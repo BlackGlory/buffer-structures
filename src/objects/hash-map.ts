@@ -1,9 +1,7 @@
 import { IHash, IReadableWritable, IClone, IDestroy } from '@src/traits'
 import { IAllocator } from '@src/interfaces'
 import { UnpackedReadableWritable } from '@src/types'
-import { Uint32View } from '@views/uint32-view'
 import { HashMapView, createInternalViews, ViewConstructor } from '@views/hash-map-view'
-import { TupleView } from '@views/tuple-view'
 import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
@@ -131,10 +129,11 @@ implements IClone<HashMap<KeyView, ValueView>>
         this.valueViewConstructor = valueViewConstructor
         this._counter = new ReferenceCounter()
 
-        const {
-          InternalBucketsOwnershipPointerView
-        , InternalBucketsView
-        } = createInternalViews(keyViewConstructor, valueViewConstructor, capacity)
+        const { InternalBucketsView } = createInternalViews(
+          keyViewConstructor
+        , valueViewConstructor
+        , capacity
+        )
 
         const bucketsByteOffset = allocator.allocate(InternalBucketsView.byteLength)
         const bucketsView = new InternalBucketsView(allocator.buffer, bucketsByteOffset)
@@ -143,32 +142,19 @@ implements IClone<HashMap<KeyView, ValueView>>
           bucketsView.setByIndex(i, null)
         }
 
-        const rootByteOffset = allocator.allocate(
-          TupleView.getByteLength([
-            Uint32View
-          , InternalBucketsOwnershipPointerView
-          ])
-        )
-        const rootView = new TupleView(
-          allocator.buffer
-        , rootByteOffset
-        , [
-            Uint32View
-          , InternalBucketsOwnershipPointerView
-          ]
-        )
-        rootView.set([
-          uint32(0)
-        , uint32(bucketsByteOffset)
-        ])
-
-        this._view = new HashMapView(
+        const byteOffset = allocator.allocate(HashMapView.byteLength)
+        const view = new HashMapView(
           this.allocator.buffer
-        , rootByteOffset
+        , byteOffset
         , keyViewConstructor
         , valueViewConstructor
         , { loadFactor, capacity, growthFactor }
         )
+        view.set([
+          uint32(0)
+        , uint32(bucketsByteOffset)
+        ])
+        this._view = view
 
         return
       }
@@ -231,31 +217,31 @@ implements IClone<HashMap<KeyView, ValueView>>
   entries(): IterableIterator<[KeyView, ValueView]> {
     this.fsm.assertAllocated()
 
-    return this._view.entries()
+    return this._view.itemEntries()
   }
 
   keys(): IterableIterator<KeyView> {
     this.fsm.assertAllocated()
 
-    return this._view.keys()
+    return this._view.itemKeys()
   }
 
   values(): IterableIterator<ValueView> {
     this.fsm.assertAllocated()
 
-    return this._view.values()
+    return this._view.itemValues()
   }
 
   has(key: IHash): boolean {
     this.fsm.assertAllocated()
 
-    return this._view.has(key)
+    return this._view.hasItem(key)
   }
 
   get(key: IHash): ValueView | undefined {
     this.fsm.assertAllocated()
 
-    return this._view.get(key)
+    return this._view.getItem(key)
   }
 
   set(
@@ -264,12 +250,12 @@ implements IClone<HashMap<KeyView, ValueView>>
   ): void {
     this.fsm.assertAllocated()
 
-    return this._view.set(this.allocator, key, value)
+    return this._view.setItem(this.allocator, key, value)
   }
 
   delete(key: IHash): void {
     this.fsm.assertAllocated()
 
-    return this._view.delete(this.allocator, key)
+    return this._view.deleteItem(this.allocator, key)
   }
 }

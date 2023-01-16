@@ -26,7 +26,7 @@ implements IReference
          , ISized
          , IHash
          , IFree {
-  static getByteLength(structure: NonEmptyArray<ViewConstructor<unknown>>): number {
+  static getByteLength(structure: NonEmptyArray<ISized>): number {
     return structure.reduce((acc, cur) => acc + cur.byteLength, 0)
   }
 

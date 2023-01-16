@@ -1,9 +1,7 @@
 import { IHash, IReadableWritable, IClone, IDestroy } from '@src/traits'
 import { IAllocator } from '@src/interfaces'
 import { UnpackedReadableWritable } from '@src/types'
-import { Uint32View } from '@views/uint32-view'
 import { HashSetView, createInternalViews, ViewConstructor } from '@views/hash-set-view'
-import { TupleView } from '@views/tuple-view'
 import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
 import { BaseObject } from '@objects/base-object'
 import { BaseView } from '@views/base-view'
@@ -111,10 +109,7 @@ implements IClone<HashSet<View>>
         this.viewConstructor = viewConstructor
         this._counter = new ReferenceCounter()
 
-        const {
-          InternalBucketsOwnershipPointerView
-        , InternalBucketsView
-        } = createInternalViews(viewConstructor, capacity)
+        const { InternalBucketsView } = createInternalViews(viewConstructor, capacity)
 
         const bucketsByteOffset = allocator.allocate(InternalBucketsView.byteLength)
         const bucketsView = new InternalBucketsView(allocator.buffer, bucketsByteOffset)
@@ -123,31 +118,18 @@ implements IClone<HashSet<View>>
           bucketsView.setByIndex(i, null)
         }
 
-        const rootByteOffset = allocator.allocate(
-          TupleView.getByteLength([
-            Uint32View
-          , InternalBucketsOwnershipPointerView
-          ])
-        )
-        const rootView = new TupleView(
-          allocator.buffer
-        , rootByteOffset
-        , [
-            Uint32View
-          , InternalBucketsOwnershipPointerView
-          ]
-        )
-        rootView.set([
-          uint32(0)
-        , uint32(bucketsByteOffset)
-        ])
-
-        this._view = new HashSetView(
+        const byteOffset = allocator.allocate(HashSetView.byteLength)
+        const view = new HashSetView(
           this.allocator.buffer
-        , rootByteOffset
+        , byteOffset
         , viewConstructor
         , { loadFactor, capacity, growthFactor }
         )
+        view.set([
+          uint32(0)
+        , uint32(bucketsByteOffset)
+        ])
+        this._view = view
 
         return
       }
@@ -200,24 +182,24 @@ implements IClone<HashSet<View>>
   values(): IterableIterator<View> {
     this.fsm.assertAllocated()
 
-    return this._view.values()
+    return this._view.itemValues()
   }
 
   has(value: IHash): boolean {
     this.fsm.assertAllocated()
 
-    return this._view.has(value)
+    return this._view.hasItem(value)
   }
 
   add(value: UnpackedReadableWritable<View> & IHash): void {
     this.fsm.assertAllocated()
 
-    this._view.add(this.allocator, value)
+    this._view.addItem(this.allocator, value)
   }
 
   delete(value: IHash): void {
     this.fsm.assertAllocated()
 
-    this._view.delete(this.allocator, value)
+    this._view.deleteItem(this.allocator, value)
   }
 }
