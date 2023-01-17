@@ -184,8 +184,8 @@ implements IReference
 
       let linkedList = pointer.deref()
       while (linkedList) {
-        const struct = linkedList.getViewOfValue()
-        yield struct.getViewByIndex(TupleKey.Value)
+        const item = linkedList.getViewOfValue()
+        yield item.getViewByIndex(TupleKey.Value)
         linkedList = linkedList.derefNext()
       }
     }
@@ -197,8 +197,8 @@ implements IReference
 
     let linkedList = pointer.deref()
     while (linkedList) {
-      const struct = linkedList.getViewOfValue()
-      const keyHash = struct.getByIndex(TupleKey.Hash).get()
+      const item = linkedList.getViewOfValue()
+      const keyHash = item.getByIndex(TupleKey.Hash).get()
       if (hash === keyHash) {
         return true
       } else {
@@ -209,20 +209,22 @@ implements IReference
     return false
   }
 
-  getItem(hash: number): View | undefined {
+  getItem(hash: number): View | null {
     const index = keyHashToIndex(this.capacity, hash)
     const pointer = this.view.getViewByIndex(index)
 
     let linkedList = pointer.deref()
     while (linkedList) {
-      const struct = linkedList.getViewOfValue()
-      const keyHash = struct.getByIndex(TupleKey.Hash).get()
+      const item = linkedList.getViewOfValue()
+      const keyHash = item.getByIndex(TupleKey.Hash).get()
       if (hash === keyHash) {
-        return struct.getViewByIndex(TupleKey.Value)
+        return item.getViewByIndex(TupleKey.Value)
       } else {
         linkedList = linkedList.derefNext()
       }
     }
+
+    return linkedList
   }
 
   /**

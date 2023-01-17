@@ -376,7 +376,7 @@ describe('HashMap', () => {
 
       const result = obj.get(key)
 
-      expect(result).toBe(undefined)
+      expect(result).toBe(null)
     })
 
     test('item exists', () => {

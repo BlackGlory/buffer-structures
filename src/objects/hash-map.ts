@@ -292,7 +292,7 @@ implements IClone<HashMap<KeyView, ValueView>>
     return this._view.hasItem(key)
   }
 
-  get(key: IHash): ValueView | undefined {
+  get(key: IHash): ValueView | null {
     this.fsm.assertAllocated()
 
     return this._view.getItem(key)

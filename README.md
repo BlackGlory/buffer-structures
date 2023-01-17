@@ -681,7 +681,7 @@ implements IClone<HashMap<KeyView, ValueView>>
   values(): IterableIterator<ValueView>
 
   has(key: IHash): boolean
-  get(key: IHash): ValueView | undefined
+  get(key: IHash): ValueView | null
   set(
     key: IHash & UnpackedReadableWritable<KeyView>
   , value: UnpackedReadableWritable<ValueView>
@@ -1320,7 +1320,7 @@ implements IReference
   itemValues(): IterableIterator<ValueView>
 
   hasItem(key: IHash): boolean
-  getItem(key: IHash): ValueView | undefined
+  getItem(key: IHash): ValueView | null
   setItem(
     allocator: IAllocator
   , key: IHash & UnpackedReadableWritable<KeyView>
@@ -1365,7 +1365,7 @@ implements IReference
   itemValues(): IterableIterator<View>
 
   hasItem(hash: number): boolean
-  getItem(hash: number): View | undefined
+  getItem(hash: number): View | null
 
   /**
    * @returns 是否插入了项目.

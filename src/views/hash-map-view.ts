@@ -228,13 +228,17 @@ implements IReference
     return buckets.hasItem(hash)
   }
 
-  getItem(key: IHash): ValueView | undefined {
+  getItem(key: IHash): ValueView | null {
     const buckets = this.derefBuckets()
     assert(buckets, 'buckets does not exist')
 
     const hash = this.getItemHash(key)
     const view = buckets.getItem(hash)
-    return view?.getViewByIndex(InnerTupleKey.Value)
+    if (view) {
+      return view.getViewByIndex(InnerTupleKey.Value)
+    } else {
+      return null
+    }
   }
 
   setItem(
