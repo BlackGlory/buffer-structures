@@ -3,7 +3,7 @@ import { FiniteStateMachine } from 'extra-fsm'
 
 export enum ConstructorType {
   Create
-, Clone
+, Reproduce
 }
 
 enum ObjectState {

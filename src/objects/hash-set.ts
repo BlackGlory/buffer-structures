@@ -1,4 +1,4 @@
-import { IHash, IReadableWritable, IClone, IDestroy } from '@src/traits'
+import { IHash, IReadableWritable, IClone, IDestroy, IReference } from '@src/traits'
 import { IAllocator } from '@src/interfaces'
 import { UnpackedReadableWritable } from '@src/types'
 import { HashSetView, ViewConstructor } from '@views/hash-set-view'
@@ -15,25 +15,8 @@ import { uint32 } from '@literals/uint32-literal'
 export class HashSet<View extends BaseView & IReadableWritable<unknown> & IHash>
 extends BaseObject
 implements IClone<HashSet<View>>
-         , IDestroy {
-  _view: HashSetView<View>
-  readonly _counter: ReferenceCounter
-  private fsm = new ObjectStateMachine()
-  private allocator: IAllocator
-  private viewConstructor: ViewConstructor<View>
-
-  get capacity(): number {
-    this.fsm.assertAllocated()
-
-    return this._view.capacity
-  }
-
-  get size(): number {
-    this.fsm.assertAllocated()
-
-    return this._view.getSize()
-  }
-
+         , IDestroy
+         , IReference {
   static create<View extends BaseView & IReadableWritable<unknown> & IHash>(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
@@ -44,6 +27,62 @@ implements IClone<HashSet<View>>
     }
   ): HashSet<View> {
     return new this(ConstructorType.Create, allocator, viewConstructor, options)
+  }
+
+  static from<View extends BaseView & IReadableWritable<unknown> & IHash>(
+    allocator: IAllocator
+  , byteOffset: number
+  , viewConstructor: ViewConstructor<View>
+  , options: {
+      capacity: number
+      loadFactor: number
+      growthFactor: number
+    }
+  ): HashSet<View> {
+    return new this(
+      ConstructorType.Reproduce
+    , allocator
+    , viewConstructor
+    , options
+    , byteOffset
+    , new ReferenceCounter()
+    )
+  }
+
+  _view: HashSetView<View>
+  readonly _counter: ReferenceCounter
+  private fsm = new ObjectStateMachine()
+  private allocator: IAllocator
+  readonly viewConstructor: ViewConstructor<View>
+
+  get byteOffset(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.byteOffset
+  }
+
+  get capacity(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.capacity
+  }
+
+  get loadFactor(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.loadFactor
+  }
+
+  get growthFactor(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.growthFactor
+  }
+
+  get size(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.getSize()
   }
 
   private constructor(
@@ -57,7 +96,7 @@ implements IClone<HashSet<View>>
     }
   )
   private constructor(
-    type: ConstructorType.Clone
+    type: ConstructorType.Reproduce
   , allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , options: {
@@ -80,7 +119,7 @@ implements IClone<HashSet<View>>
       }
     ]
   | [
-      type: ConstructorType.Clone
+      type: ConstructorType.Reproduce
     , allocator: IAllocator
     , valueViewConstructor: ViewConstructor<View>
     , options: {
@@ -139,10 +178,11 @@ implements IClone<HashSet<View>>
 
         return
       }
-      case ConstructorType.Clone: {
+      case ConstructorType.Reproduce: {
         const [, allocator, viewConstructor, options, byteOffset, counter] = args
         this.allocator = allocator
         this.viewConstructor = viewConstructor
+        this._counter = counter
 
         this._view = new HashSetView(
           this.allocator.buffer
@@ -150,9 +190,6 @@ implements IClone<HashSet<View>>
         , viewConstructor
         , options
         )
-
-        counter.increment()
-        this._counter = counter
 
         return
       }
@@ -171,8 +208,10 @@ implements IClone<HashSet<View>>
   clone(): HashSet<View> {
     this.fsm.assertAllocated()
 
+    this._counter.increment()
+
     return new HashSet(
-      ConstructorType.Clone
+      ConstructorType.Reproduce
     , this.allocator
     , this.viewConstructor
     , {

@@ -1,4 +1,4 @@
-import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { Int8View } from '@views/int8-view'
 import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
@@ -11,14 +11,30 @@ implements ICopy<Int8>
          , IClone<Int8>
          , IReadableWritable<Int8Literal>
          , IHash
-         , IDestroy {
+         , IDestroy
+         , IReference {
+  static create(allocator: IAllocator, value: Int8Literal): Int8 {
+    return new this(ConstructorType.Create, allocator, value)
+  }
+
+  static from(allocator: IAllocator, byteOffset: number): Int8 {
+    return new this(
+      ConstructorType.Reproduce
+    , allocator
+    , byteOffset
+    , new ReferenceCounter()
+    )
+  }
+
   readonly _view: Int8View
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
-  static create(allocator: IAllocator, value: Int8Literal): Int8 {
-    return new this(ConstructorType.Create, allocator, value)
+  get byteOffset(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.byteOffset
   }
 
   private constructor(
@@ -27,14 +43,14 @@ implements ICopy<Int8>
   , value: Int8Literal
   )
   private constructor(
-    type: ConstructorType.Clone
+    type: ConstructorType.Reproduce
   , allocator: IAllocator
   , byteOffset: number
   , counter: ReferenceCounter
   )
   private constructor(...args:
   | [type: ConstructorType.Create, allocator: IAllocator, value: Int8Literal]
-  | [type: ConstructorType.Clone, allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
+  | [type: ConstructorType.Reproduce, allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
   ) {
     super()
 
@@ -52,15 +68,13 @@ implements ICopy<Int8>
 
         return
       }
-      case ConstructorType.Clone: {
+      case ConstructorType.Reproduce: {
         const [, allocator, byteOffset, counter] = args
         this.allocator = allocator
+        this._counter = counter
 
         const view = new Int8View(allocator.buffer, byteOffset)
         this._view = view
-
-        counter.increment()
-        this._counter = counter
 
         return
       }
@@ -68,6 +82,8 @@ implements ICopy<Int8>
   }
 
   hash(hasher: IHasher): void {
+    this.fsm.assertAllocated()
+
     this._view.hash(hasher)
   }
 
@@ -83,8 +99,10 @@ implements ICopy<Int8>
   clone(): Int8 {
     this.fsm.assertAllocated()
 
+    this._counter.increment()
+
     return new Int8(
-      ConstructorType.Clone
+      ConstructorType.Reproduce
     , this.allocator
     , this._view.byteOffset
     , this._counter

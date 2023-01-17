@@ -1,4 +1,4 @@
-import { ICopy, IClone, IDestroy, IReadable, IHash } from '@src/traits'
+import { ICopy, IClone, IDestroy, IReadable, IHash, IReference } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { StringView } from '@views/string-view'
 import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
@@ -12,14 +12,30 @@ implements ICopy<String>
          , IClone<String>
          , IReadable<StringLiteral>
          , IHash
-         , IDestroy {
+         , IDestroy
+         , IReference {
+  static create(allocator: IAllocator, value: StringLiteral): String {
+    return new this(ConstructorType.Create, allocator, value)
+  }
+
+  static from(allocator: IAllocator, byteOffset: number): String {
+    return new this(
+      ConstructorType.Reproduce
+    , allocator
+    , byteOffset
+    , new ReferenceCounter()
+    )
+  }
+
   readonly _view: StringView
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
-  static create(allocator: IAllocator, value: StringLiteral): String {
-    return new this(ConstructorType.Create, allocator, value)
+  get byteOffset(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.byteOffset
   }
 
   private constructor(
@@ -28,14 +44,19 @@ implements ICopy<String>
   , value: StringLiteral
   )
   private constructor(
-    type: ConstructorType.Clone
+    type: ConstructorType.Reproduce
   , allocator: IAllocator
   , byteOffset: number
   , counter: ReferenceCounter
   )
   private constructor(...args:
   | [type: ConstructorType.Create, allocator: IAllocator, value: StringLiteral]
-  | [type: ConstructorType.Clone, allocator: IAllocator, byteOffset: number, counter: ReferenceCounter]
+  | [
+      type: ConstructorType.Reproduce
+    , allocator: IAllocator
+    , byteOffset: number
+    , counter: ReferenceCounter
+    ]
   ) {
     super()
 
@@ -53,15 +74,13 @@ implements ICopy<String>
 
         return
       }
-      case ConstructorType.Clone: {
+      case ConstructorType.Reproduce: {
         const [, allocator, byteOffset, counter] = args
         this.allocator = allocator
+        this._counter = counter
 
         const view = new StringView(allocator.buffer, byteOffset)
         this._view = view
-
-        counter.increment()
-        this._counter = counter
 
         return
       }
@@ -69,6 +88,8 @@ implements ICopy<String>
   }
 
   hash(hasher: IHasher): void {
+    this.fsm.assertAllocated()
+
     this._view.hash(hasher)
   }
 
@@ -84,8 +105,10 @@ implements ICopy<String>
   clone(): String {
     this.fsm.assertAllocated()
 
+    this._counter.increment()
+
     return new String(
-      ConstructorType.Clone
+      ConstructorType.Reproduce
     , this.allocator
     , this._view.byteOffset
     , this._counter

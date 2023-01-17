@@ -1,4 +1,4 @@
-import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { StructView, ViewConstructor, MapStructureToValue } from '@views/struct-view'
 import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
@@ -16,13 +16,8 @@ implements ICopy<Struct<Structure>>
          , IClone<Struct<Structure>>
          , IReadableWritable<MapStructureToValue<Structure>>
          , IHash
-         , IDestroy {
-  readonly _view: StructView<Structure>
-  readonly _counter: ReferenceCounter
-  private fsm = new ObjectStateMachine()
-  private allocator: IAllocator
-  private structure: Structure
-
+         , IDestroy
+         , IReference {
   static create<
     Structure extends Record<
       string
@@ -36,6 +31,37 @@ implements ICopy<Struct<Structure>>
     return new this(ConstructorType.Create, allocator, structure, value)
   }
 
+  static from<
+    Structure extends Record<
+      string
+    , ViewConstructor<IReadableWritable<unknown> & IHash>
+    >
+  >(
+    allocator: IAllocator
+  , byteOffset: number
+  , structure: Structure
+  ): Struct<Structure> {
+    return new this(
+      ConstructorType.Reproduce
+    , allocator
+    , structure
+    , byteOffset
+    , new ReferenceCounter()
+    )
+  }
+
+  readonly _view: StructView<Structure>
+  readonly _counter: ReferenceCounter
+  private fsm = new ObjectStateMachine()
+  private allocator: IAllocator
+  readonly structure: Structure
+
+  get byteOffset(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.byteOffset
+  }
+
   private constructor(
     type: ConstructorType.Create
   , allocator: IAllocator
@@ -43,7 +69,7 @@ implements ICopy<Struct<Structure>>
   , value: MapStructureToValue<Structure>
   )
   private constructor(
-    type: ConstructorType.Clone
+    type: ConstructorType.Reproduce
   , allocator: IAllocator
   , structure: Structure
   , byteOffset: number
@@ -57,7 +83,7 @@ implements ICopy<Struct<Structure>>
     , value: MapStructureToValue<Structure>
     ]
   | [
-      type: ConstructorType.Clone
+      type: ConstructorType.Reproduce
     , allocator: IAllocator
     , structure: Structure
     , byteOffset: number
@@ -81,16 +107,14 @@ implements ICopy<Struct<Structure>>
 
         return
       }
-      case ConstructorType.Clone: {
+      case ConstructorType.Reproduce: {
         const [, allocator, structure, byteOffset, counter] = args
         this.allocator = allocator
         this.structure = structure
+        this._counter = counter
 
         const view = new StructView<Structure>(allocator.buffer, byteOffset, structure)
         this._view = view
-
-        counter.increment()
-        this._counter = counter
 
         return
       }
@@ -98,6 +122,8 @@ implements ICopy<Struct<Structure>>
   }
 
   hash(hasher: IHasher): void {
+    this.fsm.assertAllocated()
+
     this._view.hash(hasher)
   }
 
@@ -113,8 +139,10 @@ implements ICopy<Struct<Structure>>
   clone(): Struct<Structure> {
     this.fsm.assertAllocated()
 
+    this._counter.increment()
+
     return new Struct(
-      ConstructorType.Clone
+      ConstructorType.Reproduce
     , this.allocator
     , this.structure
     , this._view.byteOffset
@@ -146,6 +174,8 @@ implements ICopy<Struct<Structure>>
   }
 
   getByKey<U extends string & keyof Structure>(key: U): MapStructureToValue<Structure>[U] {
+    this.fsm.assertAllocated()
+
     return this._view.getByKey(key)
   }
 
@@ -153,12 +183,16 @@ implements ICopy<Struct<Structure>>
     key: U
   , value: MapStructureToValue<Structure>[U]
   ): void {
+    this.fsm.assertAllocated()
+
     this._view.setByKey(key, value)
   }
 
   getViewByKey<U extends string & keyof Structure>(
     key: U
   ): ReturnTypeOfConstructor<Structure[U]> {
+    this.fsm.assertAllocated()
+
     return this._view.getViewByKey(key)
   }
 }

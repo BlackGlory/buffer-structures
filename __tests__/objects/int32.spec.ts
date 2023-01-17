@@ -20,6 +20,28 @@ describe('Int32', () => {
     expect(allocate).toBeCalledWith(Int32View.byteLength)
   })
 
+  test('from', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = Int32.create(allocator, int32(1))
+    const allocate = jest.spyOn(allocator, 'allocate')
+
+    const result = Int32.from(allocator, obj.byteOffset)
+
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(result.get()).toStrictEqual(int32(1))
+    expect(obj._counter._count).toBe(1)
+    expect(result._counter._count).toBe(1)
+    expect(allocate).not.toBeCalled()
+  })
+
+  test('byteOffset', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+
+    const result = Int32.create(allocator, int32(1))
+
+    expect(result.byteOffset).toBe(result._view.byteOffset)
+  })
+
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))

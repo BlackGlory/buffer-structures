@@ -1,4 +1,4 @@
-import { IHash, IFree, IClone, IDestroy } from '@src/traits'
+import { IHash, IFree, IClone, IDestroy, IReference } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { ViewConstructor } from '@views/pointer-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
@@ -12,19 +12,40 @@ export class OwnershipPointer<View extends BaseView & IHash & IFree>
 extends BaseObject
 implements IClone<OwnershipPointer<View>>
          , IHash
-         , IDestroy {
-  readonly _view: OwnershipPointerView<View>
-  readonly _counter: ReferenceCounter
-  private fsm = new ObjectStateMachine()
-  private allocator: IAllocator
-  private viewConstructor: ViewConstructor<View>
-
+         , IDestroy
+         , IReference {
   static create<View extends BaseView & IHash & IFree>(
     allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , valueByteOffset: number
   ): OwnershipPointer<View> {
     return new this(ConstructorType.Create, allocator, viewConstructor, valueByteOffset)
+  }
+
+  static from<View extends BaseView & IHash & IFree>(
+    allocator: IAllocator
+  , byteOffset: number
+  , viewConstructor: ViewConstructor<View>
+  ): OwnershipPointer<View> {
+    return new this(
+      ConstructorType.Reproduce
+    , allocator
+    , viewConstructor
+    , byteOffset
+    , new ReferenceCounter()
+    )
+  }
+
+  readonly _view: OwnershipPointerView<View>
+  readonly _counter: ReferenceCounter
+  private fsm = new ObjectStateMachine()
+  private allocator: IAllocator
+  readonly viewConstructor: ViewConstructor<View>
+
+  get byteOffset(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.byteOffset
   }
 
   private constructor(
@@ -34,7 +55,7 @@ implements IClone<OwnershipPointer<View>>
   , valueByteOffset: number
   )
   private constructor(
-    type: ConstructorType.Clone
+    type: ConstructorType.Reproduce
   , allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , byteOffset: number
@@ -48,7 +69,7 @@ implements IClone<OwnershipPointer<View>>
     , valueByteOffset: number
     ]
   | [
-      type: ConstructorType.Clone
+      type: ConstructorType.Reproduce
     , allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
     , byteOffset: number
@@ -76,16 +97,14 @@ implements IClone<OwnershipPointer<View>>
 
         return
       }
-      case ConstructorType.Clone: {
+      case ConstructorType.Reproduce: {
         const [, allocator, viewConstructor, byteOffset, counter] = args
         this.allocator = allocator
         this.viewConstructor = viewConstructor
+        this._counter = counter
 
         const view = new OwnershipPointerView(allocator.buffer, byteOffset, viewConstructor)
         this._view = view
-
-        counter.increment()
-        this._counter = counter
 
         return
       }
@@ -93,6 +112,8 @@ implements IClone<OwnershipPointer<View>>
   }
 
   hash(hasher: IHasher): void {
+    this.fsm.assertAllocated()
+
     const view = this._view.deref()
     if (view) {
       view.hash(hasher)
@@ -104,8 +125,10 @@ implements IClone<OwnershipPointer<View>>
   clone(): OwnershipPointer<View> {
     this.fsm.assertAllocated()
 
+    this._counter.increment()
+
     return new OwnershipPointer(
-      ConstructorType.Clone
+      ConstructorType.Reproduce
     , this.allocator
     , this.viewConstructor
     , this._view.byteOffset

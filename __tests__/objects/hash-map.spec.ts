@@ -2,6 +2,7 @@ import { toArray } from '@blackglory/prelude'
 import { HashMap } from '@objects/hash-map'
 import { IAllocator } from '@src/interfaces'
 import { Uint8View } from '@views/uint8-view'
+import { Uint16View } from '@views/uint16-view'
 import { Uint32View } from '@views/uint32-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { Allocator } from '@src/allocator'
@@ -24,6 +25,84 @@ describe('HashMap', () => {
       2
     , Uint32View.byteLength + OwnershipPointerView.byteLength
     )
+  })
+
+  test('from', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashMap.create(allocator, Uint8View, Uint8View, { capacity })
+    const allocate = jest.spyOn(allocator, 'allocate')
+
+    const result = HashMap.from(allocator, obj.byteOffset, Uint8View, Uint8View, {
+      capacity: obj.capacity
+    , growthFactor: obj.growthFactor
+    , loadFactor: obj.loadFactor
+    })
+
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(obj._counter._count).toBe(1)
+    expect(result._counter._count).toBe(1)
+    expect(allocate).not.toBeCalled()
+  })
+
+  test('byteOffset', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashMap.create(allocator, Uint8View, Uint8View, { capacity })
+
+    const result = obj.byteOffset
+
+    expect(result).toBe(obj._view.byteOffset)
+  })
+
+  test('capacity', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashMap.create(allocator, Uint8View, Uint8View, { capacity })
+
+    const result = obj.capacity
+
+    expect(result).toBe(obj._view.capacity)
+  })
+
+  test('loadFactor', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashMap.create(allocator, Uint8View, Uint8View, { capacity })
+
+    const result = obj.loadFactor
+
+    expect(result).toBe(obj._view.loadFactor)
+  })
+
+  test('growthFactor', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashMap.create(allocator, Uint8View, Uint8View, { capacity })
+
+    const result = obj.growthFactor
+
+    expect(result).toBe(obj._view.growthFactor)
+  })
+
+  test('keyViewConstructor', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashMap.create(allocator, Uint8View, Uint16View, { capacity })
+
+    const result = obj.keyViewConstructor
+
+    expect(result).toBe(Uint8View)
+  })
+
+  test('valueViewConstructor', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashMap.create(allocator, Uint8View, Uint16View, { capacity })
+
+    const result = obj.valueViewConstructor
+
+    expect(result).toBe(Uint16View)
   })
 
   describe('resize', () => {

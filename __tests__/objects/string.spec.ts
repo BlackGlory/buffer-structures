@@ -19,6 +19,29 @@ describe('String', () => {
     expect(allocate).toBeCalledWith(StringView.getByteLength('foo'))
   })
 
+  test('from', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = String.create(allocator, string('foo'))
+    const allocate = jest.spyOn(allocator, 'allocate')
+
+    const result = String.from(allocator, obj.byteOffset)
+
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(result.get()).toStrictEqual(string('foo'))
+    expect(obj._counter._count).toBe(1)
+    expect(result._counter._count).toBe(1)
+    expect(allocate).not.toBeCalled()
+  })
+
+  test('byteOffset', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = String.create(allocator, string('foo'))
+
+    const result = obj.byteOffset
+
+    expect(result).toBe(obj._view.byteOffset)
+  })
+
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = {

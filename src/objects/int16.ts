@@ -1,4 +1,4 @@
-import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { Int16View } from '@views/int16-view'
 import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
@@ -11,14 +11,30 @@ implements ICopy<Int16>
          , IClone<Int16>
          , IReadableWritable<Int16Literal>
          , IHash
-         , IDestroy {
+         , IDestroy
+         , IReference {
+  static create(allocator: IAllocator, value: Int16Literal): Int16 {
+    return new this(ConstructorType.Create, allocator, value)
+  }
+
+  static from(allocator: IAllocator, byteOffset: number): Int16 {
+    return new this(
+      ConstructorType.Reproduce
+    , allocator
+    , byteOffset
+    , new ReferenceCounter()
+    )
+  }
+
   readonly _view: Int16View
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
-  static create(allocator: IAllocator, value: Int16Literal): Int16 {
-    return new this(ConstructorType.Create, allocator, value)
+  get byteOffset(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.byteOffset
   }
 
   private constructor(
@@ -27,7 +43,7 @@ implements ICopy<Int16>
   , value: Int16Literal
   )
   private constructor(
-    type: ConstructorType.Clone
+    type: ConstructorType.Reproduce
   , allocator: IAllocator
   , byteOffset: number
   , counter: ReferenceCounter
@@ -39,7 +55,7 @@ implements ICopy<Int16>
     , value: Int16Literal
     ]
   | [
-      type: ConstructorType.Clone
+      type: ConstructorType.Reproduce
     , allocator: IAllocator
     , byteOffset: number
     , counter: ReferenceCounter
@@ -61,15 +77,13 @@ implements ICopy<Int16>
 
         return
       }
-      case ConstructorType.Clone: {
+      case ConstructorType.Reproduce: {
         const [, allocator, byteOffset, counter] = args
         this.allocator = allocator
+        this._counter = counter
 
         const view = new Int16View(allocator.buffer, byteOffset)
         this._view = view
-
-        counter.increment()
-        this._counter = counter
 
         return
       }
@@ -77,6 +91,8 @@ implements ICopy<Int16>
   }
 
   hash(hasher: IHasher): void {
+    this.fsm.assertAllocated()
+
     this._view.hash(hasher)
   }
 
@@ -92,8 +108,10 @@ implements ICopy<Int16>
   clone(): Int16 {
     this.fsm.assertAllocated()
 
+    this._counter.increment()
+
     return new Int16(
-      ConstructorType.Clone
+      ConstructorType.Reproduce
     , this.allocator
     , this._view.byteOffset
     , this._counter

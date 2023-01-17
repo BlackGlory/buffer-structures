@@ -15,11 +15,44 @@ describe('OwnershipPointer', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const allocate = jest.spyOn(allocator, 'allocate')
 
-    const result = OwnershipPointer.create(allocator, Uint8View, 1)
+    const result = OwnershipPointer.create(allocator, Uint8View, 10)
 
     expect(result).toBeInstanceOf(BaseObject)
+    expect(result._view.get()!.get()).toBe(10)
     expect(allocate).toBeCalledTimes(1)
     expect(allocate).toBeCalledWith(OwnershipPointerView.byteLength)
+  })
+
+  test('from', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = OwnershipPointer.create(allocator, Uint8View, 10)
+    const allocate = jest.spyOn(allocator, 'allocate')
+
+    const result = OwnershipPointer.from(allocator, obj.byteOffset, Uint8View)
+
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(result._view.get()!.get()).toBe(10)
+    expect(obj._counter._count).toBe(1)
+    expect(result._counter._count).toBe(1)
+    expect(allocate).not.toBeCalled()
+  })
+
+  test('byteOffset', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = OwnershipPointer.create(allocator, Uint8View, 1)
+
+    const result = obj.byteOffset
+
+    expect(result).toBe(obj._view.byteOffset)
+  })
+
+  test('viewConstructor', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = OwnershipPointer.create(allocator, Uint8View, 1)
+
+    const result = obj.viewConstructor
+
+    expect(result).toBe(Uint8View)
   })
 
   describe('destory', () => {

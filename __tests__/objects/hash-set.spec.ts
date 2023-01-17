@@ -26,6 +26,74 @@ describe('HashSet', () => {
     )
   })
 
+  test('from', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashSet.create(allocator, Uint8View, { capacity })
+    const allocate = jest.spyOn(allocator, 'allocate')
+
+    const result = HashSet.from(allocator, obj.byteOffset, Uint8View, {
+      capacity: obj.capacity
+    , growthFactor: obj.growthFactor
+    , loadFactor: obj.loadFactor
+    })
+
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(obj._counter._count).toBe(1)
+    expect(result._counter._count).toBe(1)
+    expect(allocate).not.toBeCalled()
+  })
+
+  test('byteOffset', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashSet.create(allocator, Uint8View, { capacity })
+
+    const result = obj.byteOffset
+
+    expect(result).toBe(obj._view.byteOffset)
+  })
+
+  test('capacity', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashSet.create(allocator, Uint8View, { capacity })
+
+    const result = obj.capacity
+
+    expect(result).toBe(obj._view.capacity)
+  })
+
+  test('loadFactor', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashSet.create(allocator, Uint8View, { capacity })
+
+    const result = obj.loadFactor
+
+    expect(result).toBe(obj._view.loadFactor)
+  })
+
+  test('growthFactor', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashSet.create(allocator, Uint8View, { capacity })
+
+    const result = obj.growthFactor
+
+    expect(result).toBe(obj._view.growthFactor)
+  })
+
+  test('viewConstructor', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const capacity = 10
+    const obj = HashSet.create(allocator, Uint8View, { capacity })
+
+    const result = obj.viewConstructor
+
+    expect(result).toBe(Uint8View)
+  })
+
   describe('resize', () => {
     test('(size / capacity) <= load factor', () => {
       const allocator = new Allocator(new ArrayBuffer(100))

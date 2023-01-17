@@ -1,4 +1,4 @@
-import { IHash, IReadableWritable, IClone, IDestroy } from '@src/traits'
+import { IHash, IReadableWritable, IClone, IDestroy, IReference } from '@src/traits'
 import { IAllocator } from '@src/interfaces'
 import { UnpackedReadableWritable } from '@src/types'
 import { HashMapView, ViewConstructor, createInternalViews } from '@views/hash-map-view'
@@ -18,26 +18,8 @@ export class HashMap<
 >
 extends BaseObject
 implements IClone<HashMap<KeyView, ValueView>>
-         , IDestroy {
-  _view: HashMapView<KeyView, ValueView>
-  readonly _counter: ReferenceCounter
-  private fsm = new ObjectStateMachine()
-  private allocator: IAllocator
-  private keyViewConstructor: ViewConstructor<KeyView>
-  private valueViewConstructor: ViewConstructor<ValueView>
-
-  get capacity(): number {
-    this.fsm.assertAllocated()
-
-    return this._view.capacity
-  }
-
-  get size(): number {
-    this.fsm.assertAllocated()
-
-    return this._view.getSize()
-  }
-
+         , IDestroy
+         , IReference {
   static create<
     KeyView extends BaseView & IReadableWritable<unknown> & IHash
   , ValueView extends BaseView & IReadableWritable<unknown> & IHash
@@ -60,6 +42,68 @@ implements IClone<HashMap<KeyView, ValueView>>
     )
   }
 
+  static from<
+    KeyView extends BaseView & IReadableWritable<unknown> & IHash
+  , ValueView extends BaseView & IReadableWritable<unknown> & IHash
+  >(
+    allocator: IAllocator
+  , byteOffset: number
+  , keyViewConstructor: ViewConstructor<KeyView>
+  , valueViewConstructor: ViewConstructor<ValueView>
+  , options: {
+      capacity: number
+      loadFactor: number
+      growthFactor: number
+    }
+  ): HashMap<KeyView, ValueView> {
+    return new this(
+      ConstructorType.Reproduce
+    , allocator
+    , keyViewConstructor
+    , valueViewConstructor
+    , options
+    , byteOffset
+    , new ReferenceCounter()
+    )
+  }
+
+  _view: HashMapView<KeyView, ValueView>
+  readonly _counter: ReferenceCounter
+  private fsm = new ObjectStateMachine()
+  private allocator: IAllocator
+  readonly keyViewConstructor: ViewConstructor<KeyView>
+  readonly valueViewConstructor: ViewConstructor<ValueView>
+
+  get byteOffset(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.byteOffset
+  }
+
+  get capacity(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.capacity
+  }
+
+  get loadFactor(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.loadFactor
+  }
+
+  get growthFactor(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.growthFactor
+  }
+
+  get size(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.getSize()
+  }
+
   private constructor(
     type: ConstructorType.Create
   , allocator: IAllocator
@@ -72,7 +116,7 @@ implements IClone<HashMap<KeyView, ValueView>>
     }
   )
   private constructor(
-    type: ConstructorType.Clone
+    type: ConstructorType.Reproduce
   , allocator: IAllocator
   , keyViewConstructor: ViewConstructor<KeyView>
   , valueViewConstructor: ViewConstructor<ValueView>
@@ -97,7 +141,7 @@ implements IClone<HashMap<KeyView, ValueView>>
       }
     ]
   | [
-      type: ConstructorType.Clone
+      type: ConstructorType.Reproduce
     , allocator: IAllocator
     , keyViewConstructor: ViewConstructor<KeyView>
     , valueViewConstructor: ViewConstructor<ValueView>
@@ -168,7 +212,7 @@ implements IClone<HashMap<KeyView, ValueView>>
 
         return
       }
-      case ConstructorType.Clone: {
+      case ConstructorType.Reproduce: {
         const [
         , allocator
         , keyViewConstructor
@@ -180,6 +224,7 @@ implements IClone<HashMap<KeyView, ValueView>>
         this.allocator = allocator
         this.keyViewConstructor = keyViewConstructor
         this.valueViewConstructor = valueViewConstructor
+        this._counter = counter
 
         this._view = new HashMapView(
           this.allocator.buffer
@@ -188,9 +233,6 @@ implements IClone<HashMap<KeyView, ValueView>>
         , valueViewConstructor
         , options
         )
-
-        counter.increment()
-        this._counter = counter
 
         return
       }
@@ -209,8 +251,10 @@ implements IClone<HashMap<KeyView, ValueView>>
   clone(): HashMap<KeyView, ValueView> {
     this.fsm.assertAllocated()
 
+    this._counter.increment()
+
     return new HashMap(
-      ConstructorType.Clone
+      ConstructorType.Reproduce
     , this.allocator
     , this.keyViewConstructor
     , this.valueViewConstructor

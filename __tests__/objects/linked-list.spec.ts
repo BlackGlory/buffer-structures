@@ -28,6 +28,50 @@ describe('LinkedList', () => {
     expect(allocate).toBeCalledWith(LinkedListView.getByteLength(Uint8View))
   })
 
+  test('from', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = LinkedList.create(
+      allocator
+    , Uint8View
+    , [null, uint8(1)]
+    )
+    const allocate = jest.spyOn(allocator, 'allocate')
+
+    const result = LinkedList.from(allocator, obj.byteOffset, Uint8View)
+
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(result.get()).toStrictEqual([null, uint8(1)])
+    expect(obj._counter._count).toBe(1)
+    expect(result._counter._count).toBe(1)
+    expect(allocate).not.toBeCalled()
+  })
+
+  test('byteOffset', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = LinkedList.create(
+      allocator
+    , Uint8View
+    , [null, uint8(1)]
+    )
+
+    const result = obj.byteOffset
+
+    expect(result).toBe(obj._view.byteOffset)
+  })
+
+  test('viewConstructor', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = LinkedList.create(
+      allocator
+    , Uint8View
+    , [null, uint8(1)]
+    )
+
+    const result = obj.viewConstructor
+
+    expect(result).toBe(Uint8View)
+  })
+
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))

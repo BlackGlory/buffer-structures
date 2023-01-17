@@ -1,4 +1,4 @@
-import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { TupleView, ViewConstructor, MapStructureToTupleValue } from '@views/tuple-view'
 import { NonEmptyArray } from '@blackglory/prelude'
@@ -17,12 +17,6 @@ implements ICopy<Tuple<Structure>>
          , IReadableWritable<MapStructureToTupleValue<Structure>>
          , IHash
          , IDestroy {
-  readonly _view: TupleView<Structure>
-  readonly _counter: ReferenceCounter
-  private fsm = new ObjectStateMachine()
-  private allocator: IAllocator
-  private structure: Structure
-
   static create<
     Structure extends NonEmptyArray<
       ViewConstructor<IReadableWritable<unknown> & IHash>
@@ -35,6 +29,36 @@ implements ICopy<Tuple<Structure>>
     return new this(ConstructorType.Create, allocator, structure, value)
   }
 
+  static from<
+    Structure extends NonEmptyArray<
+      ViewConstructor<IReadableWritable<unknown> & IHash>
+    >
+  >(
+    allocator: IAllocator
+  , byteOffset: number
+  , structure: Structure
+  ): Tuple<Structure> {
+    return new this(
+      ConstructorType.Reproduce
+    , allocator
+    , structure
+    , byteOffset
+    , new ReferenceCounter()
+    )
+  }
+
+  readonly _view: TupleView<Structure>
+  readonly _counter: ReferenceCounter
+  private fsm = new ObjectStateMachine()
+  private allocator: IAllocator
+  readonly structure: Structure
+
+  get byteOffset(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.byteOffset
+  }
+
   private constructor(
     type: ConstructorType.Create
   , allocator: IAllocator
@@ -42,7 +66,7 @@ implements ICopy<Tuple<Structure>>
   , value: MapStructureToTupleValue<Structure>
   )
   private constructor(
-    type: ConstructorType.Clone
+    type: ConstructorType.Reproduce
   , allocator: IAllocator
   , structure: Structure
   , byteOffset: number
@@ -56,7 +80,7 @@ implements ICopy<Tuple<Structure>>
     , value: MapStructureToTupleValue<Structure>
     ]
   | [
-      type: ConstructorType.Clone
+      type: ConstructorType.Reproduce
     , allocator: IAllocator
     , structure: Structure
     , byteOffset: number
@@ -80,16 +104,14 @@ implements ICopy<Tuple<Structure>>
 
         return
       }
-      case ConstructorType.Clone: {
+      case ConstructorType.Reproduce: {
         const [, allocator, structure, byteOffset, counter] = args
         this.allocator = allocator
         this.structure = structure
+        this._counter = counter
 
         const view = new TupleView<Structure>(allocator.buffer, byteOffset, structure)
         this._view = view
-
-        counter.increment()
-        this._counter = counter
 
         return
       }
@@ -97,6 +119,8 @@ implements ICopy<Tuple<Structure>>
   }
 
   hash(hasher: IHasher): void {
+    this.fsm.assertAllocated()
+
     this._view.hash(hasher)
   }
 
@@ -112,8 +136,10 @@ implements ICopy<Tuple<Structure>>
   clone(): Tuple<Structure> {
     this.fsm.assertAllocated()
 
+    this._counter.increment()
+
     return new Tuple(
-      ConstructorType.Clone
+      ConstructorType.Reproduce
     , this.allocator
     , this.structure
     , this._view.byteOffset
@@ -147,6 +173,8 @@ implements ICopy<Tuple<Structure>>
   getByIndex<U extends number & keyof Structure>(
     index: U
   ): MapStructureToTupleValue<Structure>[U] {
+    this.fsm.assertAllocated()
+
     return this._view.getByIndex(index)
   }
 
@@ -154,12 +182,16 @@ implements ICopy<Tuple<Structure>>
     index: U
   , value: MapStructureToTupleValue<Structure>[U]
   ): void {
+    this.fsm.assertAllocated()
+
     this._view.setByIndex(index, value)
   }
 
   getViewByIndex<U extends number & keyof Structure>(
     index: U
   ): ReturnTypeOfConstructor<Structure[U]> {
+    this.fsm.assertAllocated()
+
     return this._view.getViewByIndex(index)
   }
 }

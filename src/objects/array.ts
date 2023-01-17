@@ -1,4 +1,4 @@
-import { ICopy, IClone, IDestroy, IHash, IReadableWritable } from '@src/traits'
+import { ICopy, IClone, IDestroy, IHash, IReadableWritable, IReference } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { UnpackedReadableWritable } from '@src/types'
 import { ViewConstructor, ArrayView } from '@views/array-view'
@@ -15,14 +15,8 @@ extends BaseObject
 implements ICopy<Array<View, Length>>
          , IClone<Array<View, Length>>
          , IHash
-         , IDestroy {
-  readonly _view: ArrayView<View, Length>
-  readonly _counter: ReferenceCounter
-  private fsm = new ObjectStateMachine()
-  private allocator: IAllocator
-  private viewConstructor: ViewConstructor<View>
-  private length: Length
-
+         , IDestroy
+         , IReference {
   static create<
     View extends BaseView & IReadableWritable<unknown> & IHash
   , Length extends number
@@ -41,6 +35,43 @@ implements ICopy<Array<View, Length>>
     )
   }
 
+  static from<
+    View extends BaseView & IReadableWritable<unknown> & IHash
+  , Length extends number
+  >(
+    allocator: IAllocator
+  , byteOffset: number
+  , viewConstructor: ViewConstructor<View>
+  , length: Length
+  ): Array<View, Length> {
+    return new this<View, Length>(
+      ConstructorType.Reproduce
+    , allocator
+    , viewConstructor
+    , length
+    , byteOffset
+    , new ReferenceCounter()
+    )
+  }
+
+  readonly _view: ArrayView<View, Length>
+  readonly _counter: ReferenceCounter
+  private fsm = new ObjectStateMachine()
+  private allocator: IAllocator
+  readonly viewConstructor: ViewConstructor<View>
+
+  get length(): Length {
+    this.fsm.assertAllocated()
+
+    return this._view.length
+  }
+
+  get byteOffset(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.byteOffset
+  }
+
   private constructor(
     type: ConstructorType.Create
   , allocator: IAllocator
@@ -49,7 +80,7 @@ implements ICopy<Array<View, Length>>
   , values?: FixedLengthArray<UnpackedReadableWritable<View>, Length>
   )
   private constructor(
-    type: ConstructorType.Clone
+    type: ConstructorType.Reproduce
   , allocator: IAllocator
   , viewConstructor: ViewConstructor<View>
   , length: Length
@@ -65,7 +96,7 @@ implements ICopy<Array<View, Length>>
     , values?: FixedLengthArray<View, Length>
     ]
   | [
-      type: ConstructorType.Clone
+      type: ConstructorType.Reproduce
     , allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
     , length: Length
@@ -81,7 +112,6 @@ implements ICopy<Array<View, Length>>
         const [, allocator, viewConstructor, length, values] = args
         this.allocator = allocator
         this.viewConstructor = viewConstructor
-        this.length = length
         this._counter = new ReferenceCounter()
 
         const byteOffset = allocator.allocate(
@@ -100,11 +130,10 @@ implements ICopy<Array<View, Length>>
 
         return
       }
-      case ConstructorType.Clone: {
+      case ConstructorType.Reproduce: {
         const [, allocator, viewConstructor, length, byteOffset, counter] = args
         this.allocator = allocator
         this.viewConstructor = viewConstructor
-        this.length = length
 
         const view = new ArrayView<View, Length>(
           allocator.buffer
@@ -113,8 +142,6 @@ implements ICopy<Array<View, Length>>
         , length
         )
         this._view = view
-
-        counter.increment()
         this._counter = counter
 
         return
@@ -123,6 +150,8 @@ implements ICopy<Array<View, Length>>
   }
 
   hash(hasher: IHasher): void {
+    this.fsm.assertAllocated()
+
     this._view.hash(hasher)
   }
 
@@ -138,8 +167,10 @@ implements ICopy<Array<View, Length>>
   clone(): Array<View, Length> {
     this.fsm.assertAllocated()
 
+    this._counter.increment()
+
     return new Array(
-      ConstructorType.Clone
+      ConstructorType.Reproduce
     , this.allocator
     , this.viewConstructor
     , this.length
@@ -173,14 +204,20 @@ implements ICopy<Array<View, Length>>
   }
 
   getByIndex(index: number): UnpackedReadableWritable<View> {
+    this.fsm.assertAllocated()
+
     return this._view.getByIndex(index)
   }
 
   setByIndex(index: number, value: UnpackedReadableWritable<View>): void {
+    this.fsm.assertAllocated()
+
     this._view.setByIndex(index, value)
   }
 
   getViewByIndex(index: number): View {
+    this.fsm.assertAllocated()
+
     return this._view.getViewByIndex(index)
   }
 }

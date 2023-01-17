@@ -21,6 +21,44 @@ describe('Array', () => {
     expect(allocate).toBeCalledWith(ArrayView.getByteLength(Uint8View, 3))
   })
 
+  test('from', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = Array.create(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
+    const allocate = jest.spyOn(allocator, 'allocate')
+
+    const result = Array.from(allocator, obj.byteOffset, Uint8View, 3)
+
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(result.get()).toStrictEqual([uint8(1), uint8(2), uint8(3)])
+    expect(obj._counter._count).toBe(1)
+    expect(result._counter._count).toBe(1)
+    expect(allocate).not.toBeCalled()
+  })
+
+  test('byteOffset', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+
+    const result = Array.create(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
+
+    expect(result.byteOffset).toBe(result._view.byteOffset)
+  })
+
+  test('viewConstructor', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+
+    const result = Array.create(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
+
+    expect(result.viewConstructor).toBe(Uint8View)
+  })
+
+  test('length', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+
+    const result = Array.create(allocator, Uint8View, 3, [uint8(1), uint8(2), uint8(3)])
+
+    expect(result.length).toBe(3)
+  })
+
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))

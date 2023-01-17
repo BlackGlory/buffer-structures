@@ -1,4 +1,4 @@
-import { ICopy, IClone, IDestroy, IReadableWritable, IHash } from '@src/traits'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits'
 import { IAllocator, IHasher } from '@src/interfaces'
 import { Float32View } from '@views/float32-view'
 import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
@@ -11,14 +11,30 @@ implements ICopy<Float32>
          , IClone<Float32>
          , IReadableWritable<Float32Literal>
          , IHash
-         , IDestroy {
+         , IDestroy
+         , IReference {
+  static create(allocator: IAllocator, value: Float32Literal): Float32 {
+    return new this(ConstructorType.Create, allocator, value)
+  }
+
+  static from(allocator: IAllocator, byteOffset: number): Float32 {
+    return new this(
+      ConstructorType.Reproduce
+    , allocator
+    , byteOffset
+    , new ReferenceCounter()
+    )
+  }
+
   readonly _view: Float32View
   readonly _counter: ReferenceCounter
   private fsm = new ObjectStateMachine()
   private allocator: IAllocator
 
-  static create(allocator: IAllocator, value: Float32Literal): Float32 {
-    return new this(ConstructorType.Create, allocator, value)
+  get byteOffset(): number {
+    this.fsm.assertAllocated()
+
+    return this._view.byteOffset
   }
 
   private constructor(
@@ -27,7 +43,7 @@ implements ICopy<Float32>
   , value: Float32Literal
   )
   private constructor(
-    type: ConstructorType.Clone
+    type: ConstructorType.Reproduce
   , allocator: IAllocator
   , byteOffset: number
   , counter: ReferenceCounter
@@ -39,7 +55,7 @@ implements ICopy<Float32>
     , value: Float32Literal
     ]
   | [
-      type: ConstructorType.Clone
+      type: ConstructorType.Reproduce
     , allocator: IAllocator
     , byteOffset: number
     , counter: ReferenceCounter
@@ -61,15 +77,13 @@ implements ICopy<Float32>
 
         return
       }
-      case ConstructorType.Clone: {
+      case ConstructorType.Reproduce: {
         const [, allocator, byteOffset, counter] = args
         this.allocator = allocator
+        this._counter = counter
 
         const view = new Float32View(allocator.buffer, byteOffset)
         this._view = view
-
-        counter.increment()
-        this._counter = counter
 
         return
       }
@@ -77,6 +91,8 @@ implements ICopy<Float32>
   }
 
   hash(hasher: IHasher): void {
+    this.fsm.assertAllocated()
+
     this._view.hash(hasher)
   }
 
@@ -92,8 +108,10 @@ implements ICopy<Float32>
   clone(): Float32 {
     this.fsm.assertAllocated()
 
+    this._counter.increment()
+
     return new Float32(
-      ConstructorType.Clone
+      ConstructorType.Reproduce
     , this.allocator
     , this._view.byteOffset
     , this._counter

@@ -30,6 +30,54 @@ describe('Tuple', () => {
     ]))
   })
 
+  test('from', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = Tuple.create(
+      allocator
+    , [Uint8View, Uint16View]
+    , [uint8(1), uint16(2)]
+    )
+    const allocate = jest.spyOn(allocator, 'allocate')
+
+    const result = Tuple.from(
+      allocator
+    , obj.byteOffset
+    , [Uint8View, Uint16View]
+    )
+
+    expect(result).toBeInstanceOf(BaseObject)
+    expect(result.get()).toStrictEqual([uint8(1), uint16(2)])
+    expect(obj._counter._count).toBe(1)
+    expect(result._counter._count).toBe(1)
+    expect(allocate).not.toBeCalled()
+  })
+
+  test('byteOffset', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = Tuple.create(
+      allocator
+    , [Uint8View, Uint16View]
+    , [uint8(1), uint16(2)]
+    )
+
+    const result = obj.byteOffset
+
+    expect(result).toBe(obj._view.byteOffset)
+  })
+
+  test('structure', () => {
+    const allocator = new Allocator(new ArrayBuffer(100))
+    const obj = Tuple.create(
+      allocator
+    , [Uint8View, Uint16View]
+    , [uint8(1), uint16(2)]
+    )
+
+    const result = obj.structure
+
+    expect(result).toStrictEqual([Uint8View, Uint16View])
+  })
+
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
