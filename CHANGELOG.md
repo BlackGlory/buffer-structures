@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0](https://github.com/BlackGlory/buffer-structures/compare/v0.2.0...v0.3.0) (2023-01-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* Rewritten `HashSetView`, `HashMapView`
+* `HashMap` now store keys
+* **objects:** Replaced constructors with static create methods
+
+### Features
+
+* add `HashMapView` ([e6ea152](https://github.com/BlackGlory/buffer-structures/commit/e6ea152eb425c32335f3377034747ec104f086f4))
+* add static `from` methods ([7080c40](https://github.com/BlackGlory/buffer-structures/commit/7080c40fbadf1427ce580a67cefddb6b73611a37))
+* **hash-map:** add `keys`, `entries` methods ([d3c22c2](https://github.com/BlackGlory/buffer-structures/commit/d3c22c22f646d0220c0e4a74c5a21fe5dff05938))
+* add `HashSetView` ([5875277](https://github.com/BlackGlory/buffer-structures/commit/58752772f87d819ce3662d531b71a3b5ceded4aa))
+* store keys into `HashMap` ([299d8e5](https://github.com/BlackGlory/buffer-structures/commit/299d8e5bb11160f6c98bbbff2edf87e5213716a1))
+
+
+* rewrite `HashSetView`, `HashMapView` ([ed184f0](https://github.com/BlackGlory/buffer-structures/commit/ed184f0de577f2a3794169606737df51872cce86))
+* **objects:** replace constructors with static create methods ([7bd5e07](https://github.com/BlackGlory/buffer-structures/commit/7bd5e07799811009cb569e00651c561774d3b3f2))
+
 ## [0.2.0](https://github.com/BlackGlory/buffer-structures/compare/v0.1.2...v0.2.0) (2023-01-12)
 
 
