@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.1](https://github.com/BlackGlory/buffer-structures/compare/v0.4.0...v0.4.1) (2023-06-10)
+
+
+### Bug Fixes
+
+* export src ([415fd99](https://github.com/BlackGlory/buffer-structures/commit/415fd99f628126b8a521cd9536df0cea17d2cfe5))
+
 ## [0.4.0](https://github.com/BlackGlory/buffer-structures/compare/v0.3.0...v0.4.0) (2023-01-17)
 
 
