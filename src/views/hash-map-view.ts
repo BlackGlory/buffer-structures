@@ -1,8 +1,6 @@
 import { ISized, IHash, IReadableWritable, IReference, IFree } from '@src/traits'
 import { IAllocator } from '@src/interfaces'
 import { UnpackedReadableWritable } from '@src/types'
-import { ArrayView } from '@views/array-view'
-import { LinkedListView } from '@views/linked-list-view'
 import { Uint32View } from '@views/uint32-view'
 import { OwnershipPointerView } from '@views/ownership-pointer-view'
 import { MapStructureToTupleValue, TupleView } from '@views/tuple-view'
