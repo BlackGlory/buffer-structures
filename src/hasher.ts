@@ -1,5 +1,5 @@
-import { IHasher } from '@src/interfaces'
-import { NULL } from '@src/null'
+import { IHasher } from '@src/interfaces.js'
+import { NULL } from '@src/null.js'
 import { h32 } from 'xxhashjs'
 
 // 一个令人惊讶的事实是, 在JIT的帮助下,

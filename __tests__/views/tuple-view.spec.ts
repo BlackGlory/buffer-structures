@@ -1,13 +1,13 @@
-import { TupleView } from '@views/tuple-view'
-import { Uint8View } from '@views/uint8-view'
-import { Uint16View } from '@views/uint16-view'
-import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { uint8ToBuffer, uint16ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { BaseView } from '@views/base-view'
-import { uint8 } from '@literals/uint8-literal'
-import { uint16 } from '@literals/uint16-literal'
-import { uint32 } from '@literals/uint32-literal'
+import { TupleView } from '@views/tuple-view.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { Uint16View } from '@views/uint16-view.js'
+import { OwnershipPointerView } from '@views/ownership-pointer-view.js'
+import { uint8ToBuffer, uint16ToBuffer } from '@test/utils.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { BaseView } from '@views/base-view.js'
+import { uint8 } from '@literals/uint8-literal.js'
+import { uint16 } from '@literals/uint16-literal.js'
+import { uint32 } from '@literals/uint32-literal.js'
 
 describe('TupleView', () => {
   test('create', () => {
@@ -60,8 +60,8 @@ describe('TupleView', () => {
     test('without ownership pointers', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const byteOffset = 1
       const view = new TupleView(allocator.buffer, byteOffset, [
@@ -78,8 +78,8 @@ describe('TupleView', () => {
     test('with ownership pointers', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       class Uint8OwnershipPointerView extends OwnershipPointerView<Uint8View> {
         constructor(buffer: ArrayBufferLike, byteOffset: number) {
@@ -191,7 +191,7 @@ describe('TupleView', () => {
     ])
     view.set([uint8(10), uint16(20)])
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     view.hash(hasher)

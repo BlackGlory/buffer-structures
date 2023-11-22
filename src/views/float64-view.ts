@@ -1,8 +1,8 @@
-import { IHash, IReference, IReadableWritable, IFree } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { getSlice } from './utils'
-import { BaseView } from '@views/base-view'
-import { float64, Float64Literal } from '@literals/float64-literal'
+import { IHash, IReference, IReadableWritable, IFree } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { getSlice } from './utils.js'
+import { BaseView } from '@views/base-view.js'
+import { float64, Float64Literal } from '@literals/float64-literal.js'
 
 export class Float64View
 extends BaseView

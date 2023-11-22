@@ -1,16 +1,16 @@
-import { Float64 } from '@objects/float64'
-import { Float64View } from '@views/float64-view'
-import { IAllocator, IHasher } from '@src/interfaces'
+import { Float64 } from '@objects/float64.js'
+import { Float64View } from '@views/float64-view.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
 import { getError } from 'return-style'
-import { float64ToBuffer } from '@test/utils'
-import { Allocator } from '@src/allocator'
-import { BaseObject } from '@objects/base-object'
-import { float64 } from '@literals/float64-literal'
+import { float64ToBuffer } from '@test/utils.js'
+import { Allocator } from '@src/allocator.js'
+import { BaseObject } from '@objects/base-object.js'
+import { float64 } from '@literals/float64-literal.js'
 
 describe('Float64', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = Float64.create(allocator, float64(1))
 
@@ -23,7 +23,7 @@ describe('Float64', () => {
   test('from', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const obj = Float64.create(allocator, float64(1))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = Float64.from(allocator, obj.byteOffset)
 
@@ -45,7 +45,7 @@ describe('Float64', () => {
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const free = jest.spyOn(allocator, 'free')
+      const free = vi.spyOn(allocator, 'free')
       const result = Float64.create(allocator, float64(1))
 
       result.destroy()
@@ -57,8 +57,8 @@ describe('Float64', () => {
     it('cannot destory twice', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const result = Float64.create(allocator, float64(1))
       result.destroy()
@@ -72,8 +72,8 @@ describe('Float64', () => {
       test('does not call allocator.free()', () => {
         const allocator = {
           buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
+        , allocate: vi.fn()
+        , free: vi.fn()
         } satisfies IAllocator
         const obj1 = Float64.create(allocator, float64(1))
         const obj2 = obj1.clone()
@@ -85,7 +85,7 @@ describe('Float64', () => {
 
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const free = jest.spyOn(allocator, 'free')
+        const free = vi.spyOn(allocator, 'free')
         const obj1 = Float64.create(allocator, float64(1))
         const obj2 = obj1.clone()
 
@@ -144,7 +144,7 @@ describe('Float64', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const obj = Float64.create(allocator, float64(1))
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     obj.hash(hasher)

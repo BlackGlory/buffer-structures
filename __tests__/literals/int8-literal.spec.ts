@@ -1,7 +1,7 @@
-import { Int8Literal, int8 } from '@literals/int8-literal'
-import { IHasher } from '@src/interfaces'
-import { int8ToBuffer } from '@test/utils'
-import { BaseLiteral } from '@literals/base-literal'
+import { Int8Literal, int8 } from '@literals/int8-literal.js'
+import { IHasher } from '@src/interfaces.js'
+import { int8ToBuffer } from '@test/utils.js'
+import { BaseLiteral } from '@literals/base-literal.js'
 
 test('int8', () => {
   const result = int8(1)
@@ -29,7 +29,7 @@ describe('Int8Literal', () => {
   test('hash', () => {
     const literal = new Int8Literal(1)
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     literal.hash(hasher)

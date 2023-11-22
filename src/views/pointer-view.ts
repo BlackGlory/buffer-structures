@@ -1,9 +1,9 @@
-import { IHash, IReference, IReadableWritable, IFree } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
+import { IHash, IReference, IReadableWritable, IFree } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
 import { isntNull } from '@blackglory/prelude'
-import { BaseView } from '@views/base-view'
-import { NULL } from '@src/null'
-import { uint32, Uint32Literal } from '@literals/uint32-literal'
+import { BaseView } from '@views/base-view.js'
+import { NULL } from '@src/null.js'
+import { uint32, Uint32Literal } from '@literals/uint32-literal.js'
 
 export type ViewConstructor<View extends BaseView> = new (
   buffer: ArrayBufferLike

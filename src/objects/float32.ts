@@ -1,9 +1,9 @@
-import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { Float32View } from '@views/float32-view'
-import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
-import { BaseObject } from '@objects/base-object'
-import { Float32Literal } from '@literals/float32-literal'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { Float32View } from '@views/float32-view.js'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils.js'
+import { BaseObject } from '@objects/base-object.js'
+import { Float32Literal } from '@literals/float32-literal.js'
 
 export class Float32
 extends BaseObject

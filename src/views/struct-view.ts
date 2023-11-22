@@ -1,11 +1,11 @@
-import { IHash, IReference, ISized, IReadableWritable, IFree } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { UnpackedReadableWritable } from '@src/types'
+import { IHash, IReference, ISized, IReadableWritable, IFree } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { UnpackedReadableWritable } from '@src/types.js'
 import { pipe } from 'extra-utils'
 import { ReturnTypeOfConstructor } from 'hotypes'
 import * as Iter from 'iterable-operator'
-import { isOwnershiptPointer } from './utils'
-import { BaseView } from '@views/base-view'
+import { isOwnershiptPointer } from './utils.js'
+import { BaseView } from '@views/base-view.js'
 import { lazy } from 'extra-lazy'
 
 export type ViewConstructor<View> =
@@ -67,7 +67,7 @@ implements IReference
   }
 
   get(): MapStructureToValue<Structure> {
-    const results: Record<string, any> = {}
+    const results: Record<string, unknown> = {}
 
     for (const [key, view] of this.iterate()) {
       const value = view.get()

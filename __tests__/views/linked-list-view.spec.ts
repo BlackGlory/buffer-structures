@@ -1,12 +1,12 @@
-import { LinkedListView } from '@views/linked-list-view'
-import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { Uint8View } from '@views/uint8-view'
-import { uint8ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { BaseView } from '@views/base-view'
-import { NULL } from '@src/null'
-import { uint8 } from '@literals/uint8-literal'
-import { uint32 } from '@literals/uint32-literal'
+import { LinkedListView } from '@views/linked-list-view.js'
+import { OwnershipPointerView } from '@views/ownership-pointer-view.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { uint8ToBuffer } from '@test/utils.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { BaseView } from '@views/base-view.js'
+import { NULL } from '@src/null.js'
+import { uint8 } from '@literals/uint8-literal.js'
+import { uint32 } from '@literals/uint32-literal.js'
 
 describe('LinkedListView', () => {
   test('create', () => {
@@ -36,8 +36,8 @@ describe('LinkedListView', () => {
   test('free', () => {
     const allocator = {
       buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
+    , allocate: vi.fn()
+    , free: vi.fn()
     } satisfies IAllocator
     const byteOffset = 1
     const view = new LinkedListView(allocator.buffer, byteOffset, Uint8View)
@@ -168,7 +168,7 @@ describe('LinkedListView', () => {
     view1.setValue(uint8(10))
     view2.setValue(uint8(20))
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     view1.hash(hasher)

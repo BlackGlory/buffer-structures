@@ -1,11 +1,11 @@
-import { IHash, ISized, IReference, IReadableWritable, IFree } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { OwnershipPointerView } from '@views/ownership-pointer-view'
+import { IHash, ISized, IReference, IReadableWritable, IFree } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { OwnershipPointerView } from '@views/ownership-pointer-view.js'
 import { isntNull } from '@blackglory/prelude'
-import { TupleView, MapStructureToTupleValue } from '@views/tuple-view'
-import { BaseView } from '@views/base-view'
+import { TupleView, MapStructureToTupleValue } from '@views/tuple-view.js'
+import { BaseView } from '@views/base-view.js'
 import { withLazyStatic, lazyStatic } from 'extra-lazy'
-import { NULL } from '@src/null'
+import { NULL } from '@src/null.js'
 
 export type ViewConstructor<View extends BaseView> =
   ISized

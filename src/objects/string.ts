@@ -1,10 +1,9 @@
-import { ICopy, IClone, IDestroy, IReadable, IHash, IReference } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { StringView } from '@views/string-view'
-import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
-import {} from './utils'
-import { BaseObject } from '@objects/base-object'
-import { StringLiteral } from '@literals/string-literal'
+import { ICopy, IClone, IDestroy, IReadable, IHash, IReference } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { StringView } from '@views/string-view.js'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils.js'
+import { BaseObject } from '@objects/base-object.js'
+import { StringLiteral } from '@literals/string-literal.js'
 
 export class String
 extends BaseObject

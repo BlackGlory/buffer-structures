@@ -1,7 +1,7 @@
-import { Int16Literal, int16 } from '@literals/int16-literal'
-import { IHasher } from '@src/interfaces'
-import { int16ToBuffer } from '@test/utils'
-import { BaseLiteral } from '@literals/base-literal'
+import { Int16Literal, int16 } from '@literals/int16-literal.js'
+import { IHasher } from '@src/interfaces.js'
+import { int16ToBuffer } from '@test/utils.js'
+import { BaseLiteral } from '@literals/base-literal.js'
 
 test('int16', () => {
   const result = int16(1)
@@ -29,7 +29,7 @@ describe('Int16Literal', () => {
   test('hash', () => {
     const literal = new Int16Literal(1)
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     literal.hash(hasher)

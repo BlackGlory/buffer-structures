@@ -1,19 +1,19 @@
-import { OwnershipPointer } from '@objects/ownership-pointer'
-import { Uint8 } from '@objects/uint8'
-import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { Uint8View } from '@views/uint8-view'
-import { IAllocator, IHasher } from '@src/interfaces'
+import { OwnershipPointer } from '@objects/ownership-pointer.js'
+import { Uint8 } from '@objects/uint8.js'
+import { OwnershipPointerView } from '@views/ownership-pointer-view.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
 import { getError } from 'return-style'
-import { uint8ToBuffer } from '@test/utils'
-import { Allocator } from '@src/allocator'
-import { BaseObject } from '@objects/base-object'
-import { NULL } from '@src/null'
-import { uint8 } from '@literals/uint8-literal'
+import { uint8ToBuffer } from '@test/utils.js'
+import { Allocator } from '@src/allocator.js'
+import { BaseObject } from '@objects/base-object.js'
+import { NULL } from '@src/null.js'
+import { uint8 } from '@literals/uint8-literal.js'
 
 describe('OwnershipPointer', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = OwnershipPointer.create(allocator, Uint8View, 10)
 
@@ -26,7 +26,7 @@ describe('OwnershipPointer', () => {
   test('from', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const obj = OwnershipPointer.create(allocator, Uint8View, 10)
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = OwnershipPointer.from(allocator, obj.byteOffset, Uint8View)
 
@@ -58,7 +58,7 @@ describe('OwnershipPointer', () => {
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const free = jest.spyOn(allocator, 'free')
+      const free = vi.spyOn(allocator, 'free')
       const data = Uint8.create(allocator, uint8(50))
       const pointer = OwnershipPointer.create(allocator, Uint8View, data._view.byteOffset)
 
@@ -72,8 +72,8 @@ describe('OwnershipPointer', () => {
     it('cannot destory twice', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const pointer = OwnershipPointer.create(allocator, Uint8View, 1)
       pointer.destroy()
@@ -87,8 +87,8 @@ describe('OwnershipPointer', () => {
       test('does not call allocator.free()', () => {
         const allocator = {
           buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
+        , allocate: vi.fn()
+        , free: vi.fn()
         } satisfies IAllocator
         const obj1 = OwnershipPointer.create(allocator, Uint8View, 1)
         const obj2 = obj1.clone()
@@ -100,7 +100,7 @@ describe('OwnershipPointer', () => {
 
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const free = jest.spyOn(allocator, 'free')
+        const free = vi.spyOn(allocator, 'free')
         const data = Uint8.create(allocator, uint8(10))
         const obj1 = OwnershipPointer.create(allocator, Uint8View, data._view.byteOffset)
         const obj2 = obj1.clone()
@@ -156,7 +156,7 @@ describe('OwnershipPointer', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const obj = OwnershipPointer.create(allocator, Uint8View, 0)
       const hasher = {
-        write: jest.fn()
+        write: vi.fn()
       } satisfies IHasher
 
       obj.hash(hasher)
@@ -170,7 +170,7 @@ describe('OwnershipPointer', () => {
       const data = Uint8.create(allocator, uint8(20))
       const obj = OwnershipPointer.create(allocator, Uint8View, data._view.byteOffset)
       const hasher = {
-        write: jest.fn()
+        write: vi.fn()
       } satisfies IHasher
 
       obj.hash(hasher)

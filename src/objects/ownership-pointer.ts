@@ -1,12 +1,12 @@
-import { IHash, IFree, IClone, IDestroy, IReference } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { ViewConstructor } from '@views/pointer-view'
-import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
-import { BaseObject } from '@objects/base-object'
-import { BaseView } from '@views/base-view'
-import { NULL } from '@src/null'
-import { uint32 } from '@literals/uint32-literal'
+import { IHash, IFree, IClone, IDestroy, IReference } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { ViewConstructor } from '@views/pointer-view.js'
+import { OwnershipPointerView } from '@views/ownership-pointer-view.js'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils.js'
+import { BaseObject } from '@objects/base-object.js'
+import { BaseView } from '@views/base-view.js'
+import { NULL } from '@src/null.js'
+import { uint32 } from '@literals/uint32-literal.js'
 
 export class OwnershipPointer<View extends BaseView & IHash & IFree>
 extends BaseObject

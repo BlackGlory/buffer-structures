@@ -1,14 +1,14 @@
 import { assert } from '@blackglory/prelude'
-import { IHash, ISized, IReference, IReadableWritable, IFree, IOwnershipPointer } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { TupleView } from '@views/tuple-view'
-import { ViewConstructor } from '@views/pointer-view'
-import { Uint32View } from '@views/uint32-view'
-import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { BaseView } from '@views/base-view'
+import { IHash, ISized, IReference, IReadableWritable, IFree, IOwnershipPointer } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { TupleView } from '@views/tuple-view.js'
+import { ViewConstructor } from '@views/pointer-view.js'
+import { Uint32View } from '@views/uint32-view.js'
+import { OwnershipPointerView } from '@views/ownership-pointer-view.js'
+import { BaseView } from '@views/base-view.js'
 import { withLazyStatic, lazyStatic } from 'extra-lazy'
-import { NULL } from '@src/null'
-import { Uint32Literal, uint32 } from '@literals/uint32-literal'
+import { NULL } from '@src/null.js'
+import { Uint32Literal, uint32 } from '@literals/uint32-literal.js'
 
 type OwnershipPointerViewConstructor<View extends BaseView & IHash & IFree> =
   ISized

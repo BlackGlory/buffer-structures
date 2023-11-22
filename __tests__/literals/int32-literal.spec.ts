@@ -1,7 +1,7 @@
-import { Int32Literal, int32 } from '@literals/int32-literal'
-import { IHasher } from '@src/interfaces'
-import { int32ToBuffer } from '@test/utils'
-import { BaseLiteral } from '@literals/base-literal'
+import { Int32Literal, int32 } from '@literals/int32-literal.js'
+import { IHasher } from '@src/interfaces.js'
+import { int32ToBuffer } from '@test/utils.js'
+import { BaseLiteral } from '@literals/base-literal.js'
 
 test('int32', () => {
   const result = int32(1)
@@ -29,7 +29,7 @@ describe('Int32Literal', () => {
   test('hash', () => {
     const literal = new Int32Literal(1)
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     literal.hash(hasher)

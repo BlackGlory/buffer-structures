@@ -1,10 +1,10 @@
-import { IHash, ISized, IReference, IReadableWritable, IFree } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { Uint32View } from '@views/uint32-view'
-import { getSlice } from './utils'
-import { BaseView } from '@views/base-view'
-import { uint32 } from '@literals/uint32-literal'
-import { string, StringLiteral } from '@literals/string-literal'
+import { IHash, ISized, IReference, IReadableWritable, IFree } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { Uint32View } from '@views/uint32-view.js'
+import { getSlice } from './utils.js'
+import { BaseView } from '@views/base-view.js'
+import { uint32 } from '@literals/uint32-literal.js'
+import { string, StringLiteral } from '@literals/string-literal.js'
 
 export class StringView
 extends BaseView

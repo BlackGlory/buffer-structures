@@ -1,9 +1,9 @@
-import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { Uint32View } from '@views/uint32-view'
-import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
-import { BaseObject } from '@objects/base-object'
-import { Uint32Literal } from '@literals/uint32-literal'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { Uint32View } from '@views/uint32-view.js'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils.js'
+import { BaseObject } from '@objects/base-object.js'
+import { Uint32Literal } from '@literals/uint32-literal.js'
 
 export class Uint32
 extends BaseObject

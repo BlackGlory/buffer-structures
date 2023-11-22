@@ -1,11 +1,11 @@
-import { ICopy, IClone, IDestroy, IHash, IReadableWritable, IReference } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { UnpackedReadableWritable } from '@src/types'
-import { ViewConstructor, ArrayView } from '@views/array-view'
-import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
+import { ICopy, IClone, IDestroy, IHash, IReadableWritable, IReference } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { UnpackedReadableWritable } from '@src/types.js'
+import { ViewConstructor, ArrayView } from '@views/array-view.js'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils.js'
 import { FixedLengthArray } from 'justypes'
-import { BaseObject } from '@objects/base-object'
-import { BaseView } from '@views/base-view'
+import { BaseObject } from '@objects/base-object.js'
+import { BaseView } from '@views/base-view.js'
 
 export class Array<
   View extends BaseView & IReadableWritable<unknown> & IHash
@@ -93,7 +93,7 @@ implements ICopy<Array<View, Length>>
     , allocator: IAllocator
     , viewConstructor: ViewConstructor<View>
     , length: Length
-    , values?: FixedLengthArray<View, Length>
+    , values?: FixedLengthArray<UnpackedReadableWritable<View>, Length>
     ]
   | [
       type: ConstructorType.Reproduce

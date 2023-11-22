@@ -1,8 +1,8 @@
-import { Int8View } from '@views/int8-view'
-import { int8ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { BaseView } from '@views/base-view'
-import { int8 } from '@literals/int8-literal'
+import { Int8View } from '@views/int8-view.js'
+import { int8ToBuffer } from '@test/utils.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { BaseView } from '@views/base-view.js'
+import { int8 } from '@literals/int8-literal.js'
 
 describe('Int8View', () => {
   test('create', () => {
@@ -32,8 +32,8 @@ describe('Int8View', () => {
   test('free', () => {
     const allocator = {
       buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
+    , allocate: vi.fn()
+    , free: vi.fn()
     } satisfies IAllocator
     const byteOffset = 1
     const view = new Int8View(allocator.buffer, byteOffset)
@@ -76,7 +76,7 @@ describe('Int8View', () => {
     const view = new Int8View(buffer, byteOffset)
     view.set(int8(value))
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     view.hash(hasher)

@@ -1,20 +1,20 @@
-import { LinkedList } from '@objects/linked-list'
-import { LinkedListView } from '@views/linked-list-view'
-import { Uint8View } from '@views/uint8-view'
-import { IAllocator, IHasher } from '@src/interfaces'
+import { LinkedList } from '@objects/linked-list.js'
+import { LinkedListView } from '@views/linked-list-view.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
 import { getError } from 'return-style'
-import { uint8ToBuffer } from '@test/utils'
-import { Allocator } from '@src/allocator'
-import { OwnershipPointerView } from '@src/views/ownership-pointer-view'
-import { BaseObject } from '@objects/base-object'
-import { NULL } from '@src/null'
-import { uint8 } from '@literals/uint8-literal'
-import { uint32 } from '@literals/uint32-literal'
+import { uint8ToBuffer } from '@test/utils.js'
+import { Allocator } from '@src/allocator.js'
+import { OwnershipPointerView } from '@src/views/ownership-pointer-view.js'
+import { BaseObject } from '@objects/base-object.js'
+import { NULL } from '@src/null.js'
+import { uint8 } from '@literals/uint8-literal.js'
+import { uint32 } from '@literals/uint32-literal.js'
 
 describe('LinkedList', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = LinkedList.create(
       allocator
@@ -35,7 +35,7 @@ describe('LinkedList', () => {
     , Uint8View
     , [null, uint8(1)]
     )
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = LinkedList.from(allocator, obj.byteOffset, Uint8View)
 
@@ -75,7 +75,7 @@ describe('LinkedList', () => {
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const free = jest.spyOn(allocator, 'free')
+      const free = vi.spyOn(allocator, 'free')
       const result = LinkedList.create(
         allocator
       , Uint8View
@@ -106,8 +106,8 @@ describe('LinkedList', () => {
       test('does not call allocator.free()', () => {
         const allocator = {
           buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
+        , allocate: vi.fn()
+        , free: vi.fn()
         } satisfies IAllocator
         const obj1 = LinkedList.create(
           allocator
@@ -123,7 +123,7 @@ describe('LinkedList', () => {
 
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const free = jest.spyOn(allocator, 'free')
+        const free = vi.spyOn(allocator, 'free')
         const obj1 = LinkedList.create(
           allocator
         , Uint8View
@@ -374,7 +374,7 @@ describe('LinkedList', () => {
     , [uint32(50), uint8(10)]
     )
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     obj.hash(hasher)

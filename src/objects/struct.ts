@@ -1,9 +1,9 @@
-import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { StructView, ViewConstructor, MapStructureToValue } from '@views/struct-view'
-import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { StructView, ViewConstructor, MapStructureToValue } from '@views/struct-view.js'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils.js'
 import { ReturnTypeOfConstructor } from 'hotypes'
-import { BaseObject } from '@objects/base-object'
+import { BaseObject } from '@objects/base-object.js'
 
 export class Struct<
   Structure extends Record<

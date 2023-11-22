@@ -1,5 +1,5 @@
 import { assert } from '@blackglory/prelude'
-import { IAllocator } from '@src/interfaces'
+import { IAllocator } from '@src/interfaces.js'
 import { NonEmptyArray } from '@blackglory/prelude'
 
 interface IMetadata {

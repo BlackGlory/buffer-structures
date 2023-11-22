@@ -1,16 +1,16 @@
-import { Float32 } from '@objects/float32'
-import { Float32View } from '@views/float32-view'
-import { IAllocator, IHasher } from '@src/interfaces'
+import { Float32 } from '@objects/float32.js'
+import { Float32View } from '@views/float32-view.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
 import { getError } from 'return-style'
-import { float32ToBuffer } from '@test/utils'
-import { Allocator } from '@src/allocator'
-import { BaseObject } from '@objects/base-object'
-import { float32 } from '@literals/float32-literal'
+import { float32ToBuffer } from '@test/utils.js'
+import { Allocator } from '@src/allocator.js'
+import { BaseObject } from '@objects/base-object.js'
+import { float32 } from '@literals/float32-literal.js'
 
 describe('Float32', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = Float32.create(allocator, float32(1))
 
@@ -23,7 +23,7 @@ describe('Float32', () => {
   test('from', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const obj = Float32.create(allocator, float32(1))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = Float32.from(allocator, obj.byteOffset)
 
@@ -45,7 +45,7 @@ describe('Float32', () => {
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const free = jest.spyOn(allocator, 'free')
+      const free = vi.spyOn(allocator, 'free')
       const result = Float32.create(allocator, float32(1))
 
       result.destroy()
@@ -68,8 +68,8 @@ describe('Float32', () => {
       test('does not call allocator.free()', () => {
         const allocator = {
           buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
+        , allocate: vi.fn()
+        , free: vi.fn()
         } satisfies IAllocator
         const obj1 = Float32.create(allocator, float32(1))
         const obj2 = obj1.clone()
@@ -81,7 +81,7 @@ describe('Float32', () => {
 
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const free = jest.spyOn(allocator, 'free')
+        const free = vi.spyOn(allocator, 'free')
         const obj1 = Float32.create(allocator, float32(1))
         const obj2 = obj1.clone()
 
@@ -140,7 +140,7 @@ describe('Float32', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const obj = Float32.create(allocator, float32(1))
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     obj.hash(hasher)

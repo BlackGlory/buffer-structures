@@ -1,8 +1,8 @@
-import { Float64View } from '@views/float64-view'
-import { float64ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { BaseView } from '@views/base-view'
-import { float64 } from '@literals/float64-literal'
+import { Float64View } from '@views/float64-view.js'
+import { float64ToBuffer } from '@test/utils.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { BaseView } from '@views/base-view.js'
+import { float64 } from '@literals/float64-literal.js'
 
 describe('Float64View', () => {
   test('create', () => {
@@ -32,8 +32,8 @@ describe('Float64View', () => {
   test('free', () => {
     const allocator = {
       buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
+    , allocate: vi.fn()
+    , free: vi.fn()
     } satisfies IAllocator
     const byteOffset = 1
     const view = new Float64View(allocator.buffer, byteOffset)
@@ -76,7 +76,7 @@ describe('Float64View', () => {
     const view = new Float64View(buffer, byteOffset)
     view.set(value)
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     view.hash(hasher)

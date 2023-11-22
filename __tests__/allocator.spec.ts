@@ -1,6 +1,6 @@
-import { Allocator } from '@src/allocator'
+import { Allocator } from '@src/allocator.js'
 import { getError } from 'return-style'
-import { bufferToBytes } from '@test/utils'
+import { bufferToBytes } from '@test/utils.js'
 
 // 固定跳过缓冲区的第一个字节, 因为它被视作NULL.
 const nullSize = 1

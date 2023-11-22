@@ -1,9 +1,9 @@
-import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { Uint8View } from '@views/uint8-view'
-import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
-import { BaseObject } from '@objects/base-object'
-import { Uint8Literal } from '@literals/uint8-literal'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils.js'
+import { BaseObject } from '@objects/base-object.js'
+import { Uint8Literal } from '@literals/uint8-literal.js'
 
 export class Uint8
 extends BaseObject

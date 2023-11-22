@@ -1,10 +1,10 @@
-import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { TupleView, ViewConstructor, MapStructureToTupleValue } from '@views/tuple-view'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { TupleView, ViewConstructor, MapStructureToTupleValue } from '@views/tuple-view.js'
 import { NonEmptyArray } from '@blackglory/prelude'
-import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils.js'
 import { ReturnTypeOfConstructor } from 'hotypes'
-import { BaseObject } from '@objects/base-object'
+import { BaseObject } from '@objects/base-object.js'
 
 export class Tuple<
   Structure extends NonEmptyArray<

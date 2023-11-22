@@ -1,19 +1,19 @@
-import { Struct } from '@objects/struct'
-import { StructView } from '@views/struct-view'
-import { Uint8View } from '@views/uint8-view'
-import { Uint16View } from '@views/uint16-view'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { uint8ToBuffer, uint16ToBuffer } from '@test/utils'
+import { Struct } from '@objects/struct.js'
+import { StructView } from '@views/struct-view.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { Uint16View } from '@views/uint16-view.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { uint8ToBuffer, uint16ToBuffer } from '@test/utils.js'
 import { getError } from 'return-style'
-import { Allocator } from '@src/allocator'
-import { BaseObject } from '@objects/base-object'
-import { uint8 } from '@literals/uint8-literal'
-import { uint16 } from '@literals/uint16-literal'
+import { Allocator } from '@src/allocator.js'
+import { BaseObject } from '@objects/base-object.js'
+import { uint8 } from '@literals/uint8-literal.js'
+import { uint16 } from '@literals/uint16-literal.js'
 
 describe('Struct', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = Struct.create(
       allocator
@@ -43,7 +43,7 @@ describe('Struct', () => {
     , { foo: Uint8View, bar: Uint16View}
     , { foo: uint8(1), bar: uint16(2) }
     )
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = Struct.from(
       allocator
@@ -88,8 +88,8 @@ describe('Struct', () => {
     it('calls allocator.free()', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const result = Struct.create(
         allocator
@@ -109,8 +109,8 @@ describe('Struct', () => {
     it('cannot destory twice', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const result = Struct.create(
         allocator
@@ -131,8 +131,8 @@ describe('Struct', () => {
       test('does not call allocator.free()', () => {
         const allocator = {
           buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
+        , allocate: vi.fn()
+        , free: vi.fn()
         } satisfies IAllocator
         const obj1 = Struct.create(
           allocator
@@ -151,7 +151,7 @@ describe('Struct', () => {
 
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const free = jest.spyOn(allocator, 'free')
+        const free = vi.spyOn(allocator, 'free')
         const obj1 = Struct.create(
           allocator
         , {
@@ -314,7 +314,7 @@ describe('Struct', () => {
     , { foo: uint8(10), bar: uint16(20) }
     )
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     obj.hash(hasher)

@@ -1,8 +1,8 @@
-import { Int32View } from '@views/int32-view'
-import { int32ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { BaseView } from '@views/base-view'
-import { int32 } from '@literals/int32-literal'
+import { Int32View } from '@views/int32-view.js'
+import { int32ToBuffer } from '@test/utils.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { BaseView } from '@views/base-view.js'
+import { int32 } from '@literals/int32-literal.js'
 
 describe('Int32View', () => {
   test('create', () => {
@@ -32,8 +32,8 @@ describe('Int32View', () => {
   test('free', () => {
     const allocator = {
       buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
+    , allocate: vi.fn()
+    , free: vi.fn()
     } satisfies IAllocator
     const byteOffset = 1
     const view = new Int32View(allocator.buffer, byteOffset)
@@ -76,7 +76,7 @@ describe('Int32View', () => {
     const view = new Int32View(buffer, byteOffset)
     view.set(value)
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     view.hash(hasher)

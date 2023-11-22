@@ -1,8 +1,8 @@
-import { IHash, IReference, IReadableWritable, IFree } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { getSlice } from './utils'
-import { BaseView } from '@views/base-view'
-import { uint32, Uint32Literal } from '@literals/uint32-literal'
+import { IHash, IReference, IReadableWritable, IFree } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { getSlice } from './utils.js'
+import { BaseView } from '@views/base-view.js'
+import { uint32, Uint32Literal } from '@literals/uint32-literal.js'
 
 export class Uint32View
 extends BaseView

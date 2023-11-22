@@ -1,10 +1,10 @@
-import { IHash, IReference, ISized, IReadableWritable, IFree } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { UnpackedReadableWritable } from '@src/types'
+import { IHash, IReference, ISized, IReadableWritable, IFree } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { UnpackedReadableWritable } from '@src/types.js'
 import { FixedLengthArray } from 'justypes'
-import { isOwnershiptPointer } from './utils'
+import { isOwnershiptPointer } from './utils.js'
 import { each } from 'iterable-operator'
-import { BaseView } from '@views/base-view'
+import { BaseView } from '@views/base-view.js'
 
 export type ViewConstructor<View extends BaseView> =
   ISized
@@ -55,7 +55,7 @@ implements IHash
   }
 
   get(): FixedLengthArray<UnpackedReadableWritable<View>, Length> {
-    const results: any[] = []
+    const results: unknown[] = []
 
     for (const view of this.iterate()) {
       results.push(view.get())

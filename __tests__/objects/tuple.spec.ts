@@ -1,19 +1,19 @@
-import { Tuple } from '@objects/tuple'
-import { TupleView } from '@views/tuple-view'
-import { Uint8View } from '@views/uint8-view'
-import { Uint16View } from '@views/uint16-view'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { uint8ToBuffer, uint16ToBuffer } from '@test/utils'
+import { Tuple } from '@objects/tuple.js'
+import { TupleView } from '@views/tuple-view.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { Uint16View } from '@views/uint16-view.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { uint8ToBuffer, uint16ToBuffer } from '@test/utils.js'
 import { getError } from 'return-style'
-import { Allocator } from '@src/allocator'
-import { BaseObject } from '@objects/base-object'
-import { uint8 } from '@literals/uint8-literal'
-import { uint16 } from '@literals/uint16-literal'
+import { Allocator } from '@src/allocator.js'
+import { BaseObject } from '@objects/base-object.js'
+import { uint8 } from '@literals/uint8-literal.js'
+import { uint16 } from '@literals/uint16-literal.js'
 
 describe('Tuple', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = Tuple.create(
       allocator
@@ -37,7 +37,7 @@ describe('Tuple', () => {
     , [Uint8View, Uint16View]
     , [uint8(1), uint16(2)]
     )
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = Tuple.from(
       allocator
@@ -81,7 +81,7 @@ describe('Tuple', () => {
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const free = jest.spyOn(allocator, 'free')
+      const free = vi.spyOn(allocator, 'free')
       const obj = Tuple.create(
         allocator
       , [Uint8View, Uint16View]
@@ -97,8 +97,8 @@ describe('Tuple', () => {
     it('cannot destory twice', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const obj = Tuple.create(
         allocator
@@ -116,8 +116,8 @@ describe('Tuple', () => {
       test('does not call allocator.free()', () => {
         const allocator = {
           buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
+        , allocate: vi.fn()
+        , free: vi.fn()
         } satisfies IAllocator
         const obj1 = Tuple.create(
           allocator
@@ -133,7 +133,7 @@ describe('Tuple', () => {
 
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const free = jest.spyOn(allocator, 'free')
+        const free = vi.spyOn(allocator, 'free')
         const obj1 = Tuple.create(
           allocator
         , [Uint8View, Uint16View]
@@ -257,7 +257,7 @@ describe('Tuple', () => {
     , [uint8(10), uint16(20)]
     )
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     obj.hash(hasher)

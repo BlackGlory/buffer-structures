@@ -1,8 +1,8 @@
-import { IHash, IReference, IReadableWritable, IFree } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { getSlice } from './utils'
-import { BaseView } from '@views/base-view'
-import { uint16, Uint16Literal } from '@literals/uint16-literal'
+import { IHash, IReference, IReadableWritable, IFree } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { getSlice } from './utils.js'
+import { BaseView } from '@views/base-view.js'
+import { uint16, Uint16Literal } from '@literals/uint16-literal.js'
 
 export class Uint16View
 extends BaseView

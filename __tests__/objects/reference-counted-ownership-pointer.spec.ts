@@ -1,20 +1,20 @@
-import { ReferenceCountedOwnershipPointer } from '@objects/reference-counted-ownership-pointer'
-import { Uint8 } from '@objects/uint8'
-import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-ownership-pointer-view'
-import { Uint8View } from '@views/uint8-view'
-import { IAllocator, IHasher } from '@src/interfaces'
+import { ReferenceCountedOwnershipPointer } from '@objects/reference-counted-ownership-pointer.js'
+import { Uint8 } from '@objects/uint8.js'
+import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-ownership-pointer-view.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
 import { getError } from 'return-style'
-import { uint8ToBuffer } from '@test/utils'
-import { Allocator } from '@src/allocator'
-import { BaseObject } from '@objects/base-object'
-import { NULL } from '@src/null'
-import { uint8 } from '@literals/uint8-literal'
-import { uint32 } from '@literals/uint32-literal'
+import { uint8ToBuffer } from '@test/utils.js'
+import { Allocator } from '@src/allocator.js'
+import { BaseObject } from '@objects/base-object.js'
+import { NULL } from '@src/null.js'
+import { uint8 } from '@literals/uint8-literal.js'
+import { uint32 } from '@literals/uint32-literal.js'
 
 describe('ReferenceCountedOwnershipPointer', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = ReferenceCountedOwnershipPointer.create(allocator, Uint8View, 10)
 
@@ -27,7 +27,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
   test('from', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const obj = ReferenceCountedOwnershipPointer.create(allocator, Uint8View, 10)
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = ReferenceCountedOwnershipPointer.from(allocator, obj.byteOffset, Uint8View)
 
@@ -59,7 +59,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const free = jest.spyOn(allocator, 'free')
+      const free = vi.spyOn(allocator, 'free')
       const data = Uint8.create(allocator, uint8(10))
       const pointer = ReferenceCountedOwnershipPointer.create(
         allocator
@@ -85,8 +85,8 @@ describe('ReferenceCountedOwnershipPointer', () => {
     it('cannot destory twice', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const pointer = ReferenceCountedOwnershipPointer.create(allocator, Uint8View, 1)
       pointer.destroy()
@@ -100,8 +100,8 @@ describe('ReferenceCountedOwnershipPointer', () => {
       test('does not call allocator.free()', () => {
         const allocator = {
           buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
+        , allocate: vi.fn()
+        , free: vi.fn()
         } satisfies IAllocator
         const obj1 = ReferenceCountedOwnershipPointer.create(allocator, Uint8View, 1)
         const obj2 = obj1.clone()
@@ -113,7 +113,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
 
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const free = jest.spyOn(allocator, 'free')
+        const free = vi.spyOn(allocator, 'free')
         const data = Uint8.create(allocator, uint8(10))
         const obj1 = ReferenceCountedOwnershipPointer.create(
           allocator
@@ -177,7 +177,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
       const obj = ReferenceCountedOwnershipPointer.create(allocator, Uint8View, 0)
       const hasher = {
-        write: jest.fn()
+        write: vi.fn()
       } satisfies IHasher
 
       obj.hash(hasher)
@@ -195,7 +195,7 @@ describe('ReferenceCountedOwnershipPointer', () => {
       , data._view.byteOffset
       )
       const hasher = {
-        write: jest.fn()
+        write: vi.fn()
       } satisfies IHasher
 
       obj.hash(hasher)

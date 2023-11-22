@@ -1,6 +1,6 @@
-import { Hasher } from '@src/hasher'
-import { NULL } from '@src/null'
-import { bytesToBuffer } from '@test/utils'
+import { Hasher } from '@src/hasher.js'
+import { NULL } from '@src/null.js'
+import { bytesToBuffer } from '@test/utils.js'
 
 describe('Hasher', () => {
   test('create, write, finish', () => {

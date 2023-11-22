@@ -1,8 +1,8 @@
-import { Uint16View } from '@views/uint16-view'
-import { uint16ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { BaseView } from '@views/base-view'
-import { uint16 } from '@literals/uint16-literal'
+import { Uint16View } from '@views/uint16-view.js'
+import { uint16ToBuffer } from '@test/utils.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { BaseView } from '@views/base-view.js'
+import { uint16 } from '@literals/uint16-literal.js'
 
 describe('Uint16View', () => {
   test('create', () => {
@@ -32,8 +32,8 @@ describe('Uint16View', () => {
   test('free', () => {
     const allocator = {
       buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
+    , allocate: vi.fn()
+    , free: vi.fn()
     } satisfies IAllocator
     const byteOffset = 1
     const view = new Uint16View(allocator.buffer, byteOffset)
@@ -76,7 +76,7 @@ describe('Uint16View', () => {
     const view = new Uint16View(buffer, byteOffset)
     view.set(value)
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     view.hash(hasher)

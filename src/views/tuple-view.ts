@@ -1,11 +1,11 @@
-import { IHash, IReference, ISized, IReadableWritable, IFree } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { UnpackedReadableWritable } from '@src/types'
+import { IHash, IReference, ISized, IReadableWritable, IFree } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { UnpackedReadableWritable } from '@src/types.js'
 import { NonEmptyArray } from '@blackglory/prelude'
 import { ReturnTypeOfConstructor } from 'hotypes'
-import { isOwnershiptPointer } from './utils'
+import { isOwnershiptPointer } from './utils.js'
 import { each } from 'iterable-operator'
-import { BaseView } from '@views/base-view'
+import { BaseView } from '@views/base-view.js'
 
 export type ViewConstructor<View> =
   ISized
@@ -57,7 +57,7 @@ implements IReference
   }
 
   get(): MapStructureToTupleValue<Structure> {
-    const results: any[] = []
+    const results: unknown[] = []
 
     for (const view of this.iterate()) {
       const value = view.get()

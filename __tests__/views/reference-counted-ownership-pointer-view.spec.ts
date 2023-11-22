@@ -1,13 +1,13 @@
-import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-ownership-pointer-view'
-import { PointerView } from '@views/pointer-view'
-import { Uint8View } from '@views/uint8-view'
-import { Uint32View } from '@views/uint32-view'
-import { uint8ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { BaseView } from '@views/base-view'
-import { NULL } from '@src/null'
-import { uint8 } from '@literals/uint8-literal'
-import { uint32 } from '@literals/uint32-literal'
+import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-ownership-pointer-view.js'
+import { PointerView } from '@views/pointer-view.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { Uint32View } from '@views/uint32-view.js'
+import { uint8ToBuffer } from '@test/utils.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { BaseView } from '@views/base-view.js'
+import { NULL } from '@src/null.js'
+import { uint8 } from '@literals/uint8-literal.js'
+import { uint32 } from '@literals/uint32-literal.js'
 
 describe('ReferenceCountedOwnershipPointerView', () => {
   test('create', () => {
@@ -42,8 +42,8 @@ describe('ReferenceCountedOwnershipPointerView', () => {
     test('value: null', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const byteOffset = 1
       const pointerView = new ReferenceCountedOwnershipPointerView(
@@ -65,8 +65,8 @@ describe('ReferenceCountedOwnershipPointerView', () => {
     test('value: non-null', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const uint8View = new Uint8View(allocator.buffer, 1)
       uint8View.set(uint8(10))
@@ -89,8 +89,8 @@ describe('ReferenceCountedOwnershipPointerView', () => {
     test('value: null', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const byteOffset = 1
       const pointerView = new ReferenceCountedOwnershipPointerView(
@@ -108,8 +108,8 @@ describe('ReferenceCountedOwnershipPointerView', () => {
     test('value: non-null', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const uint8View = new Uint8View(allocator.buffer, 1)
       uint8View.set(uint8(10))
@@ -392,7 +392,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       const pointerView = new ReferenceCountedOwnershipPointerView(buffer, 50, Uint8View)
       pointerView.set([uint32(1), null])
       const hasher = {
-        write: jest.fn()
+        write: vi.fn()
       } satisfies IHasher
 
       pointerView.hash(hasher)
@@ -408,7 +408,7 @@ describe('ReferenceCountedOwnershipPointerView', () => {
       const pointerView = new ReferenceCountedOwnershipPointerView(buffer, 50, Uint8View)
       pointerView.set([uint32(1), uint32(1)])
       const hasher = {
-        write: jest.fn()
+        write: vi.fn()
       } satisfies IHasher
 
       pointerView.hash(hasher)

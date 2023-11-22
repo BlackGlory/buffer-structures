@@ -1,6 +1,6 @@
-import { StringLiteral, string } from '@literals/string-literal'
-import { IHasher } from '@src/interfaces'
-import { BaseLiteral } from '@literals/base-literal'
+import { StringLiteral, string } from '@literals/string-literal.js'
+import { IHasher } from '@src/interfaces.js'
+import { BaseLiteral } from '@literals/base-literal.js'
 
 test('string', () => {
   const result = string('foo')
@@ -28,7 +28,7 @@ describe('StringLiteral', () => {
   test('hash', () => {
     const literal = new StringLiteral('foo')
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     literal.hash(hasher)

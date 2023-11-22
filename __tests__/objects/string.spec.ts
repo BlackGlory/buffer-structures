@@ -1,15 +1,15 @@
-import { String } from '@objects/string'
-import { StringView } from '@views/string-view'
-import { IAllocator, IHasher } from '@src/interfaces'
+import { String } from '@objects/string.js'
+import { StringView } from '@views/string-view.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
 import { getError } from 'return-style'
-import { Allocator } from '@src/allocator'
-import { BaseObject } from '@objects/base-object'
-import { string } from '@literals/string-literal'
+import { Allocator } from '@src/allocator.js'
+import { BaseObject } from '@objects/base-object.js'
+import { string } from '@literals/string-literal.js'
 
 describe('String', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = String.create(allocator, string('foo'))
 
@@ -22,7 +22,7 @@ describe('String', () => {
   test('from', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const obj = String.create(allocator, string('foo'))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = String.from(allocator, obj.byteOffset)
 
@@ -46,8 +46,8 @@ describe('String', () => {
     it('calls allocator.free()', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const result = String.create(allocator, string('foo'))
 
@@ -60,8 +60,8 @@ describe('String', () => {
     it('cannot destory twice', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const result = String.create(allocator, string('foo'))
       result.destroy()
@@ -75,8 +75,8 @@ describe('String', () => {
       test('does not call allocator.free()', () => {
         const allocator = {
           buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
+        , allocate: vi.fn()
+        , free: vi.fn()
         } satisfies IAllocator
         const obj1 = String.create(allocator, string('foo'))
         const obj2 = obj1.clone()
@@ -88,7 +88,7 @@ describe('String', () => {
 
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const free = jest.spyOn(allocator, 'free')
+        const free = vi.spyOn(allocator, 'free')
         const obj1 = String.create(allocator, string('foo'))
         const obj2 = obj1.clone()
 
@@ -138,7 +138,7 @@ describe('String', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const obj = String.create(allocator, string('foo'))
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     obj.hash(hasher)

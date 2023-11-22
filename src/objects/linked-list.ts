@@ -1,11 +1,11 @@
-import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { LinkedListView, ViewConstructor, LinkedListStructure, TupleKey } from '@views/linked-list-view'
-import { MapStructureToTupleValue } from '@views/tuple-view'
-import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
-import { BaseObject } from '@objects/base-object'
-import { BaseView } from '@views/base-view'
+import { ICopy, IClone, IDestroy, IReadableWritable, IHash, IReference } from '@src/traits.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { OwnershipPointerView } from '@views/ownership-pointer-view.js'
+import { LinkedListView, ViewConstructor, LinkedListStructure, TupleKey } from '@views/linked-list-view.js'
+import { MapStructureToTupleValue } from '@views/tuple-view.js'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils.js'
+import { BaseObject } from '@objects/base-object.js'
+import { BaseView } from '@views/base-view.js'
 
 export class LinkedList<View extends BaseView & IHash & IReadableWritable<unknown>>
 extends BaseObject

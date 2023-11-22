@@ -1,9 +1,9 @@
-import { StringView } from '@views/string-view'
-import { bufferToBytes, getSlice, setSlice, uint32ToBuffer } from '@test/utils'
+import { StringView } from '@views/string-view.js'
+import { bufferToBytes, getSlice, setSlice, uint32ToBuffer } from '@test/utils.js'
 import { toArray } from '@blackglory/prelude'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { BaseView } from '@views/base-view'
-import { string } from '@literals/string-literal'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { BaseView } from '@views/base-view.js'
+import { string } from '@literals/string-literal.js'
 
 describe('StringView', () => {
   test('create', () => {
@@ -50,8 +50,8 @@ describe('StringView', () => {
   test('free', () => {
     const allocator = {
       buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
+    , allocate: vi.fn()
+    , free: vi.fn()
     } satisfies IAllocator
     const byteOffset = 1
     const view = new StringView(allocator.buffer, byteOffset)
@@ -107,7 +107,7 @@ describe('StringView', () => {
     const view = new StringView(buffer, byteOffset)
     view.set(string('foo'))
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     view.hash(hasher)

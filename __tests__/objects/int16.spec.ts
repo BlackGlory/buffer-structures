@@ -1,16 +1,16 @@
-import { Int16 } from '@objects/int16'
-import { Int16View } from '@views/int16-view'
-import { IAllocator, IHasher } from '@src/interfaces'
+import { Int16 } from '@objects/int16.js'
+import { Int16View } from '@views/int16-view.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
 import { getError } from 'return-style'
-import { int16ToBuffer } from '@test/utils'
-import { Allocator } from '@src/allocator'
-import { BaseObject } from '@objects/base-object'
-import { int16 } from '@literals/int16-literal'
+import { int16ToBuffer } from '@test/utils.js'
+import { Allocator } from '@src/allocator.js'
+import { BaseObject } from '@objects/base-object.js'
+import { int16 } from '@literals/int16-literal.js'
 
 describe('Int16', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = Int16.create(allocator, int16(1))
 
@@ -23,7 +23,7 @@ describe('Int16', () => {
   test('from', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const obj = Int16.create(allocator, int16(1))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = Int16.from(allocator, obj.byteOffset)
 
@@ -45,7 +45,7 @@ describe('Int16', () => {
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const free = jest.spyOn(allocator, 'free')
+      const free = vi.spyOn(allocator, 'free')
       const result = Int16.create(allocator, int16(1))
 
       result.destroy()
@@ -68,8 +68,8 @@ describe('Int16', () => {
       test('does not call allocator.free()', () => {
         const allocator = {
           buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
+        , allocate: vi.fn()
+        , free: vi.fn()
         } satisfies IAllocator
         const obj1 = Int16.create(allocator, int16(1))
         const obj2 = obj1.clone()
@@ -81,7 +81,7 @@ describe('Int16', () => {
 
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const free = jest.spyOn(allocator, 'free')
+        const free = vi.spyOn(allocator, 'free')
         const obj1 = Int16.create(allocator, int16(1))
         const obj2 = obj1.clone()
 
@@ -140,7 +140,7 @@ describe('Int16', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const obj = Int16.create(allocator, int16(1))
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     obj.hash(hasher)

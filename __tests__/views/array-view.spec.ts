@@ -1,11 +1,11 @@
-import { ArrayView } from '@views/array-view'
-import { Uint8View } from '@views/uint8-view'
-import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { uint8ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { BaseView } from '@views/base-view'
-import { uint8 } from '@literals/uint8-literal'
-import { uint32 } from '@literals/uint32-literal'
+import { ArrayView } from '@views/array-view.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { OwnershipPointerView } from '@views/ownership-pointer-view.js'
+import { uint8ToBuffer } from '@test/utils.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { BaseView } from '@views/base-view.js'
+import { uint8 } from '@literals/uint8-literal.js'
+import { uint32 } from '@literals/uint32-literal.js'
 
 describe('ArrayView', () => {
   test('create', () => {
@@ -46,8 +46,8 @@ describe('ArrayView', () => {
     test('without ownership pointers', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const byteOffset = 1
       const view = new ArrayView(allocator.buffer, byteOffset, Uint8View, 3)
@@ -61,8 +61,8 @@ describe('ArrayView', () => {
     test('with ownership pointers', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       class Uint8OwnershipPointerView extends OwnershipPointerView<Uint8View> {
         constructor(buffer: ArrayBufferLike, byteOffset: number) {
@@ -158,7 +158,7 @@ describe('ArrayView', () => {
     view.setByIndex(0, uint8(1))
     view.setByIndex(1, uint8(2))
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     view.hash(hasher)

@@ -1,19 +1,19 @@
 import { toArray } from '@blackglory/prelude'
-import { HashMap } from '@objects/hash-map'
-import { IAllocator } from '@src/interfaces'
-import { Uint8View } from '@views/uint8-view'
-import { Uint16View } from '@views/uint16-view'
-import { Uint32View } from '@views/uint32-view'
-import { OwnershipPointerView } from '@views/ownership-pointer-view'
-import { Allocator } from '@src/allocator'
+import { HashMap } from '@objects/hash-map.js'
+import { IAllocator } from '@src/interfaces.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { Uint16View } from '@views/uint16-view.js'
+import { Uint32View } from '@views/uint32-view.js'
+import { OwnershipPointerView } from '@views/ownership-pointer-view.js'
+import { Allocator } from '@src/allocator.js'
 import { getError } from 'return-style'
-import { BaseObject } from '@objects/base-object'
-import { uint8 } from '@literals/uint8-literal'
+import { BaseObject } from '@objects/base-object.js'
+import { uint8 } from '@literals/uint8-literal.js'
 
 describe('HashMap', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
     const capacity = 10
 
     const result = HashMap.create(allocator, Uint8View, Uint8View, { capacity })
@@ -31,7 +31,7 @@ describe('HashMap', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const capacity = 10
     const obj = HashMap.create(allocator, Uint8View, Uint8View, { capacity })
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = HashMap.from(allocator, obj.byteOffset, Uint8View, Uint8View, {
       capacity: obj.capacity
@@ -146,7 +146,7 @@ describe('HashMap', () => {
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const free = jest.spyOn(allocator, 'free')
+      const free = vi.spyOn(allocator, 'free')
       const obj = HashMap.create(allocator, Uint8View, Uint8View)
       const buckets = obj._view.derefBuckets()!
 
@@ -160,8 +160,8 @@ describe('HashMap', () => {
     it('cannot destory twice', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const obj = HashMap.create(allocator, Uint8View, Uint8View)
       obj.destroy()
@@ -174,7 +174,7 @@ describe('HashMap', () => {
     describe('reference counted', () => {
       test('does not call allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const free = jest.spyOn(allocator, 'free')
+        const free = vi.spyOn(allocator, 'free')
         const obj1 = HashMap.create(allocator, Uint8View, Uint8View)
         const obj2 = obj1.clone()
 
@@ -185,7 +185,7 @@ describe('HashMap', () => {
 
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const free = jest.spyOn(allocator, 'free')
+        const free = vi.spyOn(allocator, 'free')
         const obj1 = HashMap.create(allocator, Uint8View, Uint8View)
         const buckets = obj1._view.derefBuckets()!
         const obj2 = obj1.clone()

@@ -1,12 +1,12 @@
-import { IHash, IReadableWritable, IClone, IDestroy, IReference } from '@src/traits'
-import { IAllocator } from '@src/interfaces'
-import { UnpackedReadableWritable } from '@src/types'
-import { HashSetView, ViewConstructor } from '@views/hash-set-view'
-import { HashBucketsView } from '@views/hash-buckets-view'
-import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils'
-import { BaseObject } from '@objects/base-object'
-import { BaseView } from '@views/base-view'
-import { uint32 } from '@literals/uint32-literal'
+import { IHash, IReadableWritable, IClone, IDestroy, IReference } from '@src/traits.js'
+import { IAllocator } from '@src/interfaces.js'
+import { UnpackedReadableWritable } from '@src/types.js'
+import { HashSetView, ViewConstructor } from '@views/hash-set-view.js'
+import { HashBucketsView } from '@views/hash-buckets-view.js'
+import { ObjectStateMachine, ReferenceCounter, ConstructorType } from './utils.js'
+import { BaseObject } from '@objects/base-object.js'
+import { BaseView } from '@views/base-view.js'
+import { uint32 } from '@literals/uint32-literal.js'
 
 /**
  * 在向HashSet添加新的项目后, HashSet可能会尝试对内部数组进行扩容, 从而确保当前负载总是低于或等于负载因子.

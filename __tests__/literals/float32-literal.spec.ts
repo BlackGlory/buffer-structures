@@ -1,7 +1,7 @@
-import { Float32Literal, float32 } from '@literals/float32-literal'
-import { IHasher } from '@src/interfaces'
-import { float64ToBuffer } from '@test/utils'
-import { BaseLiteral } from '@literals/base-literal'
+import { Float32Literal, float32 } from '@literals/float32-literal.js'
+import { IHasher } from '@src/interfaces.js'
+import { float64ToBuffer } from '@test/utils.js'
+import { BaseLiteral } from '@literals/base-literal.js'
 
 test('Float32', () => {
   const result = float32(1)
@@ -29,7 +29,7 @@ describe('Float32Literal', () => {
   test('hash', () => {
     const literal = new Float32Literal(1)
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     literal.hash(hasher)

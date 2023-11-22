@@ -1,6 +1,6 @@
-import { IReadable, IHash } from '@src/traits'
-import { IHasher } from '@src/interfaces'
-import { BaseLiteral } from '@literals/base-literal'
+import { IReadable, IHash } from '@src/traits.js'
+import { IHasher } from '@src/interfaces.js'
+import { BaseLiteral } from '@literals/base-literal.js'
 
 export function string(val: string): StringLiteral {
   return new StringLiteral(val)

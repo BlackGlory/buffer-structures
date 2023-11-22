@@ -1,10 +1,10 @@
-import { PointerView } from '@views/pointer-view'
-import { Uint8View } from '@views/uint8-view'
-import { uint8ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { BaseView } from '@views/base-view'
-import { uint8 } from '@literals/uint8-literal'
-import { uint32 } from '@literals/uint32-literal'
+import { PointerView } from '@views/pointer-view.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { uint8ToBuffer } from '@test/utils.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { BaseView } from '@views/base-view.js'
+import { uint8 } from '@literals/uint8-literal.js'
+import { uint32 } from '@literals/uint32-literal.js'
 
 describe('PointerView', () => {
   test('create', () => {
@@ -34,8 +34,8 @@ describe('PointerView', () => {
   test('free', () => {
     const allocator = {
       buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
+    , allocate: vi.fn()
+    , free: vi.fn()
     } satisfies IAllocator
     const byteOffset = 1
     const view = new PointerView(allocator.buffer, byteOffset, Uint8View)
@@ -138,7 +138,7 @@ describe('PointerView', () => {
       const pointerView = new PointerView(buffer, 50, Uint8View)
       pointerView.set(uint32(1))
       const hasher = {
-        write: jest.fn()
+        write: vi.fn()
       } satisfies IHasher
 
       pointerView.hash(hasher)
@@ -154,7 +154,7 @@ describe('PointerView', () => {
       const pointerView = new PointerView(buffer, 50, Uint8View)
       pointerView.set(uint32(1))
       const hasher = {
-        write: jest.fn()
+        write: vi.fn()
       } satisfies IHasher
 
       pointerView.hash(hasher)

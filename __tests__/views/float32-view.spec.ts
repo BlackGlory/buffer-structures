@@ -1,8 +1,8 @@
-import { Float32View } from '@views/float32-view'
-import { float32ToBuffer } from '@test/utils'
-import { IAllocator, IHasher } from '@src/interfaces'
-import { BaseView } from '@views/base-view'
-import { float32 } from '@literals/float32-literal'
+import { Float32View } from '@views/float32-view.js'
+import { float32ToBuffer } from '@test/utils.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { BaseView } from '@views/base-view.js'
+import { float32 } from '@literals/float32-literal.js'
 
 describe('Float32View', () => {
   test('create', () => {
@@ -32,8 +32,8 @@ describe('Float32View', () => {
   test('free', () => {
     const allocator = {
       buffer: new ArrayBuffer(100)
-    , allocate: jest.fn()
-    , free: jest.fn()
+    , allocate: vi.fn()
+    , free: vi.fn()
     } satisfies IAllocator
     const byteOffset = 1
     const view = new Float32View(allocator.buffer, byteOffset)
@@ -76,7 +76,7 @@ describe('Float32View', () => {
     const view = new Float32View(buffer, byteOffset)
     view.set(value)
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     view.hash(hasher)

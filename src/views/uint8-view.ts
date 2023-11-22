@@ -1,8 +1,8 @@
-import { IAllocator, IHasher } from '@src/interfaces'
-import { IHash, IReference, IReadableWritable, IFree } from '@src/traits'
-import { getSlice } from './utils'
-import { BaseView } from '@views/base-view'
-import { uint8, Uint8Literal } from '@literals/uint8-literal'
+import { IAllocator, IHasher } from '@src/interfaces.js'
+import { IHash, IReference, IReadableWritable, IFree } from '@src/traits.js'
+import { getSlice } from './utils.js'
+import { BaseView } from '@views/base-view.js'
+import { uint8, Uint8Literal } from '@literals/uint8-literal.js'
 
 export class Uint8View
 extends BaseView

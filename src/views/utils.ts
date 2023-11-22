@@ -1,4 +1,4 @@
-import { IOwnershipPointer, IHash } from '@src/traits'
+import { IOwnershipPointer, IHash } from '@src/traits.js'
 import { isFunction } from '@blackglory/prelude'
 
 export function isOwnershiptPointer(view: object): view is IOwnershipPointer {

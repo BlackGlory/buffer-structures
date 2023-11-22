@@ -1,16 +1,16 @@
-import { Uint8 } from '@objects/uint8'
-import { Uint8View } from '@views/uint8-view'
-import { IAllocator, IHasher } from '@src/interfaces'
+import { Uint8 } from '@objects/uint8.js'
+import { Uint8View } from '@views/uint8-view.js'
+import { IAllocator, IHasher } from '@src/interfaces.js'
 import { getError } from 'return-style'
-import { uint8ToBuffer } from '@test/utils'
-import { Allocator } from '@src/allocator'
-import { BaseObject } from '@objects/base-object'
-import { uint8 } from '@literals/uint8-literal'
+import { uint8ToBuffer } from '@test/utils.js'
+import { Allocator } from '@src/allocator.js'
+import { BaseObject } from '@objects/base-object.js'
+import { uint8 } from '@literals/uint8-literal.js'
 
 describe('Uint8', () => {
   test('create', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = Uint8.create(allocator, uint8(1))
 
@@ -23,7 +23,7 @@ describe('Uint8', () => {
   test('from', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const obj = Uint8.create(allocator, uint8(1))
-    const allocate = jest.spyOn(allocator, 'allocate')
+    const allocate = vi.spyOn(allocator, 'allocate')
 
     const result = Uint8.from(allocator, obj.byteOffset)
 
@@ -45,7 +45,7 @@ describe('Uint8', () => {
   describe('destory', () => {
     it('calls allocator.free()', () => {
       const allocator = new Allocator(new ArrayBuffer(100))
-      const free = jest.spyOn(allocator, 'free')
+      const free = vi.spyOn(allocator, 'free')
       const result = Uint8.create(allocator, uint8(1))
 
       result.destroy()
@@ -57,8 +57,8 @@ describe('Uint8', () => {
     it('cannot destory twice', () => {
       const allocator = {
         buffer: new ArrayBuffer(100)
-      , allocate: jest.fn()
-      , free: jest.fn()
+      , allocate: vi.fn()
+      , free: vi.fn()
       } satisfies IAllocator
       const result = Uint8.create(allocator, uint8(1))
       result.destroy()
@@ -72,8 +72,8 @@ describe('Uint8', () => {
       test('does not call allocator.free()', () => {
         const allocator = {
           buffer: new ArrayBuffer(100)
-        , allocate: jest.fn()
-        , free: jest.fn()
+        , allocate: vi.fn()
+        , free: vi.fn()
         } satisfies IAllocator
         const obj1 = Uint8.create(allocator, uint8(1))
         const obj2 = obj1.clone()
@@ -85,7 +85,7 @@ describe('Uint8', () => {
 
       test('calls allocator.free()', () => {
         const allocator = new Allocator(new ArrayBuffer(100))
-        const free = jest.spyOn(allocator, 'free')
+        const free = vi.spyOn(allocator, 'free')
         const obj1 = Uint8.create(allocator, uint8(1))
         const obj2 = obj1.clone()
 
@@ -144,7 +144,7 @@ describe('Uint8', () => {
     const allocator = new Allocator(new ArrayBuffer(100))
     const obj = Uint8.create(allocator, uint8(1))
     const hasher = {
-      write: jest.fn()
+      write: vi.fn()
     } satisfies IHasher
 
     obj.hash(hasher)

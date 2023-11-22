@@ -1,4 +1,4 @@
-import { IAllocator, IHasher } from './interfaces'
+import { IAllocator, IHasher } from './interfaces.js'
 
 export interface ISized {
   readonly byteLength: number
