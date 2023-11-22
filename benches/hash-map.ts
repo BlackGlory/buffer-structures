@@ -1,7 +1,7 @@
-import { go } from '@blackglory/go'
-import { Allocator, HashMap, Uint16View, uint16 } from '..'
+import { go } from '@blackglory/prelude'
+import { Allocator, HashMap, Uint16View, uint16 } from '../lib/index.js'
 import { Benchmark } from 'extra-benchmark'
-import { MB } from './utils'
+import { MB } from './utils.js'
 
 const benchmark = new Benchmark('HashMap')
 

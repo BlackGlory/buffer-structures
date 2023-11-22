@@ -25,10 +25,10 @@
     "clean": "rimraf lib",
     "build": "tsc --project tsconfig.build.json --outDir lib",
     "bench": "run-s bench:*",
-    "bench:hash-map": "ts-node --require tsconfig-paths/register benches/hash-map.ts",
-    "bench:hash-set": "ts-node --require tsconfig-paths/register benches/hash-set.ts",
-    "bench:hash-map:debug": "NODE_OPTIONS=--inspect-brk ts-node --require tsconfig-paths/register benches/hash-map.ts",
-    "bench:hash-set:debug": "NODE_OPTIONS=--inspect-brk ts-node --require tsconfig-paths/register benches/hash-set.ts",
+    "bench:hash-map": "ts-node --esm --require tsconfig-paths/register benches/hash-map.ts",
+    "bench:hash-set": "ts-node --esm --require tsconfig-paths/register benches/hash-set.ts",
+    "bench:hash-map:debug": "NODE_OPTIONS=--inspect-brk ts-node --esm --require tsconfig-paths/register benches/hash-map.ts",
+    "bench:hash-set:debug": "NODE_OPTIONS=--inspect-brk ts-node --esm --require tsconfig-paths/register benches/hash-set.ts",
     "release": "standard-version"
   },
   "husky": {
