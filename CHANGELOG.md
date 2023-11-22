@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.5.0](https://github.com/BlackGlory/buffer-structures/compare/v0.4.1...v0.5.0) (2023-11-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* - CommonJS => ESM
+- Node.js v16 => Node.js v18
+
+* upgrade dependencies ([0af6220](https://github.com/BlackGlory/buffer-structures/commit/0af6220714e2b895da2f02187efb3ca498611e24))
+
 ### [0.4.1](https://github.com/BlackGlory/buffer-structures/compare/v0.4.0...v0.4.1) (2023-06-10)
 
 
