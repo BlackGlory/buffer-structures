@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest'
 import { HashSetView } from '@views/hash-set-view.js'
 import { Uint8View } from '@views/uint8-view.js'
 import { Uint32View } from '@views/uint32-view.js'

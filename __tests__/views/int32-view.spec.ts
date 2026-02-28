@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest'
 import { Int32View } from '@views/int32-view.js'
 import { int32ToBuffer } from '@test/utils.js'
 import { IAllocator, IHasher } from '@src/interfaces.js'

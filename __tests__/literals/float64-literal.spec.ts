@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest'
 import { Float64Literal, float64 } from '@literals/float64-literal.js'
 import { IHasher } from '@src/interfaces.js'
 import { float64ToBuffer } from '@test/utils.js'

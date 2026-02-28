@@ -1,3 +1,4 @@
+import { describe, test, it, expect, vi } from 'vitest'
 import { Int16 } from '@objects/int16.js'
 import { Int16View } from '@views/int16-view.js'
 import { IAllocator, IHasher } from '@src/interfaces.js'

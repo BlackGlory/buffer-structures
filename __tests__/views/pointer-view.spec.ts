@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest'
 import { PointerView } from '@views/pointer-view.js'
 import { Uint8View } from '@views/uint8-view.js'
 import { uint8ToBuffer } from '@test/utils.js'

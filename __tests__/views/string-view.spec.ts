@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest'
 import { StringView } from '@views/string-view.js'
 import { bufferToBytes, getSlice, setSlice, uint32ToBuffer } from '@test/utils.js'
 import { toArray } from '@blackglory/prelude'

@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest'
 import { StringLiteral, string } from '@literals/string-literal.js'
 import { IHasher } from '@src/interfaces.js'
 import { BaseLiteral } from '@literals/base-literal.js'

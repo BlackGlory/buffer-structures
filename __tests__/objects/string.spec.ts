@@ -1,3 +1,4 @@
+import { describe, test, it, expect, vi } from 'vitest'
 import { String } from '@objects/string.js'
 import { StringView } from '@views/string-view.js'
 import { IAllocator, IHasher } from '@src/interfaces.js'

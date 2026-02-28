@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest'
 import { ArrayView } from '@views/array-view.js'
 import { Uint8View } from '@views/uint8-view.js'
 import { OwnershipPointerView } from '@views/ownership-pointer-view.js'

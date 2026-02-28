@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest'
 import { Allocator } from '@src/allocator.js'
 import { getError } from 'return-style'
 import { bufferToBytes } from '@test/utils.js'

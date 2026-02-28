@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest'
 import { TupleView } from '@views/tuple-view.js'
 import { Uint8View } from '@views/uint8-view.js'
 import { Uint16View } from '@views/uint16-view.js'

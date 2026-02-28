@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest'
 import { Int8Literal, int8 } from '@literals/int8-literal.js'
 import { IHasher } from '@src/interfaces.js'
 import { int8ToBuffer } from '@test/utils.js'

@@ -1,3 +1,4 @@
+import { describe, test, it, expect, vi } from 'vitest'
 import { Array } from '@objects/array.js'
 import { ArrayView } from '@views/array-view.js'
 import { Uint8View } from '@views/uint8-view.js'

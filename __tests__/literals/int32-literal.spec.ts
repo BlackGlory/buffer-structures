@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest'
 import { Int32Literal, int32 } from '@literals/int32-literal.js'
 import { IHasher } from '@src/interfaces.js'
 import { int32ToBuffer } from '@test/utils.js'

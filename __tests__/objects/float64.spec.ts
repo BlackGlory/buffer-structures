@@ -1,3 +1,4 @@
+import { describe, test, it, expect, vi } from 'vitest'
 import { Float64 } from '@objects/float64.js'
 import { Float64View } from '@views/float64-view.js'
 import { IAllocator, IHasher } from '@src/interfaces.js'

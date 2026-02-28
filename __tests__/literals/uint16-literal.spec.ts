@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest'
 import { Uint16Literal, uint16 } from '@literals/uint16-literal.js'
 import { IHasher } from '@src/interfaces.js'
 import { uint16ToBuffer } from '@test/utils.js'

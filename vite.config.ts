@@ -6,8 +6,4 @@ export default defineConfig({
   plugins: [
     tsconfigPaths()
   ]
-  // @ts-ignore
-, test: {
-    globals: true
-  }
 })

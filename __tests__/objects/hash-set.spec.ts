@@ -1,3 +1,4 @@
+import { describe, test, it, expect, vi } from 'vitest'
 import { toArray } from '@blackglory/prelude'
 import { HashSet } from '@objects/hash-set.js'
 import { IAllocator } from '@src/interfaces.js'

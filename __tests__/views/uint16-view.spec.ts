@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest'
 import { Uint16View } from '@views/uint16-view.js'
 import { uint16ToBuffer } from '@test/utils.js'
 import { IAllocator, IHasher } from '@src/interfaces.js'

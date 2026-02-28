@@ -1,3 +1,4 @@
+import { describe, test, it, expect, vi } from 'vitest'
 import { Struct } from '@objects/struct.js'
 import { StructView } from '@views/struct-view.js'
 import { Uint8View } from '@views/uint8-view.js'

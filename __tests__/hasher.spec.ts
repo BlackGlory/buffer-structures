@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest'
 import { Hasher } from '@src/hasher.js'
 import { NULL } from '@src/null.js'
 import { bytesToBuffer } from '@test/utils.js'

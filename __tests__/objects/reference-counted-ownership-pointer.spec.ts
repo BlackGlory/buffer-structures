@@ -1,3 +1,4 @@
+import { describe, test, it, expect, vi } from 'vitest'
 import { ReferenceCountedOwnershipPointer } from '@objects/reference-counted-ownership-pointer.js'
 import { Uint8 } from '@objects/uint8.js'
 import { ReferenceCountedOwnershipPointerView } from '@views/reference-counted-ownership-pointer-view.js'
