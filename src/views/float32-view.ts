@@ -20,7 +20,7 @@ implements IHash
     this.view = new DataView(buffer)
   }
 
-  free(allocator: IAllocator) {
+  free(allocator: IAllocator): void {
     allocator.free(this.byteOffset, Float32View.byteLength)
   }
 

@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from 'vitest'
 import { Float32Literal, float32 } from '@literals/float32-literal.js'
 import { IHasher } from '@src/interfaces.js'
-import { float64ToBuffer } from '@test/utils.js'
+import { float32ToBuffer } from '@test/utils.js'
 import { BaseLiteral } from '@literals/base-literal.js'
 
 test('Float32', () => {
@@ -36,6 +36,6 @@ describe('Float32Literal', () => {
     literal.hash(hasher)
 
     expect(hasher.write).toBeCalledTimes(1)
-    expect(hasher.write).toBeCalledWith(float64ToBuffer(1))
+    expect(hasher.write).toBeCalledWith(float32ToBuffer(1))
   })
 })
