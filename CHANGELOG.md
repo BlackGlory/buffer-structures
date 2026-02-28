@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.1](https://github.com/BlackGlory/buffer-structures/compare/v0.5.0...v0.5.1) (2026-02-28)
+
+
+### Bug Fixes
+
+* **allocator:** edge cases about `free()` ([89aba46](https://github.com/BlackGlory/buffer-structures/commit/89aba4634b2c8a9f972f87a88532846731d5dfc8))
+* **int32-view:** add the missing interface `IFree` ([3d7b14f](https://github.com/BlackGlory/buffer-structures/commit/3d7b14f5f6122cd9c0907848011ab3ea015ce4fb))
+
 ## [0.5.0](https://github.com/BlackGlory/buffer-structures/compare/v0.4.1...v0.5.0) (2023-11-22)
 
 
