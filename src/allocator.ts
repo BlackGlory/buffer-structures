@@ -86,19 +86,8 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
       let previousFreeList: IFreeList | undefined = undefined
       for (const [index, currentFreeList] of this.freeLists()) {
         if (
-          (
-            byteOffset >= currentFreeList.byteOffset &&
-            byteOffset < currentFreeList.byteOffset + currentFreeList.byteLength
-          ) || (
-            byteOffset + byteLength > currentFreeList.byteOffset &&
-            byteOffset + byteLength <= currentFreeList.byteOffset + currentFreeList.byteLength
-          ) || (
-            byteOffset <= currentFreeList.byteOffset &&
-            byteOffset + byteLength >= currentFreeList.byteOffset + currentFreeList.byteLength
-          ) || (
-            byteOffset >= currentFreeList.byteOffset &&
-            byteOffset + byteLength <= currentFreeList.byteOffset + currentFreeList.byteLength
-          )
+          byteOffset < currentFreeList.byteOffset + currentFreeList.byteLength &&
+          byteOffset + byteLength > currentFreeList.byteOffset
         ) {
           throw new Error('The range includes unallocated blocks')
         } else if (currentFreeList.byteOffset > byteOffset) {
