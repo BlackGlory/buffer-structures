@@ -11,6 +11,7 @@ interface IFreeList {
   byteLength: number
 }
 
+// 缓冲区的第一个字节被视作NULL.
 const nullSize = 1
 
 /**
