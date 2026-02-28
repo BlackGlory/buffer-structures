@@ -68,6 +68,15 @@ interface IAllocator {
 该缓冲区分配器的功能非常基础, 采用First-Fit策略, 没有任何花哨功能.
 
 ```ts
+interface IMetadata {
+  freeLists: NonEmptyArray<IFreeList>
+}
+
+interface IFreeList {
+  byteOffset: number
+  byteLength: number
+}
+
 class Allocator<T extends ArrayBufferLike> implements IAllocator {
   readonly buffer: T
   readonly metadata: IMetadata
