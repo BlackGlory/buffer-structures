@@ -84,19 +84,25 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
       return
     } else {
       let previousFreeList: IFreeList | undefined = undefined
-      for (const [index, nextFreeList] of this.freeLists()) {
+      for (const [index, currentFreeList] of this.freeLists()) {
         if (
           (
-            byteOffset >= nextFreeList.byteOffset &&
-            byteOffset < nextFreeList.byteOffset + nextFreeList.byteLength
+            byteOffset >= currentFreeList.byteOffset &&
+            byteOffset < currentFreeList.byteOffset + currentFreeList.byteLength
           ) || (
-            byteOffset + byteLength > nextFreeList.byteOffset &&
-            byteOffset + byteLength <= nextFreeList.byteOffset + nextFreeList.byteLength
+            byteOffset + byteLength > currentFreeList.byteOffset &&
+            byteOffset + byteLength <= currentFreeList.byteOffset + currentFreeList.byteLength
+          ) || (
+            byteOffset <= currentFreeList.byteOffset &&
+            byteOffset + byteLength >= currentFreeList.byteOffset + currentFreeList.byteLength
+          ) || (
+            byteOffset >= currentFreeList.byteOffset &&
+            byteOffset + byteLength <= currentFreeList.byteOffset + currentFreeList.byteLength
           )
         ) {
-          throw new Error('The offset is not allocated')
-        } else if (nextFreeList.byteOffset > byteOffset) {
-          // 如果nextFreeListbyteOffset大于用户提交的offset,
+          throw new Error('The range includes unallocated blocks')
+        } else if (currentFreeList.byteOffset > byteOffset) {
+          // 如果currentFreeList.byteOffset大于用户提交的offset,
           // 说明需要被释放的区域位于previousFreeList和nextFreeList之间.
 
           // 创建一个新的空闲链表.
@@ -107,8 +113,8 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
           this.metadata.freeLists.splice(index, 0, newFreeList)
 
           // 如果下一个空闲链表刚好接上新的空闲链表, 合并两个链表.
-          if (newFreeList.byteOffset + newFreeList.byteLength === nextFreeList.byteOffset) {
-            newFreeList.byteLength += nextFreeList.byteLength
+          if (newFreeList.byteOffset + newFreeList.byteLength === currentFreeList.byteOffset) {
+            newFreeList.byteLength += currentFreeList.byteLength
             this.metadata.freeLists.splice(index, 2, newFreeList)
           }
 
@@ -123,7 +129,7 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
 
           return
         } else {
-          previousFreeList = nextFreeList
+          previousFreeList = currentFreeList
         }
       }
 

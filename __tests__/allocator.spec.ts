@@ -124,14 +124,50 @@ describe('Allocator', () => {
   })
 
   describe('free', () => {
-    test('non-allocated offset', () => {
-      const buffer = new ArrayBuffer(nullSize + 1)
-      const allocator = new Allocator(buffer)
+    describe('non-allocated range', () => {
+      test('equal', () => {
+        const buffer = new ArrayBuffer(nullSize + 1)
+        const allocator = new Allocator(buffer)
 
-      const err = getError(() => allocator.free(nullSize, 1))
+        const err = getError(() => allocator.free(nullSize, 1))
 
-      expect(err).toBeInstanceOf(Error)
-      expect(err!.message).toMatch('The offset is not allocated')
+        expect(err).toBeInstanceOf(Error)
+        expect(err!.message).toMatch('The range includes unallocated blocks')
+      })
+
+      test('contain', () => {
+        const buffer = new ArrayBuffer(nullSize + 20)
+        const allocator = new Allocator(buffer, {
+          freeLists: [
+            {
+              byteOffset: 10
+            , byteLength: 5
+            }
+          ]
+        })
+
+        const err = getError(() => allocator.free(5, 15))
+
+        expect(err).toBeInstanceOf(Error)
+        expect(err?.message).toMatch('The range includes unallocated blocks')
+      })
+
+      test('overlap', () => {
+        const buffer = new ArrayBuffer(nullSize + 20)
+        const allocator = new Allocator(buffer, {
+          freeLists: [
+            {
+              byteOffset: 10
+            , byteLength: 10
+            }
+          ]
+        })
+
+        const err = getError(() => allocator.free(5, 10))
+
+        expect(err).toBeInstanceOf(Error)
+        expect(err?.message).toMatch('The range includes unallocated blocks')
+      })
     })
 
     describe('allocated offset', () => {
