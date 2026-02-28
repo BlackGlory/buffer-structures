@@ -23,8 +23,8 @@ implements IHash
   private valueView: DataView
 
   get byteLength(): number {
-    const byteLenght = this.valueView.getUint32(this.byteOffset)
-    return Uint32View.byteLength + byteLenght
+    const byteLength = this.valueView.getUint32(this.byteOffset)
+    return Uint32View.byteLength + byteLength
   }
 
   constructor(buffer: ArrayBufferLike, public readonly byteOffset: number) {
