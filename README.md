@@ -837,7 +837,8 @@ class Int32View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<Int32Literal> {
+         , IReadableWritable<Int32Literal>
+         , IFree {
   static readonly byteLength: number
 
   constructor(buffer: ArrayBufferLike, byteOffset: number)

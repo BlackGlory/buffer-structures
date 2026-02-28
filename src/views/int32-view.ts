@@ -1,4 +1,4 @@
-import { IHash, IReference, IReadableWritable } from '@src/traits.js'
+import { IHash, IReference, IReadableWritable, IFree } from '@src/traits.js'
 import { IAllocator, IHasher } from '@src/interfaces.js'
 import { getSlice } from './utils.js'
 import { BaseView } from '@views/base-view.js'
@@ -8,7 +8,8 @@ export class Int32View
 extends BaseView
 implements IHash
          , IReference
-         , IReadableWritable<Int32Literal> {
+         , IReadableWritable<Int32Literal> 
+         , IFree {
   static readonly byteLength: number = Int32Array.BYTES_PER_ELEMENT
 
   private view: DataView
