@@ -1,9 +1,8 @@
-import { assert } from '@blackglory/prelude'
+import { assert, isEmptyArray } from '@blackglory/prelude'
 import { IAllocator } from '@src/interfaces.js'
-import { NonEmptyArray } from '@blackglory/prelude'
 
 interface IMetadata {
-  freeLists: NonEmptyArray<IFreeList>
+  freeLists: IFreeList[]
 }
 
 interface IFreeList {
@@ -75,7 +74,7 @@ export class Allocator<T extends ArrayBufferLike> implements IAllocator {
     , 'The byteOffsset + byteLength should be less than or equal to buffer.byteLength'
     )
 
-    if (this.metadata.freeLists.length === 0) {
+    if (isEmptyArray(this.metadata.freeLists)) {
       // 创建一个新的空闲链表.
       const newFreeList: IFreeList = {
         byteOffset

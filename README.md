@@ -69,7 +69,7 @@ interface IAllocator {
 
 ```ts
 interface IMetadata {
-  freeLists: NonEmptyArray<IFreeList>
+  freeLists: IFreeList[]
 }
 
 interface IFreeList {
